@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ForkLaunchScreen.storyboard: NewsBlur iPad fork, fork-only file, never upstreamed. See fork-docs/HOOKS.md (H11). -->
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="FkL-vc-001">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <scene sceneID="FkL-sc-001">
+            <objects>
+                <viewController id="FkL-vc-001" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="FkL-vw-001">
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" image="ForkLaunchMark" translatesAutoresizingMaskIntoConstraints="NO" id="FkL-mk-001">
+                                <rect key="frame" x="317" y="447" width="200" height="240"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" image="ForkLaunchTitle" translatesAutoresizingMaskIntoConstraints="NO" id="FkL-tt-001">
+                                <rect key="frame" x="315" y="665" width="204" height="47.5"/>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="FkL-sa-001"/>
+                        <color key="backgroundColor" red="0.043137254901960784" green="0.050980392156862744" blue="0.070588235294117646" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="FkL-mk-001" firstAttribute="centerX" secondItem="FkL-vw-001" secondAttribute="centerX" id="FkL-c1-001"/>
+                            <constraint firstItem="FkL-mk-001" firstAttribute="centerY" secondItem="FkL-vw-001" secondAttribute="centerY" constant="-30" id="FkL-c2-001"/>
+                            <constraint firstItem="FkL-tt-001" firstAttribute="centerX" secondItem="FkL-vw-001" secondAttribute="centerX" id="FkL-c3-001"/>
+                            <constraint firstItem="FkL-tt-001" firstAttribute="top" secondItem="FkL-mk-001" secondAttribute="bottom" constant="-22" id="FkL-c4-001"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="FkL-fr-001" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="0" y="0"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="ForkLaunchMark" width="200" height="240"/>
+        <image name="ForkLaunchTitle" width="204" height="47.5"/>
+    </resources>
+</document>

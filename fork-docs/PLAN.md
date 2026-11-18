@@ -68,6 +68,11 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 - [x] Preferences hides settings the fork replaces (hook H10). Story order and "Feed and story list" text size now drive the feed column instead of being hidden.
   - Verified on the sim: Story List shows only Story order and Mark stories read; Story Layout and Feed List are gone; Extra Large enlarges feed and story rows; Oldest first lists Penny Arcade 24 → 28 Oct.
 
+## Cacotopic Edition branding (2026-11-19, user request)
+- [x] New app icon: eclipse over a horizon on dark navy, with dark and tinted versions (user picked concept B + A's horizon). Replaces upstream's orange sun as the primary icon (hook H11).
+- [x] Start-up screen: the mark, "NewsBlur Reader" and "Cacotopic Edition" in Century Gothic on 0x0B0D12 (`Fork/ForkLaunchScreen.storyboard`).
+  - Verified on the sim: home-screen icon and cold-launch screen.
+
 ## M8 — Folder icon picker
 - [x] Long-press menu: Initials / Symbol… / First Feed's Icon; SF Symbol picker (curated ~150 topic symbols with search, user choice 2026-11-19); per folder in UserDefaults (`Fork/ForkFolderAppearance.swift`). No upstream hooks.
 - [x] Disambiguate colliding short labels: distinct icons, plus Rename Label… / Reset Label in the same menu (user choice 2026-11-19). Initials follow the custom label.
