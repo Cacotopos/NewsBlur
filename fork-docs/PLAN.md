@@ -1,6 +1,6 @@
 # Plan — milestones and tasks
 
-Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done and smoke-tested signed in. M4 done (rail; interim: folder tap loads upstream's river). Next: M5. Update this file as work lands. Stop for user review at each ⏸.
+Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done and smoke-tested signed in. M4 done. M5 built and sim-verified (feed column + reader-only split; most of M6 pulled in); merge drill and user review pending. Update this file as work lands. Stop for user review at each ⏸.
 
 ## M0 — Repo setup
 - [x] Fork `samuelclay/NewsBlur` to the user's GitHub (`gh repo fork samuelclay/NewsBlur --clone=false`).
@@ -44,13 +44,16 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
     - Interim until M5: tapping a folder loads its river into upstream's story list. Other is select-only.
 
 ## M5 — Feed column ⏸
-- [ ] Folder header + All/Unread segmented control.
-- [ ] Collapsible feed rows, multi-open, inline stories, "Show N more" pagination, selection → reader.
-- [ ] Dimmed zero-unread feeds; >3 collapse into one group row.
+- [x] Folder header + All/Unread segmented control.
+- [x] Collapsible feed rows, multi-open, inline stories, "Show N more" pagination, selection → reader (`loadFeed:withStory:`; H3 not needed).
+- [x] Dimmed zero-unread feeds; >3 collapse into one group row.
+  - Verified on the sim (landscape): Comics → Oglaf expands to its 4 unread inline; tapping "Freshwater" opens it in the reader, highlights the row, Oglaf 4→3 and Comics badge 86→85. Upstream's feed list and story titles stay hidden.
+  - Feed order is frozen when a folder opens (rows don't jump as feeds hit 0). Stories read this session stay visible, dimmed, until the filter or folder changes.
 - **Then run M9-style merge drill once** and log it. Stop for review.
 
 ## M6 — Wide layout
-- [ ] Fixed 1/8 · 2/8 · 5/8 at window width ≥ 1000 pt, reader container = upstream reader.
+- [x] Rail fixed 88 pt (user: 1/8 wasted space) · feed column 2/8 · reader the rest, at window width ≥ 1000 pt. Done in M5.
+- [ ] Rotation / Split View / Stage Manager transitions back to wide re-hide upstream's columns (untested).
 
 ## M7 — Compact layout
 - [ ] < 1000 pt: full-width reader, top-left menu button, full overlay of rail + feed column, story pick closes it. Test portrait, Split View, Stage Manager.

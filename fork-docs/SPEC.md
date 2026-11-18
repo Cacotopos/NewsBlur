@@ -16,12 +16,12 @@ Mode is decided by **window width**, not orientation (covers Split View / Stage 
 
 | Window width | Mode | Layout |
 |---|---|---|
-| ≥ 1000 pt | **Wide** | Three fixed columns: **1/8 rail · 2/8 feed column · 5/8 reader** (on 11" landscape: 149 / 298 / 746 pt) |
+| ≥ 1000 pt | **Wide** | Three fixed columns: **rail 88 pt · 2/8 feed column · reader the rest** (on 11" landscape: 88 / 299 / 807 pt). Rail changed from 1/8 at the user's request, 2026-11-18. |
 | < 1000 pt | **Compact** | Reader full width. Menu button top-left of the reader header opens the rail + feed column as a **full-screen overlay** (rail 149 pt + feed column fills the rest). Picking a story closes the overlay. Close button in the feed column header. |
 
 Columns are fixed proportions, not user-resizable. If 2/8 proves too cramped in use, the fallback to try is 1/8 · 3/8 · 4/8 — do not change without asking.
 
-## Column 1 — Folder rail (1/8)
+## Column 1 — Folder rail (88 pt)
 - One **squircle** (56 pt, continuous corner radius ≈17 pt) per **top-level folder**, label under it (short name, e.g. "Gaming" for "Blogs - Gaming"), unread-count badge top-right (hidden at 0).
 - Selected folder: dark fill / inverted.
 - **"Other"** squircle pinned at the bottom of the rail for top-level feeds not in any folder (e.g. "The Oatmeal").

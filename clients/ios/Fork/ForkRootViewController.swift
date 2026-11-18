@@ -10,14 +10,15 @@ import UIKit
 /// Upstream's `SplitViewController` stays alive as a child: the app delegate keeps its reference
 /// and presents modals from it.
 ///
-/// M4 (interim): in wide mode the folder rail takes a fixed-width strip on the left and upstream's split fills the rest.
-/// M5/M6 add the feed column and shrink the split to the reader.
+/// Wide: rail (fixed) · feed column (2/8) · upstream's split, held to its reader column by
+/// `ForkSplitViewController`. Compact (M7): upstream fills the window for now.
 final class ForkRootViewController: UIViewController {
     /// Window width at or above which the fork shows its columns (SPEC "Wide").
     static let wideThreshold: CGFloat = 1000
 
     let upstreamSplit: UIViewController
     let rail = ForkRailViewController()
+    let feedColumn = ForkFeedColumnViewController()
 
     private var refreshTimer: Timer?
     private var feedsObserver: NSObjectProtocol?
@@ -45,16 +46,20 @@ final class ForkRootViewController: UIViewController {
         view.addSubview(upstreamSplit.view)
         upstreamSplit.didMove(toParent: self)
 
+        addChild(feedColumn)
+        view.addSubview(feedColumn.view)
+        feedColumn.didMove(toParent: self)
+
         addChild(rail)
         view.addSubview(rail.view)
         rail.didMove(toParent: self)
-        rail.onSelect = { [weak self] folder in self?.didSelect(folder) }
+        rail.onSelect = { [weak self] folder in self?.feedColumn.show(folder: folder) }
 
         // Upstream posts no notification when unread counts change (marking read, sync),
         // so poll cheaply in addition to the full-reload notification. No upstream hook needed.
         feedsObserver = NotificationCenter.default.addObserver(
             forName: Notification.Name("FinishedLoadingFeedsNotification"), object: nil, queue: .main
-        ) { [weak self] _ in self?.rail.refresh() }
+        ) { [weak self] _ in self?.refreshAll() }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -72,7 +77,7 @@ final class ForkRootViewController: UIViewController {
         guard refreshTimer == nil else { return }
         let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
             guard let self, self.isWide, UIApplication.shared.applicationState == .active else { return }
-            self.rail.refresh()
+            self.refreshAll()
         }
         timer.tolerance = 0.3
         RunLoop.main.add(timer, forMode: .common)
@@ -84,25 +89,29 @@ final class ForkRootViewController: UIViewController {
         let bounds = view.bounds
         if isWide {
             let railWidth = ForkRailViewController.railWidth
+            let columnWidth = (bounds.width * 2 / 8).rounded()
             rail.view.isHidden = false
+            feedColumn.view.isHidden = false
             rail.view.frame = CGRect(x: 0, y: 0, width: railWidth, height: bounds.height)
-            upstreamSplit.view.frame = CGRect(x: railWidth, y: 0, width: bounds.width - railWidth, height: bounds.height)
+            feedColumn.view.frame = CGRect(x: railWidth, y: 0, width: columnWidth, height: bounds.height)
+            let readerX = railWidth + columnWidth
+            upstreamSplit.view.frame = CGRect(x: readerX, y: 0, width: bounds.width - readerX, height: bounds.height)
         } else {
             // Compact mode (overlay) arrives in M7; until then upstream fills the window.
             rail.view.isHidden = true
+            feedColumn.view.isHidden = true
             upstreamSplit.view.frame = bounds
         }
+        (upstreamSplit as? ForkSplitViewController)?.enforceReaderOnly()
     }
 
-    // MARK: - Selection
+    // MARK: - Refresh
 
-    private func didSelect(_ folder: ForkFolder) {
-        // Interim until the feed column (M5): show the folder's river in upstream's story list.
-        guard folder.key != ForkFolderStore.otherKey,
-              let app = NewsBlurAppDelegate.shared,
-              let order = app.dictFoldersArray as? [String],
-              let index = order.firstIndex(of: folder.key) else { return }
-        app.feedsViewController.didSelectSectionHeader(withTag: index)
+    /// Rail counts, then the feed column for whichever folder the rail has selected.
+    private func refreshAll() {
+        rail.refresh()
+        if let folder = rail.selectedFolder { feedColumn.show(folderIfChanged: folder) }
+        feedColumn.refreshLiveState()
     }
 
     // Let upstream keep control of the status bar and home indicator.

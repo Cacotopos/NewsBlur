@@ -1858,6 +1858,7 @@ class DetailViewController: BaseViewController {
     private var isAdjustingStoryTitleColumns = false
 
     private func setStoryTitlesCollapsed(_ requestedCollapse: Bool, animated: Bool) {
+        let requestedCollapse = ForkUI.ownsLayout || requestedCollapse // FORK: fork's feed column replaces story titles — see fork-docs/HOOKS.md
         // DetailViewController.swift's layout callbacks must not reopen the standalone column while Dashboard owns the titles.
         guard !storyTitlesInDashboard else { return }
         if !showsStoryTitlesBesideTiledFeeds { restoreReaderBesideStoryTitles() }

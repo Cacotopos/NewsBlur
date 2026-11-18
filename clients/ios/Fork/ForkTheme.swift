@@ -24,6 +24,18 @@ enum ForkTheme {
     static var railLabel: UIColor { c(0x4A4A44, 0x6B5B4B, 0xBBBBBB, 0xAAAAAA) }
     static var railLabelSelected: UIColor { c(0x1F1F1C, 0x3B2E22, 0xFFFFFF, 0xFFFFFF) }
 
+    // Feed column
+    static var columnBackground: UIColor { c(0xFFFFFF, 0xFAF5ED, 0x333333, 0x111111) }
+    static var columnHeader: UIColor { c(0xF4F4F2, 0xF3E2CB, 0x2A2A2A, 0x1A1A1A) }
+    static var separator: UIColor { c(0xE9E8E4, 0xD4C8B8, 0x444444, 0x2A2A2A) }
+    static var text: UIColor { c(0x1F1F1C, 0x3B2E22, 0xEEEEEE, 0xDDDDDD) }
+    static var secondaryText: UIColor { c(0x8F918B, 0x8B7B6B, 0xAAAAAA, 0x8F918B) }
+    static var readText: UIColor { c(0xA8A9A3, 0xA89A8A, 0x888888, 0x666666) }
+    static var unreadDot: UIColor { c(0x6B6C64, 0x8B7B6B, 0xBBBBBB, 0x8F918B) }
+    static var selectedRow: UIColor { c(0xFFF6D6, 0xF3E2CB, 0x454545, 0x262626) }
+    static var feedRowOpen: UIColor { c(0xF7F7F5, 0xF6EBDC, 0x3A3A3A, 0x181818) }
+    static var count: UIColor { c(0x6B6C64, 0x8B7B6B, 0xBBBBBB, 0xAAAAAA) }
+
     /// Identifies the visual theme, to notice changes.
     static var current: String { ThemeManager.shared.effectiveTheme ?? "" }
 }

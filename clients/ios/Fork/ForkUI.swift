@@ -33,6 +33,12 @@ final class ForkUI: NSObject {
     /// The installed fork root, if any.
     private(set) static weak var root: ForkRootViewController?
 
+    /// True while the fork's own columns are on screen and upstream's split must show only the reader.
+    static var ownsLayout: Bool {
+        guard let root, root.isViewLoaded else { return false }
+        return root.isWide
+    }
+
     /// Called once from `SceneDelegate` after `prepareViewControllers()`.
     /// Re-parents upstream's split view controller into the fork root. No-op when inactive.
     static func install(in window: UIWindow?, split: UIViewController?) {
@@ -40,6 +46,10 @@ final class ForkUI: NSObject {
               window.rootViewController === split else {
             NSLog("ForkUI: not installed (enabled=%d, active=%d)", isEnabled, isActive)
             return
+        }
+        // Swap in the fork subclass so the split keeps to its reader column (no upstream hook needed).
+        if type(of: split) == SplitViewController.self {
+            object_setClass(split, ForkSplitViewController.self)
         }
         let forkRoot = ForkRootViewController(upstreamSplit: split)
         window.rootViewController = forkRoot
