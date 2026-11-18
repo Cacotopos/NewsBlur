@@ -799,6 +799,7 @@
     if (changes != nil) {
         storyContent = changes;
     }
+    storyContent = [ForkStoryContent content:storyContent story:self.activeStory inTextView:self.inTextView]; // FORK: show image for teaser-only stories — see fork-docs/HOOKS.md
 
     NSUserDefaults *userPreferences = [NSUserDefaults standardUserDefaults];
     

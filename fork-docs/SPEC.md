@@ -47,7 +47,8 @@ Columns are fixed proportions, not user-resizable. If 2/8 proves too cramped in 
 - Ordering: unread feeds first (upstream's sort order within them), then dimmed feeds.
 
 ## Column 3 — Reader (5/8)
-- **Upstream story reader unchanged**: Story/Text modes, header (feed name, title, date, author, tags), bottom bar (Text, share, prev/next, Done). Only its container frame changes.
+- **Exception (hook H5, 2026-11-18):** for teaser-only stories (no image in the body, ≤ 200 characters of text) the reader appends the story's first `image_urls` picture, so feeds like Penny Arcade show the comic. If the server hasn't found an image yet (newest stories sometimes), nothing is added.
+- **Upstream story reader otherwise unchanged**: Story/Text modes, header (feed name, title, date, author, tags), bottom bar (Text, share, prev/next, Done). Only its container frame changes.
 - Optional later (not now): one injected CSS `max-width` rule if line length bothers the user.
 
 ## Removed from view (hide, never delete — see merge strategy)
