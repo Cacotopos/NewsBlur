@@ -70,4 +70,5 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 ## M9 — Merge drill & polish ⏸
 - [ ] Merge latest upstream, log conflicts/time in MERGE_LOG.md.
 - [ ] Theme check (light/dark/sepia), Dynamic Type sanity, VoiceOver labels on rail/rows.
-- [ ] Install on the user's iPad Pro 11" (user does signing in Xcode).
+- [x] Signing for a free Personal Team (hooks H6a/H6b, 2026-11-18): unsigned device build succeeds with no extensions embedded.
+- [ ] Install on the user's iPad Pro 11" (user does signing in Xcode). Lost on device: push, share/subscribe extensions, widgets, Sign in with Apple, universal links, iCloud. Free-team installs expire after 7 days.

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  ForkSigning/Fork.entitlements — NewsBlur iPad fork, never upstreamed. See fork-docs/HOOKS.md (H6).
+  Device builds of the NewsBlur target sign with this instead of Resources/App.entitlements.
+  A free Personal Team can't provision push, iCloud, Sign in with Apple, associated domains,
+  communication notifications or NewsBlur's App Group, so it asks for nothing.
+-->
+<plist version="1.0">
+<dict/>
+</plist>
