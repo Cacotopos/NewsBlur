@@ -42,7 +42,7 @@ Columns are fixed proportions, not user-resizable. If 2/8 proves too cramped in 
   - Stories are fetched **per feed** (decided 2026-11-18, AUDIT §7.1). The reader's prev/next walks the tapped feed's stories, not the column's order across feeds.
 - **Unread** mode hides read stories; **All** shows them (dimmed text).
 - **Feeds with 0 unread**: always visible but **dimmed**. If a folder has **more than 3** such feeds, they collapse into a single dimmed row "N feeds with nothing unread" that expands to show them.
-- Nested subfolders inside a top-level folder: render as collapsible group rows in this column (tree). *Assumption — confirm with user if the audit shows the user has nested folders.*
+- Nested subfolders inside a top-level folder: render as collapsible group rows in this column (tree). *Audit 2026-11-18: the account has no nested folders (names like "Blogs - Gaming" are flat top-level folders). Tree rendering is deferred; if a subfolder ever appears, list its feeds flat under the parent.*
 - Ordering: unread feeds first (upstream's sort order within them), then dimmed feeds.
 
 ## Column 3 — Reader (5/8)
