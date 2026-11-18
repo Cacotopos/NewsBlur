@@ -1,6 +1,6 @@
 # Plan — milestones and tasks
 
-Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done and smoke-tested signed in. M4 done. M5 built and sim-verified (feed column + reader-only split; most of M6 pulled in); merge drill and user review pending. Update this file as work lands. Stop for user review at each ⏸.
+Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done and smoke-tested signed in. M4 done. M5 reviewed and drilled. M6 done except Split View/Stage Manager. M7 built early (2026-11-18) with Wide full screen. Update this file as work lands. Stop for user review at each ⏸.
 
 ## M0 — Repo setup
 - [x] Fork `samuelclay/NewsBlur` to the user's GitHub (`gh repo fork samuelclay/NewsBlur --clone=false`).
@@ -54,10 +54,14 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 
 ## M6 — Wide layout
 - [x] Rail fixed 88 pt (user: 1/8 wasted space) · feed column 2/8 · reader the rest, at window width ≥ 1000 pt. Done in M5.
-- [ ] Rotation / Split View / Stage Manager transitions back to wide re-hide upstream's columns (untested).
+- [x] Rotation transitions back to wide re-hide upstream's columns and dock the fork's (sim, 11" portrait ↔ landscape).
+- [ ] Split View / Stage Manager: not testable with the sim tooling here; check on device.
 
 ## M7 — Compact layout
-- [ ] < 1000 pt: full-width reader, top-left menu button, full overlay of rail + feed column, story pick closes it. Test portrait, Split View, Stage Manager.
+- [x] < 1000 pt: full-width reader, top-left menu button, full overlay of rail + feed column, story pick closes it. Built 2026-11-18 together with Wide full screen (hooks H7–H9): the reader's full-screen button switches Wide into the same reader-only layout, and the sidebar button became the menu button.
+  - Verified on the sim: landscape full screen on/off, overlay panel + dim + story pick closes it; portrait full-screen overlay with close button; rotation both ways.
+- [ ] Split View / Stage Manager (compact size class): untested. Upstream's split collapses in a compact size class, so the reader-only hold may not apply there.
+- [ ] Launch straight into portrait opens the overlay automatically: written, not yet seen on the sim.
 
 ## M8 — Folder icon picker
 - [ ] Long-press menu: Initials / Symbol… / First feed's icon; SF Symbol picker; persist per folder in UserDefaults.

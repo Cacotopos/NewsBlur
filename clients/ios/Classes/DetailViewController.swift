@@ -1402,6 +1402,7 @@ class DetailViewController: BaseViewController {
     }
 
     @objc override func toggleTemporaryFullScreen(_ sender: Any?) {
+        if ForkUI.toggleReaderFullScreen() { storyPagesViewController?.updateStoryTitleNavigationButtons(); return } // FORK: full screen hides the fork's columns — see fork-docs/HOOKS.md
         guard !isPhoneOrCompact else { return }
         if canToggleDuoFullscreenReader { toggleDuoFullscreenReader(); return }
 

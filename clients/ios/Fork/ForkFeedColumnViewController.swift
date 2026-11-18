@@ -26,6 +26,8 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
         NSLocalizedString("Unread", comment: "Fork feed column filter"),
     ])
     private let header = UIView()
+    private let titleRow = UIStackView()
+    private let closeButton = UIButton(type: .system)
     private let headerBorder = UIView()
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let border = UIView()
@@ -41,6 +43,16 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
     private var selectedStoryHash: String?
     private var lastTheme = ""
 
+    /// Called after a story is sent to the reader (the root closes the overlay).
+    var onOpenStory: (() -> Void)?
+    /// Called by the header's close button.
+    var onClose: (() -> Void)?
+
+    /// The close button shows only while the column is an overlay (SPEC "Compact").
+    var showsCloseButton = false {
+        didSet { if isViewLoaded { closeButton.isHidden = !showsCloseButton } }
+    }
+
     private var readFilter: String {
         get { UserDefaults.standard.string(forKey: Self.readFilterDefaults) ?? "unread" }
         set { UserDefaults.standard.set(newValue, forKey: Self.readFilterDefaults) }
@@ -54,7 +66,22 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
 
         titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
         titleLabel.lineBreakMode = .byTruncatingTail
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        closeButton.setImage(UIImage(systemName: "xmark", withConfiguration: UIImage.SymbolConfiguration(pointSize: 15, weight: .semibold)), for: .normal)
+        closeButton.accessibilityLabel = NSLocalizedString("Close", comment: "Fork feed column overlay close")
+        closeButton.accessibilityIdentifier = "fork-close-menu"
+        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        closeButton.setContentHuggingPriority(.required, for: .horizontal)
+        closeButton.isHidden = !showsCloseButton
+
+        titleRow.axis = .horizontal
+        titleRow.alignment = .center
+        titleRow.spacing = 8
+        titleRow.addArrangedSubview(titleLabel)
+        titleRow.addArrangedSubview(closeButton)
+        titleRow.translatesAutoresizingMaskIntoConstraints = false
 
         filterControl.selectedSegmentIndex = readFilter == "all" ? 0 : 1
         filterControl.addTarget(self, action: #selector(filterChanged), for: .valueChanged)
@@ -63,7 +90,7 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
 
         header.translatesAutoresizingMaskIntoConstraints = false
         headerBorder.translatesAutoresizingMaskIntoConstraints = false
-        header.addSubview(titleLabel)
+        header.addSubview(titleRow)
         header.addSubview(filterControl)
         header.addSubview(headerBorder)
         view.addSubview(header)
@@ -89,11 +116,12 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
             header.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             header.trailingAnchor.constraint(equalTo: border.leadingAnchor),
 
-            titleLabel.topAnchor.constraint(equalTo: header.topAnchor, constant: 12),
-            titleLabel.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 14),
-            titleLabel.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -14),
+            titleRow.topAnchor.constraint(equalTo: header.topAnchor, constant: 12),
+            titleRow.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 14),
+            titleRow.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -14),
+            titleRow.heightAnchor.constraint(greaterThanOrEqualToConstant: 28),
 
-            filterControl.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
+            filterControl.topAnchor.constraint(equalTo: titleRow.bottomAnchor, constant: 10),
             filterControl.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 14),
             filterControl.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -14),
             filterControl.bottomAnchor.constraint(equalTo: header.bottomAnchor, constant: -10),
@@ -124,6 +152,7 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
         headerBorder.backgroundColor = ForkTheme.separator
         border.backgroundColor = ForkTheme.railBorder
         titleLabel.textColor = ForkTheme.text
+        closeButton.tintColor = ForkTheme.secondaryText
         tableView.reloadData()
     }
 
@@ -275,7 +304,10 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
         app.setValue(["feedId": story.feedId, "storyHash": story.hash], forKey: "pendingNotificationStory")
         // Upstream loads the feed and opens the story in its reader; prev/next walks this feed.
         app.loadFeed(story.feedId, withStory: story.hash, storyTitle: story.title, animated: false)
+        onOpenStory?()
     }
+
+    @objc private func closeTapped() { onClose?() }
 
     // MARK: - Table
 

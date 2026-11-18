@@ -1031,6 +1031,7 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
         storiesSidebarButton = self.storiesSidebarBarButton;
     }
 
+    if (ForkUI.ownsLayout) { storiesSidebarButton = ForkUI.readerMenuButton; } // FORK: reader's sidebar button opens the fork's menu — see fork-docs/HOOKS.md
     NSArray *items = sidebarButton ? @[sidebarButton, settingsBarButton]
                                    : @[settingsBarButton];
     NSArray *storiesItems = storiesSidebarButton ? @[storiesSidebarButton] : nil;

@@ -184,6 +184,7 @@
                                                                                                isMac:self.isMac
                                                                                    isUserOverlayMode:isUserOverlayMode
                                                                                isTemporaryFullScreen:isTemporaryFullScreen];
+        if (ForkUI.ownsLayout) { isTemporaryFullScreen = ForkUI.isReaderFullScreen; shouldShowTemporaryFullScreenButton = self.appDelegate.detailViewController.hasVisibleStoryForSidebarLayout && !ForkUI.hidesFullScreenButton; } // FORK: button reflects the fork's full screen — see fork-docs/HOOKS.md
 
         if (shouldShowTemporaryFullScreenButton) {
             NSString *iconName = isTemporaryFullScreen
