@@ -53,6 +53,9 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
         didSet { if isViewLoaded { closeButton.isHidden = !showsCloseButton } }
     }
 
+    private var lastOrder: String?
+    private var lastFontScale: CGFloat = 1
+
     private var readFilter: String {
         get { UserDefaults.standard.string(forKey: Self.readFilterDefaults) ?? "unread" }
         set { UserDefaults.standard.set(newValue, forKey: Self.readFilterDefaults) }
@@ -179,6 +182,7 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
     func refreshLiveState() {
         guard isViewLoaded else { return }
         if ForkTheme.current != lastTheme { applyTheme() }
+        applyListPreferencesIfChanged()
         guard let folder else { return }
         // Folder membership may change after a sync; counts are re-read by visible cells.
         let ids = ForkFolderStore.feedIds(inFolder: folder.key)
@@ -192,6 +196,21 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
             if let cell = cell as? ForkFeedCell, cell.refreshCount() { changed = true }
         }
         if changed { rebuildRows() }
+    }
+
+    /// Picks up Story order and list text size changes made in Preferences.
+    private func applyListPreferencesIfChanged() {
+        let order = ForkPreferences.storyOrder
+        let scale = ForkPreferences.listFontScale
+        guard order != lastOrder || scale != lastFontScale else { return }
+        let orderChanged = lastOrder != nil && order != lastOrder
+        lastOrder = order
+        lastFontScale = scale
+        if orderChanged {
+            storiesByFeed = [:]
+            for feedId in openFeeds { load(stories(for: feedId)) }
+        }
+        rebuildRows()
     }
 
     // MARK: - Model
@@ -209,9 +228,10 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
     }
 
     private func stories(for feedId: String) -> ForkFeedStories {
-        let key = "\(feedId)|\(readFilter)"
+        let order = ForkPreferences.storyOrder
+        let key = "\(feedId)|\(order)|\(readFilter)"
         if let existing = storiesByFeed[key] { return existing }
-        let created = ForkFeedStories(feedId: feedId, readFilter: readFilter)
+        let created = ForkFeedStories(feedId: feedId, readFilter: readFilter, order: order)
         storiesByFeed[key] = created
         return created
     }
@@ -433,6 +453,9 @@ private final class ForkFeedCell: UITableViewCell {
         self.feedId = feedId
         let app = NewsBlurAppDelegate.shared
         let feed = app?.dictFeeds?[feedId] as? [AnyHashable: Any]
+        let scale = ForkPreferences.listFontScale
+        nameLabel.font = .systemFont(ofSize: 15 * scale, weight: .semibold)
+        countLabel.font = .monospacedDigitSystemFont(ofSize: 13 * scale, weight: .medium)
         nameLabel.text = (feed?["feed_title"] as? String) ?? feedId
         icon.image = app?.getFavicon(feedId)
         chevron.image = UIImage(systemName: isOpen ? "chevron.down" : "chevron.right")
@@ -499,6 +522,9 @@ private final class ForkStoryCell: UITableViewCell {
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
 
     func configure(story: ForkStory, selected: Bool) {
+        let scale = ForkPreferences.listFontScale
+        titleLabel.font = .systemFont(ofSize: 14 * scale, weight: .regular)
+        dateLabel.font = .systemFont(ofSize: 11 * scale)
         titleLabel.text = story.title
         dateLabel.text = story.date
         titleLabel.textColor = story.isRead ? ForkTheme.readText : ForkTheme.text
@@ -545,6 +571,7 @@ private final class ForkInfoCell: UITableViewCell {
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
 
     func configure(text: String, style: Style, indent: Bool) {
+        label.font = .systemFont(ofSize: 13 * ForkPreferences.listFontScale, weight: .medium)
         label.text = text
         backgroundColor = ForkTheme.columnBackground
         switch style {

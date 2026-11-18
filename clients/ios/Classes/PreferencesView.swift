@@ -1244,6 +1244,7 @@ class PreferencesViewModel: ObservableObject {
                                footerText: NBLocalization.text("This setting only applies after the app is restarted."))
             ]
         }
+        sections = ForkPreferences.filtered(sections) // FORK: hide feed-list and story-list settings — see fork-docs/HOOKS.md
     }
 
     private func gestureSection() -> PreferenceSection {

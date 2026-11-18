@@ -18,15 +18,18 @@ struct ForkStory: Equatable {
 final class ForkFeedStories {
     let feedId: String
     let readFilter: String
+    /// "newest" or "oldest", from upstream's Story order preference (`ForkPreferences.storyOrder`).
+    let order: String
     private(set) var stories: [ForkStory] = []
     private(set) var nextPage = 1
     private(set) var isLoading = false
     private(set) var reachedEnd = false
     private(set) var failed = false
 
-    init(feedId: String, readFilter: String) {
+    init(feedId: String, readFilter: String, order: String) {
         self.feedId = feedId
         self.readFilter = readFilter
+        self.order = order
     }
 
     /// Fetches the next page from `/reader/feed/<id>/` (the same endpoint upstream's story list uses).
@@ -34,7 +37,7 @@ final class ForkFeedStories {
         guard !isLoading, !reachedEnd, let app = NewsBlurAppDelegate.shared else { return }
         isLoading = true
         failed = false
-        let url = "\(app.url ?? "")/reader/feed/\(feedId)/?page=\(nextPage)&order=newest&read_filter=\(readFilter)"
+        let url = "\(app.url ?? "")/reader/feed/\(feedId)/?page=\(nextPage)&order=\(order)&read_filter=\(readFilter)"
         app.get(url, parameters: nil, success: { [weak self] _, response in
             guard let self else { return }
             self.isLoading = false

@@ -63,6 +63,10 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 - [ ] Split View / Stage Manager (compact size class): untested. Upstream's split collapses in a compact size class, so the reader-only hold may not apply there.
 - [ ] Launch straight into portrait opens the overlay automatically: written, not yet seen on the sim.
 
+## Preferences trim (2026-11-19, user request)
+- [x] Preferences hides settings the fork replaces (hook H10). Story order and "Feed and story list" text size now drive the feed column instead of being hidden.
+  - Verified on the sim: Story List shows only Story order and Mark stories read; Story Layout and Feed List are gone; Extra Large enlarges feed and story rows; Oldest first lists Penny Arcade 24 → 28 Oct.
+
 ## M8 — Folder icon picker
 - [ ] Long-press menu: Initials / Symbol… / First feed's icon; SF Symbol picker; persist per folder in UserDefaults.
 - [ ] Disambiguate colliding short labels ("Blogs - Technology" / "News - Technology" both show "Te / Technology") — user chose to solve via distinct icons here (2026-11-18).
