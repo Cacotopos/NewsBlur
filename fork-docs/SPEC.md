@@ -25,7 +25,8 @@ Columns are fixed proportions, not user-resizable. If 2/8 proves too cramped in 
 - One **squircle** (56 pt, continuous corner radius ≈17 pt) per **top-level folder**, label under it (short name, e.g. "Gaming" for "Blogs - Gaming"), unread-count badge top-right (hidden at 0).
 - Selected folder: dark fill / inverted.
 - **"Other"** squircle pinned at the bottom of the rail for top-level feeds not in any folder (e.g. "The Oatmeal").
-- **Settings** gear at the very bottom → opens upstream's existing settings.
+- Folder membership includes **muted** feeds (they show, dimmed later, and add 0 to badges). Folders with no feeds at all are hidden. *(decided in M4, 2026-11-18)*
+- **Settings** gear at the very bottom → opens upstream's Preferences screen (`showPreferences`). Upstream's settings popover menu is tied to its feed-list toolbar.
 - **Folder icon is per folder, chosen by the user** via long-press context menu:
   1. Initials (default)
   2. Symbol… (SF Symbols picker)

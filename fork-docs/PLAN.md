@@ -1,6 +1,6 @@
 # Plan — milestones and tasks
 
-Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done and smoke-tested signed in. Next: M4 (M3 folded into M4/M5 unless the user objects). Update this file as work lands. Stop for user review at each ⏸.
+Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done and smoke-tested signed in. M4 done (rail; interim: folder tap loads upstream's river). Next: M5. Update this file as work lands. Stop for user review at each ⏸.
 
 ## M0 — Repo setup
 - [x] Fork `samuelclay/NewsBlur` to the user's GitHub (`gh repo fork samuelclay/NewsBlur --clone=false`).
@@ -29,8 +29,19 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 - **Done when:** none of the SPEC "Removed from view" items show; All/Unread work.
 
 ## M4 — Folder rail
-- [ ] 1/8 rail: squircles, labels, unread badges, selection, Other (top-level feeds), Settings.
-- [ ] Unread counts update live with upstream's count notifications.
+- [x] 1/8 rail: squircles, labels, unread badges, selection, Other (top-level feeds), Settings.
+- [x] Unread counts update live. Upstream has **no** count-change notification, so the rail listens for `FinishedLoadingFeedsNotification` and also re-reads counts once a second while wide and active. That's cheap, with no hook; it redraws only on change.
+  - Verified 2026-11-18 on the sim (landscape 1194 pt):
+    - 7 folders + Other + Settings fit without scrolling.
+    - Tapping Comics selects it and loads its river in upstream's list.
+    - The badge dropped 88 → 87 when the opened story was marked read.
+    - The gear opens Preferences.
+    - The rail re-themes in dark mode.
+  - Decisions taken:
+    - Muted feeds count as folder members, so The Oatmeal shows under Other, but they add 0 to badges.
+    - Empty folders are hidden.
+    - The gear opens upstream's Preferences directly: its settings menu is anchored to the feed-list toolbar, which the fork will hide.
+    - Interim until M5: tapping a folder loads its river into upstream's story list. Other is select-only.
 
 ## M5 — Feed column ⏸
 - [ ] Folder header + All/Unread segmented control.
