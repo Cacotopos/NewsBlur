@@ -75,6 +75,8 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 
 ## M9 — Merge drill & polish ⏸
 - [ ] Merge latest upstream, log conflicts/time in MERGE_LOG.md.
-- [ ] Theme check (light/dark/sepia), Dynamic Type sanity, VoiceOver labels on rail/rows.
+- [x] Theme check: light, sepia, medium and dark all checked on the sim (2026-11-19); rail, squircles, badges and feed column follow each.
+- [x] Dynamic Type: the feed column follows "Use system size" (via H10's list text size); rail labels stay fixed on purpose so they fit 88 pt.
+- [x] VoiceOver labels: rail buttons (folder, unread count, selected), feed rows (name, unread, expanded/collapsed, hint), story rows (title, unread, date), menu and close buttons, symbol picker. Not yet walked through with VoiceOver running.
 - [x] Signing for a free Personal Team (hooks H6a/H6b, 2026-11-18): unsigned device build succeeds with no extensions embedded.
 - [ ] Install on the user's iPad Pro 11" (user does signing in Xcode). Lost on device: push, share/subscribe extensions, widgets, Sign in with Apple, universal links, iCloud. Free-team installs expire after 7 days.

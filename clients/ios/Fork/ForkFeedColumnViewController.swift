@@ -404,6 +404,7 @@ private final class ForkFeedCell: UITableViewCell {
     private let separator = UIView()
     private var feedId: String?
     private var shownCount = -1
+    private var isOpen = false
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -451,6 +452,7 @@ private final class ForkFeedCell: UITableViewCell {
 
     func configure(feedId: String, isOpen: Bool) {
         self.feedId = feedId
+        self.isOpen = isOpen
         let app = NewsBlurAppDelegate.shared
         let feed = app?.dictFeeds?[feedId] as? [AnyHashable: Any]
         let scale = ForkPreferences.listFontScale
@@ -467,6 +469,21 @@ private final class ForkFeedCell: UITableViewCell {
         shownCount = -1
         _ = refreshCount()
         accessibilityIdentifier = "fork-feed-\(feedId)"
+        isAccessibilityElement = true
+        accessibilityLabel = nameLabel.text
+        accessibilityTraits = .button
+        accessibilityHint = isOpen
+            ? NSLocalizedString("Hides this feed's stories", comment: "Fork feed row VoiceOver hint")
+            : NSLocalizedString("Shows this feed's stories", comment: "Fork feed row VoiceOver hint")
+        accessibilityValue = Self.accessibilityValue(count: shownCount, isOpen: isOpen)
+    }
+
+    private static func accessibilityValue(count: Int, isOpen: Bool) -> String {
+        let state = isOpen ? NSLocalizedString("Expanded", comment: "Fork feed row VoiceOver state")
+                           : NSLocalizedString("Collapsed", comment: "Fork feed row VoiceOver state")
+        guard count > 0 else { return state }
+        let unread = String.localizedStringWithFormat(NSLocalizedString("%d unread", comment: "Fork feed row VoiceOver unread count"), count)
+        return "\(unread), \(state)"
     }
 
     /// Updates the unread count in place; returns true when a feed crossed to or from zero.
@@ -481,6 +498,7 @@ private final class ForkFeedCell: UITableViewCell {
         let muted = count == 0
         nameLabel.alpha = muted ? 0.45 : 1
         icon.alpha = muted ? 0.45 : 1
+        accessibilityValue = Self.accessibilityValue(count: count, isOpen: isOpen)
         return crossedZero
     }
 }
@@ -533,6 +551,11 @@ private final class ForkStoryCell: UITableViewCell {
         dot.isHidden = story.isRead
         backgroundColor = selected ? ForkTheme.selectedRow : ForkTheme.columnBackground
         accessibilityIdentifier = "fork-story-\(story.hash)"
+        isAccessibilityElement = true
+        accessibilityLabel = story.title
+        accessibilityValue = [story.isRead ? nil : NSLocalizedString("Unread", comment: "Fork story row VoiceOver state"),
+                              story.date.isEmpty ? nil : story.date].compactMap { $0 }.joined(separator: ", ")
+        accessibilityTraits = selected ? [.button, .selected] : .button
     }
 }
 
