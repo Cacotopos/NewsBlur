@@ -85,6 +85,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 #endif
         
         appDelegate.prepareViewControllers()
+        ForkUI.install(in: window, split: appDelegate.splitViewController) // FORK: wrap split in fork root — see fork-docs/HOOKS.md
 #if targetEnvironment(macCatalyst)
         appDelegate.splitViewController.installMacReaderChrome()
         MacReaderChrome.updateTheme()

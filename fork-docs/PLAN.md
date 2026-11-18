@@ -1,6 +1,6 @@
 # Plan — milestones and tasks
 
-Status: M0 done (push of `ipad-ui` deferred until asked), M1 done — awaiting review. Update this file as work lands. Stop for user review at each ⏸.
+Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done — signed-in smoke test pending. Update this file as work lands. Stop for user review at each ⏸.
 
 ## M0 — Repo setup
 - [x] Fork `samuelclay/NewsBlur` to the user's GitHub (`gh repo fork samuelclay/NewsBlur --clone=false`).
@@ -18,9 +18,10 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 done — awaiting r
 - **Output:** `fork-docs/AUDIT.md` — file/symbol map, proposed hook points (each with file + one-line change), risks, estimate of upstream churn per file (`git log --since=1.year --format=%h -- <file> | wc -l`). **Stop for review.**
 
 ## M2 — Fork scaffold
-- [ ] `Fork/` group, `ForkUI.isEnabled` switch, `HOOKS.md`, `MERGE_LOG.md`.
-- [ ] Single hook that swaps in a fork root controller for iPad when enabled.
+- [x] `Fork/` group, `ForkUI.isEnabled` switch, `HOOKS.md`, `MERGE_LOG.md`.
+- [x] Single hook that swaps in a fork root controller for iPad when enabled.
 - **Done when:** app builds and runs with the switch on (showing upstream UI inside the new root) and off.
+  - Verified 2026-11-18 on the iPad Pro 11 Fork sim: builds; launch log confirms the root is installed when on and skipped when off (`-fork_ui_enabled NO`); the login modal presents in both. **Not yet verified signed in** (needs your sign-in on the sim).
 
 ## M3 — Declutter
 - [ ] Hide special rows and profile block (filter at data-source level, one hook).

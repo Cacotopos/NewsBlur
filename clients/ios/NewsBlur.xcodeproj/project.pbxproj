@@ -2919,6 +2919,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		F04C0000000000000000F001 /* Fork */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Fork; sourceTree = "<group>"; };
 		17D669B82CE444390093C995 /* Releases */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Releases; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -3317,6 +3318,7 @@
 			children = (
 				C11320261113000000000002 /* WindowChrome.swift */,
 				F519D0A10516273849A00004 /* NewsBlurAlphaUITests */,
+				F04C0000000000000000F001 /* Fork */,
 				17D669B82CE444390093C995 /* Releases */,
 				17D669B62CE444260093C995 /* TestFlight */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -4653,6 +4655,9 @@
 				C11320261113000000000015 /* PBXTargetDependency */,
 				17654E492B02C0A800F61B2B /* PBXTargetDependency */,
 			);
+			fileSystemSynchronizedGroups = (
+				F04C0000000000000000F001 /* Fork */,
+			);
 			name = "NewsBlur Alpha";
 			productName = NewsBlur;
 			productReference = 175792E42930605500490924 /* NB Alpha.app */;
@@ -4711,6 +4716,9 @@
 				FF8A949E1DE3BB77000A4C31 /* PBXTargetDependency */,
 				177551DE238E228A00E27818 /* PBXTargetDependency */,
 				173CB31926BCE94A00BA872A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F04C0000000000000000F001 /* Fork */,
 			);
 			name = NewsBlur;
 			productName = NewsBlur;
