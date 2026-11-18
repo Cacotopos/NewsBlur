@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NewsBlur iPad layout</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#2856a8}a:hover{color:#1b3d78}
+.root{width:1194px;height:834px;display:grid;grid-template-columns:1fr 2fr 5fr;background:#ffffff;font-family:system-ui,-apple-system,sans-serif;overflow:hidden;position:relative}
+.root-p{width:834px;height:1194px;display:flex;background:#ffffff;font-family:system-ui,-apple-system,sans-serif;overflow:hidden;position:relative}
+.navwrap{display:contents}
+.root-p .navwrap{display:none}
+.root-p .navwrap.navwrap-open{display:grid;grid-template-columns:149px 1fr;position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;background:#ffffff;box-shadow:0 0 0 1px #d9d9d4}
+.root-p main{flex:1}
+.fbtn{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;padding:0;cursor:pointer;font:500 12px/1.2 system-ui,-apple-system,sans-serif;color:#4a4a44;width:120px;text-align:center}
+.sq{width:56px;height:56px;border-radius:17px;background:#ffffff;color:#3b3b36;font:600 20px/1 system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.10)}
+.sq-on{background:#33332f;color:#ffffff}
+.badge{position:absolute;top:-7px;right:-11px;background:#6b6c64;color:#fff;font:600 11px/1 system-ui,-apple-system,sans-serif;padding:4px 6px;border-radius:9px;min-width:12px;text-align:center;border:2px solid #e8e8e4}
+.feed{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 16px;border:none;border-top:1px solid #e3e3df;background:#f4f4f1;cursor:pointer;font:600 15px/1.2 system-ui,-apple-system,sans-serif;color:#2b2b27;text-align:left;box-sizing:border-box}
+.feed-dim{color:#6f6f68;font-weight:500}
+.feed-dim .ficon{opacity:.45}
+.chev{flex:none;transition:transform .15s ease;color:#6b6c64}
+.chev-open{transform:rotate(90deg)}
+.count{margin-left:auto;background:#6b6c64;color:#fff;font:600 12px/1 system-ui,-apple-system,sans-serif;padding:4px 7px;border-radius:8px}
+.story{display:flex;gap:10px;width:100%;padding:12px 16px 12px 44px;border:none;border-top:1px solid #eeeeea;background:#ffffff;text-align:left;cursor:pointer;font:400 15px/1.3 system-ui,-apple-system,sans-serif;color:#1f1f1c;box-sizing:border-box;min-height:44px}
+.story-read{color:#6f6f68}
+.story-on{background:#fff8c9}
+.dot{width:8px;height:8px;border-radius:50%;border:2px solid #8a8b82;margin-top:5px;flex:none;box-sizing:border-box}
+.story-read .dot{border-color:transparent}
+.seg{border:none;background:transparent;padding:0 18px;min-height:40px;border-radius:9px;font:600 14px/1 system-ui,-apple-system,sans-serif;color:#55554f;cursor:pointer}
+.seg-on{background:#ffffff;color:#1f1f1c;box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.more{width:100%;border:none;border-top:1px solid #eeeeea;background:#ffffff;padding:12px 16px 12px 44px;text-align:left;font:600 13px/1 system-ui,-apple-system,sans-serif;color:#2856a8;cursor:pointer;min-height:44px}
+.bar{height:14px;border-radius:7px;background:#ececE8;margin-bottom:14px}
+.rbtn{border:none;background:#f4f4f1;border-radius:12px;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#33332f;font:600 15px/1 system-ui,-apple-system,sans-serif;padding:0 18px;gap:8px}
+.mini{width:36px;height:36px;border-radius:10px;color:#ffffff;font:700 16px/1 system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center}
+</style>
+</helmet>
+<div class="{{rootCls}}">
+
+<div class="{{navCls}}">
+<nav aria-label="Folders" style="background: #e8e8e4; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 0 16px; border-right: 1px solid #d9d9d4; overflow-y: auto">
+<sc-for list="{{folders}}" as="f" hint-placeholder-count="7">
+<button class="fbtn" onClick="{{f.pick}}">
+<span class="{{f.cls}}">
+<sc-if value="{{f.isInitials}}" hint-placeholder-val="{{true}}">{{f.abbr}}</sc-if>
+<sc-if value="{{f.isFeed}}" hint-placeholder-val="{{false}}"><span class="mini" style="background: {{f.feedColor}}">{{f.feedAbbr}}</span></sc-if>
+<sc-if value="{{f.symBubble}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12z"></path></svg></sc-if>
+<sc-if value="{{f.symChip}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"></rect><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"></path></svg></sc-if>
+<sc-if value="{{f.symGlobe}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg></sc-if>
+<sc-if value="{{f.hasBadge}}" hint-placeholder-val="{{true}}"><span class="badge">{{f.unread}}</span></sc-if>
+</span>
+<span>{{f.label}}</span>
+</button>
+</sc-for>
+<div style="flex: 1"></div>
+<button class="fbtn" onClick="{{other.pick}}">
+<span class="{{other.cls}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"></path><path d="M3 13h5l1 2h6l1-2h5"></path></svg></span>
+<span>Other</span>
+</button>
+<button class="rbtn" aria-label="Settings" style="background: transparent">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+</button>
+</nav>
+
+<section aria-label="Feeds and stories" style="display: flex; flex-direction: column; border-right: 1px solid #d9d9d4; min-width: 0; background: #ffffff">
+<div style="padding: 28px 16px 16px; display: flex; flex-direction: column; gap: 14px; background: #f4f4f1; border-bottom: 1px solid #e3e3df">
+<div style="display: flex; align-items: center; gap: 12px">
+<h2 style="margin: 0; font-size: 22px; font-weight: 700; color: #1f1f1c; flex: 1">{{folderTitle}}</h2>
+<sc-if value="{{portrait}}" hint-placeholder-val="{{false}}">
+<button class="rbtn" aria-label="Close menu" onClick="{{closeMenu}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</sc-if>
+</div>
+<div role="group" aria-label="Story filter" style="display: flex; gap: 2px; padding: 3px; background: #e3e3df; border-radius: 11px; align-self: flex-start">
+<button class="{{segAll}}" onClick="{{showAll}}">All</button>
+<button class="{{segUnread}}" onClick="{{showUnread}}">Unread</button>
+</div>
+</div>
+<div style="flex: 1; overflow-y: auto">
+<sc-if value="{{noFeeds}}" hint-placeholder-val="{{false}}">
+<p style="margin: 24px 16px; font-size: 14px; line-height: 1.4; color: #6b6c64">Sample feeds are filled in for Gaming, Comics and Other only.</p>
+</sc-if>
+<sc-for list="{{items}}" as="feed" hint-placeholder-count="6">
+<div>
+<sc-if value="{{feed.isGroup}}" hint-placeholder-val="{{false}}">
+<button class="feed feed-dim" onClick="{{feed.toggle}}" aria-expanded="{{feed.open}}">
+<svg class="{{feed.chev}}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+<span>{{feed.name}}</span>
+</button>
+</sc-if>
+<sc-if value="{{feed.isFeed}}" hint-placeholder-val="{{true}}">
+<button class="{{feed.cls}}" onClick="{{feed.toggle}}" aria-expanded="{{feed.open}}">
+<svg class="{{feed.chev}}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+<span class="ficon" style="width: 24px; height: 24px; border-radius: 6px; background: {{feed.color}}; color: #ffffff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none" aria-hidden="true">{{feed.abbr}}</span>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0">{{feed.name}}</span>
+<sc-if value="{{feed.hasCount}}" hint-placeholder-val="{{true}}"><span class="count">{{feed.unread}}</span></sc-if>
+</button>
+<sc-if value="{{feed.open}}" hint-placeholder-val="{{false}}">
+<sc-for list="{{feed.stories}}" as="st" hint-placeholder-count="3">
+<button class="{{st.cls}}" onClick="{{st.pick}}">
+<span class="dot" aria-hidden="true"></span>
+<span style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<span>{{st.title}}</span>
+<span style="font-size: 12px; color: #6b6c64">{{st.time}}</span>
+</span>
+</button>
+</sc-for>
+<sc-if value="{{feed.hasMore}}" hint-placeholder-val="{{false}}">
+<button class="more">{{feed.moreLabel}}</button>
+</sc-if>
+</sc-if>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+
+<main aria-label="Reader" style="display: flex; flex-direction: column; min-width: 0; position: relative">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 24px 0 40px; min-height: 60px; background: #f4f4f1; border-bottom: 1px solid #e3e3df; font-size: 14px; font-weight: 600; color: #4a4a44">
+<sc-if value="{{portrait}}" hint-placeholder-val="{{false}}">
+<button class="rbtn" aria-label="Open folders and feeds" onClick="{{openMenu}}" style="margin-left: -24px; margin-right: 6px; background: #ffffff"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+</sc-if>
+<span style="width: 20px; height: 20px; border-radius: 5px; background: {{sel.color}}" aria-hidden="true"></span>
+<span>{{sel.feed}}</span>
+</div>
+<article style="padding: 36px 48px 110px; overflow-y: auto; flex: 1">
+<h1 style="margin: 0 0 12px; font-size: 32px; line-height: 1.2; font-weight: 700; color: #1f1f1c">{{sel.title}}</h1>
+<p style="margin: 0 0 36px; font-size: 14px; color: #6b6c64">{{sel.time}} · [Author]</p>
+<div class="bar" style="width: 100%"></div>
+<div class="bar" style="width: 96%"></div>
+<div class="bar" style="width: 98%"></div>
+<div class="bar" style="width: 72%; margin-bottom: 34px"></div>
+<div style="height: 260px; border-radius: 14px; background: #f1f1ed; margin-bottom: 34px; display: flex; align-items: center; justify-content: center; color: #6b6c64; font-size: 14px">[Story image]</div>
+<div class="bar" style="width: 100%"></div>
+<div class="bar" style="width: 94%"></div>
+<div class="bar" style="width: 99%"></div>
+<div class="bar" style="width: 88%"></div>
+<div class="bar" style="width: 60%"></div>
+</article>
+<div style="position: absolute; left: 48px; right: 48px; bottom: 24px; display: flex; gap: 10px; align-items: center">
+<button class="rbtn" aria-label="Previous story"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<button class="rbtn" aria-label="Next story"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+<div style="flex: 1"></div>
+<button class="rbtn">Text</button>
+<button class="rbtn" aria-label="Share"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M8 7l4-4 4 4"></path><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"></path></svg></button>
+</div>
+</main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"orientation":{"editor":"enum","options":["landscape","portrait"],"default":"landscape"},"menuOpen":{"editor":"boolean","default":false},"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { folder: 'gaming', open: { aftermath: true }, filter: 'unread', story: 'aftermath-0', menuOpen: !!props.menuOpen, groupOpen: {} };
+  }
+  renderVals() {
+    var s = this.state;
+    var self = this;
+    var portrait = (this.props.orientation || 'landscape') === 'portrait';
+    var FEEDS = {
+      gaming: [
+        { id: 'aftermath', name: 'Aftermath', abbr: 'A', color: '#1f1f1c', unread: 57 },
+        { id: 'alexandrian', name: 'The Alexandrian', abbr: 'A', color: '#3b3b36', unread: 10 },
+        { id: 'goblin', name: 'Goblin Punch', abbr: 'G', color: '#3a7d2c', unread: 1 },
+        { id: 'biff', name: 'SPACE-BIFF!', abbr: 'S', color: '#b5452f', unread: 5 },
+        { id: 'polygon', name: 'Tabletop Games – Polygon', abbr: 'P', color: '#b8386d', unread: 0 },
+        { id: 'twenty', name: 'Twenty Sided', abbr: '20', color: '#2856a8', unread: 4 }
+      ],
+      comics: [
+        { id: 'ca', name: '[Comic feed A]', abbr: 'A', color: '#7a4fb0', unread: 40 },
+        { id: 'cb', name: '[Comic feed B]', abbr: 'B', color: '#b0702a', unread: 48 },
+        { id: 'cc', name: '[Comic feed C]', abbr: 'C', color: '#2a8a86', unread: 0 },
+        { id: 'cd', name: '[Comic feed D]', abbr: 'D', color: '#8a2a5e', unread: 0 },
+        { id: 'ce', name: '[Comic feed E]', abbr: 'E', color: '#4a6a2a', unread: 0 },
+        { id: 'cf', name: '[Comic feed F]', abbr: 'F', color: '#2a4a8a', unread: 0 }
+      ],
+      other: [
+        { id: 'oatmeal', name: 'The Oatmeal - Comics by Matthew Inman', abbr: 'O', color: '#7a7a72', unread: 0 }
+      ]
+    };
+    function total(id) { return (FEEDS[id] || []).reduce(function (a, f) { return a + f.unread; }, 0); }
+    var FOLDERS = [
+      { id: 'gaming', label: 'Gaming', title: 'Blogs – Gaming', mode: 'feed', unread: total('gaming') },
+      { id: 'general', label: 'General', title: 'Blogs – General', mode: 'initials', abbr: 'Ge', unread: 0 },
+      { id: 'btech', label: 'Technology', title: 'Blogs – Technology', mode: 'initials', abbr: 'Te', unread: 7 },
+      { id: 'writing', label: 'Writing', title: 'Blogs – Writing', mode: 'initials', abbr: 'Wr', unread: 0 },
+      { id: 'comics', label: 'Comics', title: 'Comics', mode: 'bubble', unread: total('comics') },
+      { id: 'ntech', label: 'News Tech', title: 'News – Technology', mode: 'chip', unread: 7 },
+      { id: 'world', label: 'World', title: 'News – World', mode: 'globe', unread: 666 }
+    ];
+    var TITLES = ['[Story headline]', '[A longer story headline that wraps onto a second line]', '[Story headline of medium length]'];
+    var TIMES = ['5:09am', '4:40am', '2:15am', 'Yesterday', 'Mon', 'Sun', '12 Nov'];
+    function build(f) {
+      var shown = Math.min(f.unread, 3);
+      var st = [];
+      for (var i = 0; i < shown; i++) st.push({ id: f.id + '-' + i, title: TITLES[(i + f.name.length) % 3], time: TIMES[i], read: false });
+      for (var j = 0; j < 2; j++) st.push({ id: f.id + '-r' + j, title: TITLES[(j + 1) % 3], time: TIMES[shown + j + 1], read: true });
+      return { st: st, more: f.unread - shown };
+    }
+    var all = FEEDS[s.folder] || [];
+    var sel = null;
+    Object.keys(FEEDS).forEach(function (k) {
+      FEEDS[k].forEach(function (f) {
+        build(f).st.forEach(function (x) { if (x.id === s.story) sel = { feed: f.name, color: f.color, title: x.title, time: x.time }; });
+      });
+    });
+    if (!sel) sel = { feed: '[Feed]', color: '#c9c9c3', title: 'Select a story', time: '—' };
+    function feedItem(f) {
+      var b = build(f);
+      var open = !!s.open[f.id];
+      return {
+        isFeed: true, isGroup: false,
+        name: f.name, abbr: f.abbr, color: f.color, unread: f.unread,
+        cls: 'feed' + (f.unread === 0 ? ' feed-dim' : ''),
+        hasCount: f.unread > 0,
+        open: open,
+        chev: 'chev' + (open ? ' chev-open' : ''),
+        toggle: function () { self.setState(function (p) { var o = Object.assign({}, p.open); o[f.id] = !p.open[f.id]; return { open: o }; }); },
+        stories: b.st.filter(function (x) { return s.filter === 'all' || !x.read; }).map(function (x) {
+          return { title: x.title, time: x.time, cls: 'story' + (x.read ? ' story-read' : '') + (x.id === s.story ? ' story-on' : ''), pick: function () { self.setState({ story: x.id, menuOpen: false }); } };
+        }),
+        hasMore: b.more > 0,
+        moreLabel: 'Show ' + b.more + ' more unread'
+      };
+    }
+    var live = all.filter(function (f) { return f.unread > 0; });
+    var quiet = all.filter(function (f) { return f.unread === 0; });
+    var items = live.map(feedItem);
+    if (quiet.length > 3) {
+      var gOpen = !!s.groupOpen[s.folder];
+      var folderId = s.folder;
+      items.push({
+        isGroup: true, isFeed: false, open: gOpen,
+        name: quiet.length + ' feeds with nothing unread',
+        chev: 'chev' + (gOpen ? ' chev-open' : ''),
+        toggle: function () { self.setState(function (p) { var o = Object.assign({}, p.groupOpen); o[folderId] = !p.groupOpen[folderId]; return { groupOpen: o }; }); }
+      });
+      if (gOpen) items = items.concat(quiet.map(feedItem));
+    } else {
+      items = items.concat(quiet.map(feedItem));
+    }
+    function sq(id) { return 'sq' + (id === s.folder ? ' sq-on' : ''); }
+    var titleMap = { other: 'Other' };
+    FOLDERS.forEach(function (f) { titleMap[f.id] = f.title; });
+    return {
+      portrait: portrait,
+      rootCls: portrait ? 'root-p' : 'root',
+      navCls: 'navwrap' + (s.menuOpen ? ' navwrap-open' : ''),
+      openMenu: function () { self.setState({ menuOpen: true }); },
+      closeMenu: function () { self.setState({ menuOpen: false }); },
+      folders: FOLDERS.map(function (f) {
+        var first = (FEEDS[f.id] || [])[0];
+        return {
+          abbr: f.abbr, label: f.label, unread: f.unread, hasBadge: f.unread > 0, cls: sq(f.id),
+          isInitials: f.mode === 'initials',
+          isFeed: f.mode === 'feed',
+          feedColor: first ? first.color : '#999', feedAbbr: first ? first.abbr : '',
+          symBubble: f.mode === 'bubble', symChip: f.mode === 'chip', symGlobe: f.mode === 'globe',
+          pick: function () { self.setState({ folder: f.id }); }
+        };
+      }),
+      other: { cls: sq('other'), pick: function () { self.setState({ folder: 'other' }); } },
+      folderTitle: titleMap[s.folder],
+      items: items,
+      noFeeds: items.length === 0,
+      segAll: 'seg' + (s.filter === 'all' ? ' seg-on' : ''),
+      segUnread: 'seg' + (s.filter === 'unread' ? ' seg-on' : ''),
+      showAll: function () { self.setState({ filter: 'all' }); },
+      showUnread: function () { self.setState({ filter: 'unread' }); },
+      sel: sel
+    };
+  }
+}
+</script>
+</body>
+</html>
