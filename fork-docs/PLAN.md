@@ -1,20 +1,20 @@
 # Plan — milestones and tasks
 
-Status: M0 not started. Update this file as work lands. Stop for user review at each ⏸.
+Status: M0 done (push of `ipad-ui` deferred until asked), M1 done — awaiting review. Update this file as work lands. Stop for user review at each ⏸.
 
 ## M0 — Repo setup
-- [ ] Fork `samuelclay/NewsBlur` to the user's GitHub (`gh repo fork samuelclay/NewsBlur --clone=false`).
-- [ ] `~/Source/NewsBlur` already exists (holds `fork-docs/` and `CLAUDE.local.md`), so **init in place, don't clone**: see CLAUDE_CODE_PROMPT.md for exact commands (partial fetch `--filter=blob:none`).
-- [ ] Branches per MERGE_STRATEGY.md; `rerere` on; `CLAUDE.local.md` in `.git/info/exclude`.
-- [ ] Commit `fork-docs/` on `ipad-ui`; push `ipad-ui` to origin.
+- [x] Fork `samuelclay/NewsBlur` to the user's GitHub (`gh repo fork samuelclay/NewsBlur --clone=false`).
+- [x] `~/Source/NewsBlur` already exists (holds `fork-docs/` and `CLAUDE.local.md`), so **init in place, don't clone**: see CLAUDE_CODE_PROMPT.md for exact commands (partial fetch `--filter=blob:none`).
+- [x] Branches per MERGE_STRATEGY.md; `rerere` on; `CLAUDE.local.md` in `.git/info/exclude`.
+- [ ] Commit `fork-docs/` on `ipad-ui`; push `ipad-ui` to origin. *(committed; push not done — only on request)*
 - **Done when:** `git remote -v` shows origin + upstream, `ipad-ui` checked out, docs committed.
 
 ## M1 — Audit ⏸
-- [ ] Locate the iOS project/workspace, schemes, targets, dependency manager (CocoaPods/SPM), min iOS version.
-- [ ] Build unmodified app for iPad simulator via `xcodebuild`. Record any signing/capability blockers for a free Personal Team (push, iCloud, app groups, extensions).
-- [ ] Map: iPad root/split view controller; feed list controller + data source (where Dashboard/Infrequent/All Site/Read/Global Shared/Widely Read/Long Reads/Good Reads rows are built); story list controller; story reader controller; bottom filter bar (All/unread/focus/saved); theme manager; folder/feed data model and unread counts; how story lists are fetched/paginated.
-- [ ] Check whether upstream already has settings to hide special rows.
-- [ ] Check whether the user's account has nested subfolders (affects SPEC tree assumption).
+- [x] Locate the iOS project/workspace, schemes, targets, dependency manager (CocoaPods/SPM), min iOS version.
+- [x] Build unmodified app for iPad simulator via `xcodebuild`. Record any signing/capability blockers for a free Personal Team (push, iCloud, app groups, extensions).
+- [x] Map: iPad root/split view controller; feed list controller + data source (where Dashboard/Infrequent/All Site/Read/Global Shared/Widely Read/Long Reads/Good Reads rows are built); story list controller; story reader controller; bottom filter bar (All/unread/focus/saved); theme manager; folder/feed data model and unread counts; how story lists are fetched/paginated.
+- [x] Check whether upstream already has settings to hide special rows.
+- [ ] *(blocked: needs sign-in or user answer)* Check whether the user's account has nested subfolders (affects SPEC tree assumption).
 - **Output:** `fork-docs/AUDIT.md` — file/symbol map, proposed hook points (each with file + one-line change), risks, estimate of upstream churn per file (`git log --since=1.year --format=%h -- <file> | wc -l`). **Stop for review.**
 
 ## M2 — Fork scaffold
