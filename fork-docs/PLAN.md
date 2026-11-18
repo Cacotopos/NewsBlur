@@ -49,7 +49,8 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 - [x] Dimmed zero-unread feeds; >3 collapse into one group row.
   - Verified on the sim (landscape): Comics → Oglaf expands to its 4 unread inline; tapping "Freshwater" opens it in the reader, highlights the row, Oglaf 4→3 and Comics badge 86→85. Upstream's feed list and story titles stay hidden.
   - Feed order is frozen when a folder opens (rows don't jump as feeds hit 0). Stories read this session stay visible, dimmed, until the filter or folder changes.
-- **Then run M9-style merge drill once** and log it. Stop for review.
+- [x] **M9-style merge drill** run and logged (simulated over 4 weeks of upstream; 2 trivial conflicts, ~1 min). Stop for review.
+  - Fixed after review: stories past page 1 never opened (now looked up by hash); rail badge shows feeds/stories.
 
 ## M6 — Wide layout
 - [x] Rail fixed 88 pt (user: 1/8 wasted space) · feed column 2/8 · reader the rest, at window width ≥ 1000 pt. Done in M5.

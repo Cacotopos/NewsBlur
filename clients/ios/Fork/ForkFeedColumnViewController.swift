@@ -268,8 +268,13 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
         selectedStoryHash = story.hash
         for loaded in storiesByFeed.values { loaded.markRead(hash: story.hash) }
         rebuildRows()
+        guard let app = NewsBlurAppDelegate.shared else { return }
+        // Upstream normally finds the story by paging its (hidden) story list, which stalls past page 1.
+        // Marking it as a pending notification story makes `loadFeed:withStory:` look it up by hash
+        // instead (`/reader/river_stories?h=`). The property is readonly in the header, so set it via KVC.
+        app.setValue(["feedId": story.feedId, "storyHash": story.hash], forKey: "pendingNotificationStory")
         // Upstream loads the feed and opens the story in its reader; prev/next walks this feed.
-        NewsBlurAppDelegate.shared?.loadFeed(story.feedId, withStory: story.hash, storyTitle: story.title, animated: false)
+        app.loadFeed(story.feedId, withStory: story.hash, storyTitle: story.title, animated: false)
     }
 
     // MARK: - Table

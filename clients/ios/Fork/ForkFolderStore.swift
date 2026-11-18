@@ -16,6 +16,8 @@ struct ForkFolder: Equatable {
     /// Feed ids in upstream's sort order.
     let feedIds: [String]
     let unread: Int
+    /// Feeds ("publications") in the folder with at least one unread story.
+    let unreadFeeds: Int
 
     /// Two-letter initials from the short label ("Gaming" → "Ga").
     var initials: String {
@@ -57,7 +59,7 @@ enum ForkFolderStore {
             let ids = feedIds(inFolder: key)
             guard !ids.isEmpty else { return nil }
             return ForkFolder(key: key, title: key, shortLabel: shortLabel(for: key),
-                              feedIds: ids, unread: unread(feedIds: ids))
+                              feedIds: ids, unread: unread(feedIds: ids), unreadFeeds: unreadFeeds(feedIds: ids))
         }
     }
 
@@ -65,7 +67,7 @@ enum ForkFolderStore {
     static func otherFolder() -> ForkFolder {
         let ids = feedIds(inFolder: otherKey)
         return ForkFolder(key: otherKey, title: "Other", shortLabel: "Other",
-                          feedIds: ids, unread: unread(feedIds: ids))
+                          feedIds: ids, unread: unread(feedIds: ids), unreadFeeds: unreadFeeds(feedIds: ids))
     }
 
     static func shortLabel(for title: String) -> String {
@@ -97,5 +99,9 @@ enum ForkFolderStore {
 
     static func unread(feedIds: [String]) -> Int {
         feedIds.reduce(0) { $0 + unread(feedId: $1) }
+    }
+
+    static func unreadFeeds(feedIds: [String]) -> Int {
+        feedIds.filter { unread(feedId: $0) > 0 }.count
     }
 }

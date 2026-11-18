@@ -14,6 +14,8 @@ Fork-only code lives in `clients/ios/Fork/` and never conflicts on merge.
 
 No-hook overrides: `ForkUI.install` swaps upstream's `SplitViewController` instance to `ForkSplitViewController` (`object_setClass`), which keeps `preferredDisplayMode` at `.secondaryOnly` and ignores `show(.primary/.supplementary)` while the fork owns the layout. If upstream ever adds stored properties or subclasses the split, revisit this.
 
+The feed column opens a story by setting upstream's `pendingNotificationStory` (readonly in `NewsBlurAppDelegate.h`, set via KVC) before `loadFeed:withStory:`. That makes upstream look the story up by hash, the way it does for push notifications, instead of paging its hidden story list (which stalls after page 1 and gives up after 15 s). If upstream renames that property, story taps in the fork will log a KVC exception: check `ForkFeedColumnViewController.open(_:)` first.
+
 ## Planned (from AUDIT.md section 6, not yet applied)
 - H3: not needed so far — `loadFeed:withStory:` works with the split held reader-only.
 - H4b/H5: signing xcconfig/entitlements and skipping embedded extensions for the Personal Team (before installing on a device).

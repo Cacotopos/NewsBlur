@@ -22,7 +22,7 @@ Mode is decided by **window width**, not orientation (covers Split View / Stage 
 Columns are fixed proportions, not user-resizable. If 2/8 proves too cramped in use, the fallback to try is 1/8 · 3/8 · 4/8 — do not change without asking.
 
 ## Column 1 — Folder rail (88 pt)
-- One **squircle** (56 pt, continuous corner radius ≈17 pt) per **top-level folder**, label under it (short name, e.g. "Gaming" for "Blogs - Gaming"), unread-count badge top-right (hidden at 0).
+- One **squircle** (56 pt, continuous corner radius ≈17 pt) per **top-level folder**, label under it (short name, e.g. "Gaming" for "Blogs - Gaming"), badge top-right as **feeds/stories**, e.g. `3/12` = 3 feeds with unread, 12 unread stories (hidden at 0; changed from a single count at the user's request, 2026-11-18).
 - Selected folder: dark fill / inverted.
 - **"Other"** squircle pinned at the bottom of the rail for top-level feeds not in any folder (e.g. "The Oatmeal").
 - Folder membership includes **muted** feeds (they show, dimmed later, and add 0 to badges). Folders with no feeds at all are hidden. *(decided in M4, 2026-11-18)*

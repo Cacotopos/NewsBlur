@@ -241,7 +241,8 @@ final class ForkRailButton: UIControl {
             symbolView.centerYAnchor.constraint(equalTo: squircle.centerYAnchor),
 
             badge.topAnchor.constraint(equalTo: squircle.topAnchor, constant: -7),
-            badge.centerXAnchor.constraint(equalTo: squircle.trailingAnchor, constant: 1),
+            // Pinned by its trailing edge so the wider "3/663" stays inside the 88 pt rail.
+            badge.trailingAnchor.constraint(equalTo: squircle.trailingAnchor, constant: 10),
 
             titleLabel.topAnchor.constraint(equalTo: squircle.bottomAnchor, constant: 6),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
@@ -266,12 +267,15 @@ final class ForkRailButton: UIControl {
             symbolView.isHidden = false
             initialsLabel.isHidden = true
         }
-        badge.text = folder.unread > 0 ? NBLocalization.formattedCount(folder.unread) : nil
+        // "feeds/stories": 3/12 = three publications with something unread, twelve unread stories.
+        badge.text = folder.unread > 0
+            ? "\(NBLocalization.formattedCount(folder.unreadFeeds))/\(NBLocalization.formattedCount(folder.unread))" : nil
         badge.isHidden = folder.unread == 0
         accessibilityIdentifier = "fork-rail-\(folder.key)"
         accessibilityLabel = folder.title
         accessibilityValue = folder.unread > 0
-            ? String.localizedStringWithFormat(NSLocalizedString("%d unread", comment: ""), folder.unread) : nil
+            ? String.localizedStringWithFormat(NSLocalizedString("%d unread in %d feeds", comment: "Fork rail badge"),
+                                               folder.unread, folder.unreadFeeds) : nil
         accessibilityTraits = selected ? [.button, .selected] : .button
         applyTheme()
     }
