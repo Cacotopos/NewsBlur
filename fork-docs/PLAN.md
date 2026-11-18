@@ -69,8 +69,9 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
   - Verified on the sim: Story List shows only Story order and Mark stories read; Story Layout and Feed List are gone; Extra Large enlarges feed and story rows; Oldest first lists Penny Arcade 24 → 28 Oct.
 
 ## M8 — Folder icon picker
-- [ ] Long-press menu: Initials / Symbol… / First feed's icon; SF Symbol picker; persist per folder in UserDefaults.
-- [ ] Disambiguate colliding short labels ("Blogs - Technology" / "News - Technology" both show "Te / Technology") — user chose to solve via distinct icons here (2026-11-18).
+- [x] Long-press menu: Initials / Symbol… / First Feed's Icon; SF Symbol picker (curated ~150 topic symbols with search, user choice 2026-11-19); per folder in UserDefaults (`Fork/ForkFolderAppearance.swift`). No upstream hooks.
+- [x] Disambiguate colliding short labels: distinct icons, plus Rename Label… / Reset Label in the same menu (user choice 2026-11-19). Initials follow the custom label.
+  - Verified on the sim: Comics → theatre masks via search "theater"; News - Technology → first feed's favicon and label "Tech News".
 
 ## M9 — Merge drill & polish ⏸
 - [ ] Merge latest upstream, log conflicts/time in MERGE_LOG.md.

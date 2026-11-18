@@ -18,13 +18,6 @@ struct ForkFolder: Equatable {
     let unread: Int
     /// Feeds ("publications") in the folder with at least one unread story.
     let unreadFeeds: Int
-
-    /// Two-letter initials from the short label ("Gaming" → "Ga").
-    var initials: String {
-        let letters = shortLabel.filter { $0.isLetter || $0.isNumber }
-        let two = String(letters.prefix(2))
-        return two.prefix(1).uppercased() + two.dropFirst().lowercased()
-    }
 }
 
 /// Read-only view of upstream's folder/feed/unread data for the fork UI.

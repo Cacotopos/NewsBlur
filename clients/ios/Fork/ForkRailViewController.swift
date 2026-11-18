@@ -6,7 +6,7 @@
 import UIKit
 
 /// Column 1: one squircle per top-level folder, "Other" and Settings pinned at the bottom.
-final class ForkRailViewController: UIViewController {
+final class ForkRailViewController: UIViewController, UIContextMenuInteractionDelegate {
     /// Fixed rail width: squircle (56) plus room for the badge and a 12pt label like "Technology".
     static let railWidth: CGFloat = 88
 
@@ -128,6 +128,7 @@ final class ForkRailViewController: UIViewController {
             folderButtons = folders.map { _ in
                 let button = ForkRailButton()
                 button.addTarget(self, action: #selector(folderTapped(_:)), for: .touchUpInside)
+                button.addInteraction(UIContextMenuInteraction(delegate: self))
                 folderStack.addArrangedSubview(button)
                 return button
             }
@@ -138,12 +139,106 @@ final class ForkRailViewController: UIViewController {
 
     private func applyContent() {
         for (button, folder) in zip(folderButtons, folders) {
-            button.configure(folder: folder, glyph: .initials(folder.initials), selected: folder.key == selectedKey)
+            button.configure(folder: folder, label: ForkFolderAppearance.label(for: folder),
+                             glyph: glyph(for: folder), selected: folder.key == selectedKey)
         }
         if let other {
-            otherButton.configure(folder: other, glyph: .symbol("tray"), selected: other.key == selectedKey)
+            otherButton.configure(folder: other, label: other.shortLabel, glyph: .symbol("tray"),
+                                  selected: other.key == selectedKey)
             otherButton.isHidden = other.feedIds.isEmpty
         }
+    }
+
+    private func glyph(for folder: ForkFolder) -> ForkRailButton.Glyph {
+        switch ForkFolderAppearance.icon(for: folder.key) {
+        case .initials:
+            return .initials(ForkFolderAppearance.initials(for: folder))
+        case .symbol(let name):
+            return UIImage(systemName: name) == nil ? .initials(ForkFolderAppearance.initials(for: folder)) : .symbol(name)
+        case .firstFeed:
+            guard let feedId = folder.feedIds.first, let image = NewsBlurAppDelegate.shared?.getFavicon(feedId) else {
+                return .initials(ForkFolderAppearance.initials(for: folder))
+            }
+            return .image(image)
+        }
+    }
+
+    // MARK: - Long-press menu (M8)
+
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction,
+                                configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let button = interaction.view as? ForkRailButton,
+              let index = folderButtons.firstIndex(of: button), folders.indices.contains(index) else { return nil }
+        let folder = folders[index]
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            self?.menu(for: folder)
+        }
+    }
+
+    private func menu(for folder: ForkFolder) -> UIMenu {
+        let current = ForkFolderAppearance.icon(for: folder.key)
+        let initials = UIAction(title: NSLocalizedString("Initials", comment: "Fork folder icon menu"),
+                                image: UIImage(systemName: "textformat"),
+                                state: current == .initials ? .on : .off) { [weak self] _ in
+            self?.setIcon(.initials, for: folder)
+        }
+        var symbolState: UIMenuElement.State = .off
+        var currentSymbol: String?
+        if case .symbol(let name) = current { symbolState = .on; currentSymbol = name }
+        let symbol = UIAction(title: NSLocalizedString("Symbol…", comment: "Fork folder icon menu"),
+                              image: UIImage(systemName: currentSymbol ?? "square.grid.3x3"),
+                              state: symbolState) { [weak self] _ in
+            guard let self else { return }
+            ForkSymbolPicker.present(from: self, folderTitle: folder.title, current: currentSymbol) { [weak self] name in
+                self?.setIcon(.symbol(name), for: folder)
+            }
+        }
+        let firstFeed = UIAction(title: NSLocalizedString("First Feed's Icon", comment: "Fork folder icon menu"),
+                                 image: UIImage(systemName: "photo"),
+                                 state: current == .firstFeed ? .on : .off) { [weak self] _ in
+            self?.setIcon(.firstFeed, for: folder)
+        }
+        let iconMenu = UIMenu(title: NSLocalizedString("Icon", comment: "Fork folder icon menu"),
+                              options: .displayInline, children: [initials, symbol, firstFeed])
+
+        var labelActions: [UIMenuElement] = [
+            UIAction(title: NSLocalizedString("Rename Label…", comment: "Fork folder label menu"),
+                     image: UIImage(systemName: "character.cursor.ibeam")) { [weak self] _ in
+                self?.promptForLabel(folder)
+            },
+        ]
+        if ForkFolderAppearance.customLabel(for: folder.key) != nil {
+            labelActions.append(UIAction(title: NSLocalizedString("Reset Label", comment: "Fork folder label menu"),
+                                         image: UIImage(systemName: "arrow.uturn.backward")) { [weak self] _ in
+                ForkFolderAppearance.setCustomLabel(nil, for: folder.key)
+                self?.refresh(force: true)
+            })
+        }
+        let labelMenu = UIMenu(title: "", options: .displayInline, children: labelActions)
+        return UIMenu(title: folder.title, children: [iconMenu, labelMenu])
+    }
+
+    private func setIcon(_ icon: ForkFolderIcon, for folder: ForkFolder) {
+        ForkFolderAppearance.setIcon(icon, for: folder.key)
+        refresh(force: true)
+    }
+
+    private func promptForLabel(_ folder: ForkFolder) {
+        let alert = UIAlertController(title: NSLocalizedString("Rail Label", comment: "Fork folder label prompt title"),
+                                      message: folder.title, preferredStyle: .alert)
+        alert.addTextField { field in
+            field.text = ForkFolderAppearance.label(for: folder)
+            field.placeholder = folder.shortLabel
+            field.clearButtonMode = .whileEditing
+            field.autocapitalizationType = .words
+            field.accessibilityIdentifier = "fork-label-field"
+        }
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Fork folder label prompt"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Save", comment: "Fork folder label prompt"), style: .default) { [weak self, weak alert] _ in
+            ForkFolderAppearance.setCustomLabel(alert?.textFields?.first?.text, for: folder.key)
+            self?.refresh(force: true)
+        })
+        present(alert, animated: true)
     }
 
     private func applyTheme() {
@@ -176,7 +271,7 @@ final class ForkRailViewController: UIViewController {
 
 /// One squircle + label in the rail.
 final class ForkRailButton: UIControl {
-    enum Glyph { case initials(String), symbol(String) }
+    enum Glyph { case initials(String), symbol(String), image(UIImage) }
 
     static let squircleSize: CGFloat = 56
 
@@ -185,6 +280,7 @@ final class ForkRailButton: UIControl {
     private let squircle = UIView()
     private let initialsLabel = UILabel()
     private let symbolView = UIImageView()
+    private let imageView = UIImageView()
     private let badge = ForkBadgeLabel()
     private let titleLabel = UILabel()
     private var isChosen = false
@@ -214,6 +310,13 @@ final class ForkRailButton: UIControl {
         symbolView.translatesAutoresizingMaskIntoConstraints = false
         squircle.addSubview(symbolView)
 
+        imageView.contentMode = .scaleAspectFit
+        imageView.layer.cornerRadius = 6
+        imageView.layer.cornerCurve = .continuous
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        squircle.addSubview(imageView)
+
         badge.translatesAutoresizingMaskIntoConstraints = false
         addSubview(badge)
 
@@ -239,6 +342,10 @@ final class ForkRailButton: UIControl {
             initialsLabel.centerYAnchor.constraint(equalTo: squircle.centerYAnchor),
             symbolView.centerXAnchor.constraint(equalTo: squircle.centerXAnchor),
             symbolView.centerYAnchor.constraint(equalTo: squircle.centerYAnchor),
+            imageView.centerXAnchor.constraint(equalTo: squircle.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: squircle.centerYAnchor),
+            imageView.widthAnchor.constraint(equalToConstant: 32),
+            imageView.heightAnchor.constraint(equalToConstant: 32),
 
             badge.topAnchor.constraint(equalTo: squircle.topAnchor, constant: -7),
             // Pinned by its trailing edge so the wider "3/663" stays inside the 88 pt rail.
@@ -254,18 +361,22 @@ final class ForkRailButton: UIControl {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
 
-    func configure(folder: ForkFolder, glyph: Glyph, selected: Bool) {
+    func configure(folder: ForkFolder, label: String, glyph: Glyph, selected: Bool) {
         isChosen = selected
-        titleLabel.text = folder.shortLabel
+        titleLabel.text = label
+        initialsLabel.isHidden = true
+        symbolView.isHidden = true
+        imageView.isHidden = true
         switch glyph {
         case .initials(let text):
             initialsLabel.text = text
             initialsLabel.isHidden = false
-            symbolView.isHidden = true
         case .symbol(let name):
             symbolView.image = UIImage(systemName: name)
             symbolView.isHidden = false
-            initialsLabel.isHidden = true
+        case .image(let image):
+            imageView.image = image
+            imageView.isHidden = false
         }
         // "feeds/stories": 3/12 = three publications with something unread, twelve unread stories.
         badge.text = folder.unread > 0
