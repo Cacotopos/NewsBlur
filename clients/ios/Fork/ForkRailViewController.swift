@@ -7,6 +7,9 @@ import UIKit
 
 /// Column 1: one squircle per top-level folder, "Other" and Settings pinned at the bottom.
 final class ForkRailViewController: UIViewController {
+    /// Fixed rail width: squircle (56) plus room for the badge and a 12pt label like "Technology".
+    static let railWidth: CGFloat = 88
+
     /// Called when the user picks a folder (or Other).
     var onSelect: ((ForkFolder) -> Void)?
 
@@ -24,17 +27,23 @@ final class ForkRailViewController: UIViewController {
     private var folderButtons: [ForkRailButton] = []
     private var lastTheme = ""
 
-    private(set) var selectedKey: String? {
+    /// The user's saved choice. Only written by a tap, never by a fallback, so a launch that sees
+    /// partial or stale folder data can't overwrite it.
+    private var savedKey: String? {
         get { UserDefaults.standard.string(forKey: Self.selectedKeyDefaults) }
         set { UserDefaults.standard.set(newValue, forKey: Self.selectedKeyDefaults) }
     }
 
-    /// The folder currently selected, if it still exists.
+    /// The saved folder if it exists right now, otherwise the first folder (or Other).
     var selectedFolder: ForkFolder? {
-        guard let key = selectedKey else { return nil }
-        if key == other?.key { return other }
-        return folders.first { $0.key == key }
+        if let key = savedKey {
+            if key == other?.key, let other, !other.feedIds.isEmpty { return other }
+            if let match = folders.first(where: { $0.key == key }) { return match }
+        }
+        return folders.first ?? other
     }
+
+    var selectedKey: String? { selectedFolder?.key }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -123,12 +132,6 @@ final class ForkRailViewController: UIViewController {
                 return button
             }
         }
-        // Only repair the selection once upstream's feed list has loaded, or the first (empty) pass
-        // would overwrite the saved choice.
-        let hasData = !folders.isEmpty || !(other?.feedIds.isEmpty ?? true)
-        if hasData, selectedKey == nil || selectedFolder == nil {
-            selectedKey = folders.first?.key ?? other?.key
-        }
         applyContent()
         applyTheme()
     }
@@ -151,7 +154,7 @@ final class ForkRailViewController: UIViewController {
     }
 
     private func select(_ folder: ForkFolder) {
-        selectedKey = folder.key
+        savedKey = folder.key
         applyContent()
         onSelect?(folder)
     }
@@ -217,6 +220,8 @@ final class ForkRailButton: UIControl {
         titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
         titleLabel.textAlignment = .center
         titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.minimumScaleFactor = 0.8
         titleLabel.adjustsFontForContentSizeCategory = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.isUserInteractionEnabled = false
@@ -224,7 +229,7 @@ final class ForkRailButton: UIControl {
 
         let size = Self.squircleSize
         NSLayoutConstraint.activate([
-            widthAnchor.constraint(equalToConstant: 128),
+            widthAnchor.constraint(equalToConstant: ForkRailViewController.railWidth - 1),
             squircle.topAnchor.constraint(equalTo: topAnchor, constant: 7),
             squircle.centerXAnchor.constraint(equalTo: centerXAnchor),
             squircle.widthAnchor.constraint(equalToConstant: size),

@@ -10,7 +10,7 @@ import UIKit
 /// Upstream's `SplitViewController` stays alive as a child: the app delegate keeps its reference
 /// and presents modals from it.
 ///
-/// M4 (interim): in wide mode the folder rail takes the left 1/8 and upstream's split fills the rest.
+/// M4 (interim): in wide mode the folder rail takes a fixed-width strip on the left and upstream's split fills the rest.
 /// M5/M6 add the feed column and shrink the split to the reader.
 final class ForkRootViewController: UIViewController {
     /// Window width at or above which the fork shows its columns (SPEC "Wide").
@@ -83,7 +83,7 @@ final class ForkRootViewController: UIViewController {
         super.viewDidLayoutSubviews()
         let bounds = view.bounds
         if isWide {
-            let railWidth = (bounds.width / 8).rounded()
+            let railWidth = ForkRailViewController.railWidth
             rail.view.isHidden = false
             rail.view.frame = CGRect(x: 0, y: 0, width: railWidth, height: bounds.height)
             upstreamSplit.view.frame = CGRect(x: railWidth, y: 0, width: bounds.width - railWidth, height: bounds.height)

@@ -57,6 +57,7 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 
 ## M8 — Folder icon picker
 - [ ] Long-press menu: Initials / Symbol… / First feed's icon; SF Symbol picker; persist per folder in UserDefaults.
+- [ ] Disambiguate colliding short labels ("Blogs - Technology" / "News - Technology" both show "Te / Technology") — user chose to solve via distinct icons here (2026-11-18).
 
 ## M9 — Merge drill & polish ⏸
 - [ ] Merge latest upstream, log conflicts/time in MERGE_LOG.md.
