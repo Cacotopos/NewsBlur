@@ -1,6 +1,6 @@
 # Plan — milestones and tasks
 
-Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done and smoke-tested signed in. M4 done. M5 reviewed and drilled. M3 and M6 done (Split View/Stage Manager dropped). M7 built early (2026-11-18) with Wide full screen. Update this file as work lands. Stop for user review at each ⏸.
+Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A chosen), M2 done and smoke-tested signed in. M4 done. M5 reviewed and drilled. M3 and M6 done (Split View/Stage Manager dropped). M7 built early (2026-11-18) with Wide full screen. M8 done; M9 done except the device install (2026-11-19). Update this file as work lands. Stop for user review at each ⏸.
 
 ## M0 — Repo setup
 - [x] Fork `samuelclay/NewsBlur` to the user's GitHub (`gh repo fork samuelclay/NewsBlur --clone=false`).
@@ -74,7 +74,7 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
   - Verified on the sim: Comics → theatre masks via search "theater"; News - Technology → first feed's favicon and label "Tech News".
 
 ## M9 — Merge drill & polish ⏸
-- [ ] Merge latest upstream, log conflicts/time in MERGE_LOG.md.
+- [x] Merge latest upstream, log conflicts/time in MERGE_LOG.md. 2026-11-19: `d50a20d1e`, 19 commits, no conflicts, all hooks intact, wide + compact smoke test passed.
 - [x] Theme check: light, sepia, medium and dark all checked on the sim (2026-11-19); rail, squircles, badges and feed column follow each.
 - [x] Dynamic Type: the feed column follows "Use system size" (via H10's list text size); rail labels stay fixed on purpose so they fit 88 pt.
 - [x] VoiceOver labels: rail buttons (folder, unread count, selected), feed rows (name, unread, expanded/collapsed, hint), story rows (title, unread, date), menu and close buttons, symbol picker. Not yet walked through with VoiceOver running.
