@@ -1577,7 +1577,8 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
         [userPreferences synchronize];
         
         self.loginViewController.modalPresentationStyle = UIModalPresentationFullScreen;
-        
+
+        if ([ForkUI presentLogin:self.loginViewController]) return; // FORK: present login over the fork root — see fork-docs/HOOKS.md (H12)
         if (self.feedsNavigationController.isViewLoaded && self.feedsNavigationController.view.window) {
             if ([self.feedsNavigationController visibleViewController] == self.loginViewController) {
                 NSLog(@"Already showing login!");

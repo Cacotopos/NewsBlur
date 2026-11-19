@@ -55,6 +55,21 @@ final class ForkUI: NSObject {
     /// Hook in `StoryPagesObjCViewController.m`: full screen means nothing while compact.
     static var hidesFullScreenButton: Bool { ownsLayout && !(root?.isWide ?? false) }
 
+    // MARK: - Login (hook in upstream's app delegate)
+
+    /// Hook H12 in `NewsBlurAppDelegate.showLogin`. Upstream presents the login screen from its feed
+    /// list only while that list is in the window, which it never is under the fork, so a logged-out
+    /// app showed an empty fork screen. Presents it from the top of the fork root instead.
+    /// Returns true when the fork handled it. The login screen dismisses itself, so no other hook is needed.
+    static func presentLogin(_ login: UIViewController) -> Bool {
+        guard ownsLayout, let root else { return false }
+        guard login.presentingViewController == nil else { return true }
+        var top: UIViewController = root
+        while let presented = top.presentedViewController { top = presented }
+        top.present(login, animated: false)
+        return true
+    }
+
     /// Hook in `FeedDetailObjCViewController.m`: the button at the top left of the reader.
     /// Opens the overlay while reader-only; hidden while the columns are docked.
     static var readerMenuButton: UIBarButtonItem? {
