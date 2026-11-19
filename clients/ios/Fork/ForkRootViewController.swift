@@ -30,6 +30,12 @@ final class ForkRootViewController: UIViewController {
     /// Set when a story is picked, so the filler doesn't flash back while upstream loads it.
     private var awaitingStory = false
 
+    /// Progress bar under the reader header and the "7 of 21 · 14 unread" pill.
+    private let progress = ForkReaderProgress()
+    private var progressTimer: Timer?
+    private var lastProgressTheme = ""
+    private var lastPosition: ForkReaderProgress.Position?
+
     private var refreshTimer: Timer?
     private var feedsObserver: NSObjectProtocol?
 
@@ -103,6 +109,9 @@ final class ForkRootViewController: UIViewController {
         upstreamSplit.didMove(toParent: self)
 
         view.addSubview(emptyReader)
+        view.addSubview(progress.bar)
+        view.addSubview(progress.pill)
+        progress.show(nil)
 
         backdrop.backgroundColor = UIColor.black.withAlphaComponent(0.3)
         backdrop.alpha = 0
@@ -135,6 +144,7 @@ final class ForkRootViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         startRefreshTimer()
+        startProgressTimer()
         // Reader-only at launch: the reader starts empty, so start with the menu open.
         if !columnsDocked { setOverlay(open: true, animated: false) }
     }
@@ -143,6 +153,47 @@ final class ForkRootViewController: UIViewController {
         super.viewDidDisappear(animated)
         refreshTimer?.invalidate()
         refreshTimer = nil
+        progressTimer?.invalidate()
+        progressTimer = nil
+    }
+
+    /// Swiping changes the story without telling the fork, so check the position a few times a second.
+    private func startProgressTimer() {
+        guard progressTimer == nil else { return }
+        let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
+            guard let self, UIApplication.shared.applicationState == .active else { return }
+            self.updateProgress()
+        }
+        timer.tolerance = 0.1
+        RunLoop.main.add(timer, forMode: .common)
+        progressTimer = timer
+    }
+
+    private func updateProgress() {
+        if ForkTheme.current != lastProgressTheme {
+            lastProgressTheme = ForkTheme.current
+            progress.applyTheme()
+        }
+        let position = emptyReader.isHidden ? ForkReaderProgress.current() : nil
+        guard position != lastPosition || progress.bar.isHidden != (position == nil) else { return }
+        lastPosition = position
+        progress.show(position)
+        layoutProgress()
+    }
+
+    /// The bar sits on the bottom edge of the reader's header; the pill is centred in its bottom toolbar row.
+    private func layoutProgress() {
+        let reader = upstreamSplit.view.frame
+        var headerBottom = reader.minY + view.safeAreaInsets.top + 50
+        if let navBar = NewsBlurAppDelegate.shared?.detailViewController?.navigationController?.navigationBar,
+           navBar.window != nil, !navBar.isHidden {
+            headerBottom = navBar.convert(navBar.bounds, to: view).maxY
+        }
+        progress.bar.frame = CGRect(x: reader.minX, y: headerBottom, width: reader.width, height: 3)
+        let size = progress.pill.intrinsicContentSize
+        let centerY = reader.maxY - view.safeAreaInsets.bottom - 20
+        progress.pill.frame = CGRect(x: reader.midX - size.width / 2, y: centerY - size.height / 2,
+                                     width: size.width, height: size.height)
     }
 
     private func startRefreshTimer() {
@@ -188,6 +239,7 @@ final class ForkRootViewController: UIViewController {
         emptyReader.frame = upstreamSplit.view.frame
         emptyReader.columnsDocked = columnsDocked
         updateEmptyReader()
+        layoutProgress()
         backdrop.alpha = overlayOpen ? 1 : 0
         backdrop.isUserInteractionEnabled = overlayOpen
         feedColumn.showsCloseButton = !columnsDocked
