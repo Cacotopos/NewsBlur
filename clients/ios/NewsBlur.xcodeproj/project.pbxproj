@@ -1494,7 +1494,6 @@
 		FF8364C01756949E008F5C58 /* traverse_text_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FF8364BE1756949E008F5C58 /* traverse_text_on@2x.png */; };
 		FF8364C61757EC0B008F5C58 /* traverse_background_left.png in Resources */ = {isa = PBXBuildFile; fileRef = FF8364C41757EC0B008F5C58 /* traverse_background_left.png */; };
 		FF8364C71757EC0B008F5C58 /* traverse_background_left@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FF8364C51757EC0B008F5C58 /* traverse_background_left@2x.png */; };
-		FF83FF011FB51628008DAC0F /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF83FF001FB51628008DAC0F /* StoreKit.framework */; platformFilter = maccatalyst; };
 		FF83FF051FB52565008DAC0F /* PremiumViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FF83FF031FB52565008DAC0F /* PremiumViewController.m */; };
 		FF83FF061FB52565008DAC0F /* PremiumViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FF83FF041FB52565008DAC0F /* PremiumViewController.xib */; };
 		FF83FF081FB53374008DAC0F /* g_icn_greensun.png in Resources */ = {isa = PBXBuildFile; fileRef = FF83FF071FB53373008DAC0F /* g_icn_greensun.png */; };
@@ -2999,7 +2998,6 @@
 				17CF7DD41C5C6AE40067BC5B /* WebKit.framework in Frameworks */,
 				FF308A8118C01043009F986A /* MediaPlayer.framework in Frameworks */,
 				FF308A7F18C01037009F986A /* CoreLocation.framework in Frameworks */,
-				FF83FF011FB51628008DAC0F /* StoreKit.framework in Frameworks */,
 				FF308A7D18C01025009F986A /* CoreMotion.framework in Frameworks */,
 				FF468E3817FCFB970080325C /* AVFoundation.framework in Frameworks */,
 				78095E45128EF37E00230C8E /* SystemConfiguration.framework in Frameworks */,
