@@ -324,6 +324,10 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
         app.setValue(["feedId": story.feedId, "storyHash": story.hash], forKey: "pendingNotificationStory")
         // Upstream loads the feed and opens the story in its reader; prev/next walks this feed.
         app.loadFeed(story.feedId, withStory: story.hash, storyTitle: story.title, animated: false)
+        // That lookup also forces upstream's list to "all" (NewsBlurAppDelegate.m `loadFeed:withStory:`), so
+        // swiping and Next walked read stories the column hides. Match the column's All/Unread instead; any
+        // non-nil override keeps the by-hash lookup of the opened story working.
+        app.storiesCollection.readFilterOverride = readFilter
         onOpenStory?()
     }
 

@@ -75,6 +75,11 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
   - Verified on the sim: home-screen icon and cold-launch screen.
 - [x] Respaced after review: smaller sun, finer horizon lines with an 82-unit gap, main line at 80% so it no longer outshines the ring, mark centred in the icon (user picked "Finer lines" + 80%).
 
+## Reader polish (2026-11-20, user requests)
+- [x] Empty reader shows the "Clear horizon" filler (eclipse, "The horizon is clear", hint that follows the layout) in `Fork/ForkEmptyReaderView.swift`; hidden while a story is open or loading. No upstream hook.
+- [x] Swiping and Next follow the feed column: opening a story from the column now sets upstream's read filter to the column's All/Unread instead of the "all" its by-hash lookup forced. Verified: Unread, newest first, Warframe → Next → the next row in the column.
+- [ ] Position indicator in the reader (where you are in the feed): proposal pending.
+
 ## M8 — Folder icon picker
 - [x] Long-press menu: Initials / Symbol… / First Feed's Icon; SF Symbol picker (curated ~150 topic symbols with search, user choice 2026-11-19); per folder in UserDefaults (`Fork/ForkFolderAppearance.swift`). No upstream hooks.
 - [x] Disambiguate colliding short labels: distinct icons, plus Rename Label… / Reset Label in the same menu (user choice 2026-11-19). Initials follow the custom label.

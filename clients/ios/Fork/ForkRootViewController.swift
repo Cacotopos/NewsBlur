@@ -25,6 +25,11 @@ final class ForkRootViewController: UIViewController {
     /// Dims the reader behind the overlay panel; tapping it closes the overlay.
     private let backdrop = UIControl()
 
+    /// "Clear horizon" filler over the reader while no story is open.
+    private let emptyReader = ForkEmptyReaderView()
+    /// Set when a story is picked, so the filler doesn't flash back while upstream loads it.
+    private var awaitingStory = false
+
     private var refreshTimer: Timer?
     private var feedsObserver: NSObjectProtocol?
 
@@ -97,6 +102,8 @@ final class ForkRootViewController: UIViewController {
         view.addSubview(upstreamSplit.view)
         upstreamSplit.didMove(toParent: self)
 
+        view.addSubview(emptyReader)
+
         backdrop.backgroundColor = UIColor.black.withAlphaComponent(0.3)
         backdrop.alpha = 0
         backdrop.accessibilityLabel = NSLocalizedString("Close menu", comment: "Fork overlay backdrop")
@@ -111,7 +118,11 @@ final class ForkRootViewController: UIViewController {
         view.addSubview(rail.view)
         rail.didMove(toParent: self)
         rail.onSelect = { [weak self] folder in self?.feedColumn.show(folder: folder) }
-        feedColumn.onOpenStory = { [weak self] in self?.setOverlay(open: false) }
+        feedColumn.onOpenStory = { [weak self] in
+            self?.awaitingStory = true
+            self?.emptyReader.isHidden = true
+            self?.setOverlay(open: false)
+        }
         feedColumn.onClose = { [weak self] in self?.setOverlay(open: false) }
 
         // Upstream posts no notification when unread counts change (marking read, sync),
@@ -137,8 +148,9 @@ final class ForkRootViewController: UIViewController {
     private func startRefreshTimer() {
         guard refreshTimer == nil else { return }
         let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
-            guard let self, self.panelVisible, UIApplication.shared.applicationState == .active else { return }
-            self.refreshAll()
+            guard let self, UIApplication.shared.applicationState == .active else { return }
+            self.updateEmptyReader()
+            if self.panelVisible { self.refreshAll() }
         }
         timer.tolerance = 0.3
         RunLoop.main.add(timer, forMode: .common)
@@ -173,6 +185,9 @@ final class ForkRootViewController: UIViewController {
             upstreamSplit.view.frame = bounds
         }
         backdrop.frame = bounds
+        emptyReader.frame = upstreamSplit.view.frame
+        emptyReader.columnsDocked = columnsDocked
+        updateEmptyReader()
         backdrop.alpha = overlayOpen ? 1 : 0
         backdrop.isUserInteractionEnabled = overlayOpen
         feedColumn.showsCloseButton = !columnsDocked
@@ -186,6 +201,14 @@ final class ForkRootViewController: UIViewController {
     }
 
     // MARK: - Refresh
+
+    /// Shows the empty-reader filler only while upstream's reader has no story to show.
+    private func updateEmptyReader() {
+        let hasStory = NewsBlurAppDelegate.shared?.detailViewController?.hasVisibleStoryForSidebarLayout ?? true
+        if hasStory { awaitingStory = false }
+        emptyReader.isHidden = hasStory || awaitingStory
+        if !hasStory { emptyReader.applyThemeIfChanged() }
+    }
 
     /// Rail counts, then the feed column for whichever folder the rail has selected.
     private func refreshAll() {
