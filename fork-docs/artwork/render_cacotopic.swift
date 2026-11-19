@@ -42,51 +42,57 @@ let background: UInt32 = 0x0B0D12
 let amber: UInt32 = 0xFFB23F
 let ember: UInt32 = 0xFF7A3D
 
-/// Eclipse mark: dark moon over an amber disc, with a corona and a "diamond ring" bead at upper right.
-/// `size` is the mark's full width (the corona reaches the edge). `mono` draws it in greys for the tinted icon.
+/// Eclipse mark: dark moon over an amber disc, with a corona, a "diamond ring" bead at upper right,
+/// and two horizon lines below. Units are an 800-wide design space scaled to `size`.
+/// `center` is the sun's centre; the mark reaches 240 above it and 380 below (to the second line's edge).
+/// `mono` draws it in greys for the tinted icon.
+/// Spacing chosen 2026-11-19 ("Finer lines", main line at 80%): an 82-unit gap between sun and horizon.
 func eclipse(_ ctx: CGContext, center c: CGPoint, size: CGFloat, moon: UInt32, mono: Bool = false) {
     let s = size / 800
+    let sun: CGFloat = 240 * s
+    let k = sun / 255
     let hot = mono ? 0xFFFFFF : amber
     let warm = mono ? 0xBBBBBB : ember
-    let horizonY = c.y + 300 * s
+    let horizonY = c.y + 330 * s
     ctx.saveGState()
     ctx.clip(to: CGRect(x: c.x - 600 * s, y: c.y - 600 * s, width: 1200 * s, height: horizonY - (c.y - 600 * s)))
-    radial(ctx, [color(hot, 0.55), color(warm, 0.22), color(warm, 0)], [0, 0.62, 1], center: c, radius: 400 * s)
+    radial(ctx, [color(hot, 0.55), color(warm, 0.22), color(warm, 0)], [0, 0.62, 1], center: c, radius: 400 * k)
     ctx.restoreGState()
-    // Horizon lines from concept A.
+    // Horizon: a fine main line at 80% so it doesn't outshine the ring, and a fainter, shorter one below.
     ctx.setLineCap(.round)
-    ctx.setLineWidth(24 * s)
-    ctx.setStrokeColor(color(hot))
-    ctx.move(to: CGPoint(x: c.x - 330 * s, y: horizonY)); ctx.addLine(to: CGPoint(x: c.x + 330 * s, y: horizonY))
+    ctx.setLineWidth(16 * s)
+    ctx.setStrokeColor(color(hot, 0.8))
+    ctx.move(to: CGPoint(x: c.x - 320 * s, y: horizonY)); ctx.addLine(to: CGPoint(x: c.x + 320 * s, y: horizonY))
     ctx.strokePath()
+    ctx.setLineWidth(12 * s)
     ctx.setStrokeColor(color(hot, 0.45))
-    ctx.move(to: CGPoint(x: c.x - 200 * s, y: horizonY + 62 * s)); ctx.addLine(to: CGPoint(x: c.x + 200 * s, y: horizonY + 62 * s))
+    ctx.move(to: CGPoint(x: c.x - 190 * s, y: horizonY + 44 * s)); ctx.addLine(to: CGPoint(x: c.x + 190 * s, y: horizonY + 44 * s))
     ctx.strokePath()
     ctx.setFillColor(color(hot))
-    ctx.addEllipse(in: CGRect(x: c.x - 255 * s, y: c.y - 255 * s, width: 510 * s, height: 510 * s))
+    ctx.addEllipse(in: CGRect(x: c.x - sun, y: c.y - sun, width: 2 * sun, height: 2 * sun))
     ctx.fillPath()
     ctx.setFillColor(color(moon))
-    ctx.addEllipse(in: CGRect(x: c.x - 240 * s, y: c.y - 252 * s, width: 490 * s, height: 490 * s))
+    ctx.addEllipse(in: CGRect(x: c.x - 240 * k, y: c.y - 252 * k, width: 490 * k, height: 490 * k))
     ctx.fillPath()
     // Diamond-ring bead where the ring is thickest.
     let angle = -CGFloat.pi / 4
-    let bead = CGPoint(x: c.x + cos(angle) * 252 * s, y: c.y + sin(angle) * 252 * s)
-    radial(ctx, [color(0xFFFFFF, 0.95), color(hot, 0.6), color(hot, 0)], [0, 0.25, 1], center: bead, radius: 70 * s)
+    let bead = CGPoint(x: c.x + cos(angle) * 252 * k, y: c.y + sin(angle) * 252 * k)
+    radial(ctx, [color(0xFFFFFF, 0.95), color(hot, 0.6), color(hot, 0)], [0, 0.25, 1], center: bead, radius: 70 * k)
 }
 
 // App icon variants, 1024 px.
 save(opaque(canvas(1024, 1024) { ctx in
     ctx.setFillColor(color(background)); ctx.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024))
     radial(ctx, [color(0x1A2030), color(background)], [0, 1], center: CGPoint(x: 512, y: 512), radius: 720)
-    eclipse(ctx, center: CGPoint(x: 512, y: 470), size: 800, moon: background)
+    eclipse(ctx, center: CGPoint(x: 512, y: 442), size: 800, moon: background)
 }), "ForkAppIcon")
 save(opaque(canvas(1024, 1024) { ctx in
     ctx.setFillColor(color(0x000000)); ctx.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024))
-    eclipse(ctx, center: CGPoint(x: 512, y: 470), size: 800, moon: 0x000000)
+    eclipse(ctx, center: CGPoint(x: 512, y: 442), size: 800, moon: 0x000000)
 }), "ForkAppIconDark")
 save(opaque(canvas(1024, 1024) { ctx in
     ctx.setFillColor(color(0x000000)); ctx.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024))
-    eclipse(ctx, center: CGPoint(x: 512, y: 470), size: 800, moon: 0x000000, mono: true)
+    eclipse(ctx, center: CGPoint(x: 512, y: 442), size: 800, moon: 0x000000, mono: true)
 }), "ForkAppIconTinted")
 
 // Launch mark on transparent background: 200 pt.
