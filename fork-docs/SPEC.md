@@ -17,7 +17,7 @@ Mode is decided by **window width**, not orientation (covers Split View / Stage 
 | Window width | Mode | Layout |
 |---|---|---|
 | ≥ 1000 pt | **Wide** | Three fixed columns: **rail 88 pt · 2/8 feed column · reader the rest** (on 11" landscape: 88 / 299 / 807 pt). Rail changed from 1/8 at the user's request, 2026-11-18. |
-| < 1000 pt | **Compact** | Reader full width. Menu button top-left of the reader header opens the rail + feed column as a **full-screen overlay** (rail 88 pt + feed column fills the rest; rail matches Wide since 2026-11-18). Picking a story closes the overlay. Close button in the feed column header. Upstream's full-screen button is hidden. |
+| < 1000 pt | **Compact** | Reader full width. Menu button top-left of the reader header opens the rail + feed column as an **overlay 3/4 of the window wide** over a dimmed reader, so the page behind stays visible; tapping the dimmed reader closes it (user, 2026-11-20; was full-screen). Rail 88 pt + feed column fills the rest of the panel. Picking a story closes the overlay. Close button in the feed column header. Upstream's full-screen button is hidden. |
 | ≥ 1000 pt, full screen | **Wide reader-only** | The reader's full-screen button switches Wide into the Compact layout: reader full width, same menu button. The overlay here is a panel at Wide widths (88 + 2/8) over a dimmed reader, not full-screen; tapping the dimmed reader closes it. Tap full screen again to dock the columns. *(user, 2026-11-18: "combine" upstream's full screen with Compact.)* |
 
 Columns are fixed proportions, not user-resizable. If 2/8 proves too cramped in use, the fallback to try is 1/8 · 3/8 · 4/8 — do not change without asking.

@@ -62,7 +62,8 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 - [x] < 1000 pt: full-width reader, top-left menu button, full overlay of rail + feed column, story pick closes it. Built 2026-11-18 together with Wide full screen (hooks H7–H9): the reader's full-screen button switches Wide into the same reader-only layout, and the sidebar button became the menu button.
   - Verified on the sim: landscape full screen on/off, overlay panel + dim + story pick closes it; portrait full-screen overlay with close button; rotation both ways.
 - [~] Split View / Stage Manager (compact size class): won't do, as in M6.
-- [ ] Launch straight into portrait opens the overlay automatically: written, not yet seen on the sim.
+- [x] Launch straight into portrait opens the overlay automatically: seen on the sim 2026-11-20.
+- [x] Overlay is 3/4 of the window over a dimmed reader instead of full-screen, so the page behind shows; tapping the dimmed reader closes it (user, 2026-11-20).
 
 ## Preferences trim (2026-11-19, user request)
 - [x] Preferences hides settings the fork replaces (hook H10). Story order and "Feed and story list" text size now drive the feed column instead of being hidden.

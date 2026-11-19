@@ -22,7 +22,7 @@ final class ForkRootViewController: UIViewController {
     let rail = ForkRailViewController()
     let feedColumn = ForkFeedColumnViewController()
 
-    /// Dims the reader behind the wide overlay panel; tapping it closes the overlay.
+    /// Dims the reader behind the overlay panel; tapping it closes the overlay.
     private let backdrop = UIControl()
 
     private var refreshTimer: Timer?
@@ -164,15 +164,16 @@ final class ForkRootViewController: UIViewController {
             let readerX = railWidth + wideColumnWidth
             upstreamSplit.view.frame = CGRect(x: readerX, y: 0, width: bounds.width - readerX, height: bounds.height)
         } else {
-            // Wide full screen: the overlay is a panel at docked widths. Compact: it fills the window (SPEC).
-            let panelWidth = isWide ? railWidth + wideColumnWidth : bounds.width
+            // Wide full screen: the overlay is a panel at docked widths. Compact: 3/4 of the window, so the
+            // reader stays visible behind it (SPEC, user 2026-11-20).
+            let panelWidth = isWide ? railWidth + wideColumnWidth : (bounds.width * 3 / 4).rounded()
             let panelX = overlayOpen ? 0 : -panelWidth
             rail.view.frame = CGRect(x: panelX, y: 0, width: railWidth, height: bounds.height)
             feedColumn.view.frame = CGRect(x: panelX + railWidth, y: 0, width: panelWidth - railWidth, height: bounds.height)
             upstreamSplit.view.frame = bounds
         }
         backdrop.frame = bounds
-        backdrop.alpha = overlayOpen && isWide ? 1 : 0
+        backdrop.alpha = overlayOpen ? 1 : 0
         backdrop.isUserInteractionEnabled = overlayOpen
         feedColumn.showsCloseButton = !columnsDocked
         if UIView.inheritedAnimationDuration == 0 { setPanelHidden(!panelVisible) }
