@@ -956,7 +956,7 @@ private struct OnboardingView: View {
     private var header: some View {
         VStack(spacing: 16) {
             HStack(spacing: 8) {
-                Image(uiImage: UIImage(named: "logo_512.png") ?? UIImage(systemName: "sun.max.fill")!)
+                Image(uiImage: ForkBranding.logo ?? UIImage(named: "logo_512.png") ?? UIImage(systemName: "sun.max.fill")!) // FORK: Cacotopic logo — see fork-docs/HOOKS.md (H13)
                     .resizable().frame(width: 36, height: 36)
                 Text(verbatim: "NewsBlur").font(.title3.bold())
                 Spacer(minLength: 8)

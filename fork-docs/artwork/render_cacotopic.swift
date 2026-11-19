@@ -95,6 +95,17 @@ save(opaque(canvas(1024, 1024) { ctx in
     eclipse(ctx, center: CGPoint(x: 512, y: 442), size: 800, moon: 0x000000, mono: true)
 }), "ForkAppIconTinted")
 
+// In-app logo (login and onboarding): the app icon as a rounded badge, transparent outside, 512 px.
+let iconImage = NSImage(contentsOfFile: "\(out)/ForkAppIcon.png")!.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+save(canvas(512, 512) { ctx in
+    let rect = CGRect(x: 0, y: 0, width: 512, height: 512)
+    ctx.addPath(CGPath(roundedRect: rect, cornerWidth: 115, cornerHeight: 115, transform: nil))
+    ctx.clip()
+    // The canvas is flipped to a top-left origin; flip back so the image isn't drawn upside down.
+    ctx.translateBy(x: 0, y: 512); ctx.scaleBy(x: 1, y: -1)
+    ctx.draw(iconImage, in: rect)
+}, "ForkLogo")
+
 // Launch mark on transparent background: 200 pt.
 for scale in [2, 3] {
     let px = 200 * scale

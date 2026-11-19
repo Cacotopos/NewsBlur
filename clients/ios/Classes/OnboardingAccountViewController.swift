@@ -550,7 +550,7 @@ struct OnboardingAccountView: View {
                     .onChange(of: language) { _, value in NBLocalization.apply(value, pending: true) }
                     .disabled(model.busy)
                     VStack(spacing: 10) {
-                        Image(uiImage: UIImage(named: "logo_512.png") ?? UIImage(systemName: "sun.max.fill")!)
+                        Image(uiImage: ForkBranding.logo ?? UIImage(named: "logo_512.png") ?? UIImage(systemName: "sun.max.fill")!) // FORK: Cacotopic logo — see fork-docs/HOOKS.md (H13)
                             .resizable().scaledToFit().frame(width: 120, height: 120)
                             .shadow(color: gold.opacity(0.4), radius: 30)
                             .accessibilityHidden(true)
