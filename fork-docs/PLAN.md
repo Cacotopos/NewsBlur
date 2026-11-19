@@ -79,6 +79,7 @@ Status: M0 done (push of `ipad-ui` deferred until asked), M1 reviewed (Option A 
 - [x] Empty reader shows the "Clear horizon" filler (eclipse, "The horizon is clear", hint that follows the layout) in `Fork/ForkEmptyReaderView.swift`; hidden while a story is open or loading. No upstream hook.
 - [x] Swiping and Next follow the feed column: opening a story from the column now sets upstream's read filter to the column's All/Unread instead of the "all" its by-hash lookup forced. Verified: Unread, newest first, Warframe → Next → the next row in the column.
 - [x] Position indicator (user picked bar + pill): thin amber bar under the reader header and a glass pill in the bottom toolbar row, "7 of 21 · 14 unread" (`Fork/ForkReaderProgress.swift`). Unread mode counts exactly; All mode adds "+". Hidden for rivers and while no story is open. Verified: Next moves 2 of 16 → 3 of 16.
+- [x] The feed column's highlight follows the reader through Next and swipes, scrolling the row into view. Verified: two Nexts from row 1 → highlight on row 3.
 
 ## M8 — Folder icon picker
 - [x] Long-press menu: Initials / Symbol… / First Feed's Icon; SF Symbol picker (curated ~150 topic symbols with search, user choice 2026-11-19); per folder in UserDefaults (`Fork/ForkFolderAppearance.swift`). No upstream hooks.

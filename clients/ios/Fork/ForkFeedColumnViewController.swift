@@ -195,7 +195,32 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
         for cell in tableView.visibleCells {
             if let cell = cell as? ForkFeedCell, cell.refreshCount() { changed = true }
         }
-        if changed { rebuildRows() }
+        let followed = followReaderStory()
+        if changed || followed { rebuildRows() }
+        if followed { scrollToSelectedStory() }
+    }
+
+    /// Moves the highlight to the story the reader shows, so Next and swipes carry it down the list.
+    /// Only for stories already in the column; a story from elsewhere leaves the highlight alone.
+    private func followReaderStory() -> Bool {
+        guard let hash = (NewsBlurAppDelegate.shared?.activeStory as? [String: Any])?["story_hash"] as? String,
+              hash != selectedStoryHash, rowIndex(ofStory: hash) != nil else { return false }
+        selectedStoryHash = hash
+        return true
+    }
+
+    private func rowIndex(ofStory hash: String) -> Int? {
+        rows.firstIndex { row in
+            if case .story(let story) = row { return story.hash == hash }
+            return false
+        }
+    }
+
+    private func scrollToSelectedStory() {
+        guard let hash = selectedStoryHash, let index = rowIndex(ofStory: hash) else { return }
+        let indexPath = IndexPath(row: index, section: 0)
+        guard !(tableView.indexPathsForVisibleRows ?? []).contains(indexPath) else { return }
+        tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
     }
 
     /// Picks up Story order and list text size changes made in Preferences.
