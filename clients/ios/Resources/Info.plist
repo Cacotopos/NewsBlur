@@ -417,7 +417,9 @@
 	<array>
 		<dict>
 			<key>CFBundleURLSchemes</key>
-			<array><string>newsblur-auth</string></array>
+			<array>
+				<string>newsblur-auth</string>
+			</array>
 		</dict>
 		<dict>
 			<key>CFBundleURLName</key>
