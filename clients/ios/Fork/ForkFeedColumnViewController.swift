@@ -419,6 +419,37 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
             rebuildRows()
         }
     }
+
+    /// Long-press a feed title: upstream's mark-feed-as-read endpoint.
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath,
+                   point: CGPoint) -> UIContextMenuConfiguration? {
+        guard case .feed(let feedId) = rows[indexPath.row] else { return nil }
+        let title = String(localized: "Mark All as Read", comment: "Fork feed column")
+        return UIContextMenuConfiguration(actionProvider: { _ in
+            UIMenu(children: [
+                UIAction(title: title, image: UIImage(systemName: "checkmark.circle")) { [weak self] _ in
+                    self?.markAllRead(feedId: feedId)
+                },
+            ])
+        })
+    }
+
+    /// POSTs the feed id, then zeroes the cached counts so the badge and the
+    /// quiet-group split update before the server's recount lands.
+    private func markAllRead(feedId: String) {
+        guard let app = NewsBlurAppDelegate.shared, let base = app.url else { return }
+        app.post("\(base)/reader/mark_feed_as_read", parameters: ["feed_id": [feedId]]) { [weak self] _, _ in
+            app.markFeedRead(inCache: [feedId])
+            (app.dictUnreadCounts?[feedId] as? NSMutableDictionary)?.setValuesForKeys(
+                ["ps": 0, "nt": 0, "ng": 0])
+            app.feedsViewController?.refreshFeedList(feedId)
+            app.feedsViewController?.reloadFeedTitlesTable()
+            DispatchQueue.main.async {
+                self?.recomputeOrder()
+                self?.rebuildRows()
+            }
+        } failure: { _, _ in }
+    }
 }
 
 // MARK: - Cells
