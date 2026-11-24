@@ -23,10 +23,6 @@
 @class FeedsViewController;
 @class FeedDetailViewController;
 @class MarkReadMenuViewController;
-@class FirstTimeUserViewController;
-@class FirstTimeUserAddSitesViewController;
-@class FirstTimeUserAddFriendsViewController;
-@class FirstTimeUserAddNewsBlurViewController;
 @class FontSettingsViewController;
 @class DetailViewController;
 @class StoryPagesViewController;
@@ -58,10 +54,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
     UINavigationController *premiumNavigationController;
     DetailViewController *detailViewController;
     
-    FirstTimeUserViewController *firstTimeUserViewController;
-    FirstTimeUserAddSitesViewController *firstTimeUserAddSitesViewController;
-    FirstTimeUserAddFriendsViewController *firstTimeUserAddFriendsViewController;
-    FirstTimeUserAddNewsBlurViewController *firstTimeUserAddNewsBlurViewController;
     
     FeedsViewController *feedsViewController;
     FontSettingsViewController *fontSettingsViewController;
@@ -173,10 +165,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 @property (nonatomic, strong) UINavigationController *fontSettingsNavigationController;
 @property (nonatomic, strong) MarkReadMenuViewController *markReadMenuViewController;
 @property (nonatomic, strong) FeedChooserViewController *feedChooserViewController;
-@property (nonatomic) IBOutlet FirstTimeUserViewController *firstTimeUserViewController;
-@property (nonatomic) IBOutlet FirstTimeUserAddSitesViewController *firstTimeUserAddSitesViewController;
-@property (nonatomic) IBOutlet FirstTimeUserAddFriendsViewController *firstTimeUserAddFriendsViewController;
-@property (nonatomic) IBOutlet FirstTimeUserAddNewsBlurViewController *firstTimeUserAddNewsBlurViewController;
 
 @property (nonatomic) AFHTTPSessionManager *networkManager;
 @property (nonatomic, readwrite) StoriesCollection *storiesCollection;
@@ -415,7 +403,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 - (NSArray *)feedIdsForTopLevelRiverWithReadFilter:(NSString *)readFilter;
 - (NSArray *)feedIdsForFolderTitle:(NSString *)folderTitle;
 - (void)confirmLogout;
-- (void)showConnectToService:(NSString *)serviceName;
 - (void)showAlert:(UIAlertController *)alert withViewController:(UIViewController *)vc;
 - (void)refreshUserProfile:(void(^)(void))callback;
 - (void)refreshFeedCount:(id)feedId;

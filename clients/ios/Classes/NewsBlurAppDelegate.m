@@ -8,7 +8,6 @@
 #import "NewsBlurAppDelegate.h"
 #import <WebKit/WebKit.h>
 #import "MarkReadMenuViewController.h"
-#import "FirstTimeUserViewController.h"
 #import "LoginViewController.h"
 #import "AddSiteViewController.h"
 #import "MoveSiteViewController.h"
@@ -17,17 +16,12 @@
 #import "FontSettingsViewController.h"
 #import "FeedChooserViewController.h"
 #import "PremiumViewController.h"
-#import "FirstTimeUserViewController.h"
-#import "FirstTimeUserAddSitesViewController.h"
-#import "FirstTimeUserAddFriendsViewController.h"
-#import "FirstTimeUserAddNewsBlurViewController.h"
 #import "TUSafariActivity.h"
 #import "ARChromeActivity.h"
 #import "NBCopyLinkActivity.h"
 #import "MBProgressHUD.h"
 #import "Utilities.h"
 #import "StringHelper.h"
-#import "AuthorizeServicesViewController.h"
 #import "Reachability.h"
 #import "FMDatabase.h"
 #import "FMDatabaseQueue.h"
@@ -166,10 +160,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 @synthesize originalStoryViewNavController;
 @synthesize premiumViewController;
 
-@synthesize firstTimeUserViewController;
-@synthesize firstTimeUserAddSitesViewController;
-@synthesize firstTimeUserAddFriendsViewController;
-@synthesize firstTimeUserAddNewsBlurViewController;
 
 @synthesize networkManager;
 @synthesize feedDetailPortraitYCoordinate;
@@ -1432,10 +1422,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     self.notificationsViewController = [NotificationsViewController new];
     self.fontSettingsViewController = [FontSettingsViewController new];
     self.premiumViewController = [PremiumViewController new];
-    self.firstTimeUserViewController = [FirstTimeUserViewController new];
-    self.firstTimeUserAddSitesViewController = [FirstTimeUserAddSitesViewController new];
-    self.firstTimeUserAddFriendsViewController = [FirstTimeUserAddFriendsViewController new];
-    self.firstTimeUserAddNewsBlurViewController = [FirstTimeUserAddNewsBlurViewController new];
 
     NSUserDefaults *preferences = NSUserDefaults.standardUserDefaults;
     BOOL restoredDuoFullscreen = [self.detailViewController restoreDuoFullscreenReaderForAccount:[preferences stringForKey:@"active_username"]];
@@ -2759,21 +2745,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     HUD.labelText = [NBLocalization text:@"Logging out..."];
 }
 
-- (void)showConnectToService:(NSString *)serviceName {
-    AuthorizeServicesViewController *serviceVC = [[AuthorizeServicesViewController alloc] init];
-    serviceVC.url = [NSString stringWithFormat:@"/oauth/%@_connect", serviceName];
-    serviceVC.type = serviceName;
-    serviceVC.fromStory = YES;
-    
-    UINavigationController *connectNav = [[UINavigationController alloc]
-                                          initWithRootViewController:serviceVC];
-    self.modalNavigationController = connectNav;
-    [self.splitViewController dismissViewControllerAnimated:NO completion:nil];
-    self.modalNavigationController.modalPresentationStyle = UIModalPresentationFormSheet;
-    self.modalNavigationController.navigationBar.translucent = NO;
-    [self.splitViewController presentViewController:modalNavigationController
-                                           animated:YES completion:nil];
-}
 
 - (void)showAlert:(UIAlertController *)alert withViewController:(UIViewController *)vc {
     [self.splitViewController presentViewController:alert animated:YES completion:nil];
