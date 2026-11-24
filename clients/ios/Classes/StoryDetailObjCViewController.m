@@ -2353,12 +2353,8 @@
             }
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
-        } else if ([action isEqualToString:@"premium-archive"]) {
-            [self.appDelegate showPremiumDialogForArchive];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        } else if ([action isEqualToString:@"premium"]) {
-            [self.appDelegate showPremiumDialog];
+        } else if ([action isEqualToString:@"premium-archive"] || [action isEqualToString:@"premium"]) {
+            // FORK: premium upsell stripped; swallow the gated-feature link.
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
 

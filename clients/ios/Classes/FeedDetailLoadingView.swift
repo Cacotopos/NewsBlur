@@ -37,11 +37,6 @@ struct FeedDetailLoadingView: View {
             .padding(cache.isGrid ? 0 : 20)
             .modifier(ReaderEntrance(session: cache.motionSession, key: "end-of-stories"))
             .transition(.opacity.combined(with: .offset(y: 10)))
-            .onTapGesture {
-                if feedDetailInteraction.isPremiumRestriction {
-                    feedDetailInteraction.openPremiumDialog()
-                }
-            }
         } else if cache.isGrid {
             RoundedRectangle(cornerRadius: 10)
                 .fill(animate ? Color.themed([0x5C89C9, 0x666666]) : Color.themed([0xE1EBFF, 0x222222]))

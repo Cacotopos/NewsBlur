@@ -50,7 +50,6 @@
 - (IBAction)showOrganizeSites:(id)sender;
 - (IBAction)showWidgetSites:(id)sender;
 - (IBAction)showNotifications:(id)sender;
-- (IBAction)showPremium:(id)sender;
 - (IBAction)showSupportForum:(id)sender;
 - (IBAction)showManageAccount:(id)sender;
 - (IBAction)showLogout:(id)sender;

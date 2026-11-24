@@ -120,9 +120,6 @@ final class NewsBlurUITestHarness {
         case "preferences":
             didScheduleScenario = true
             configurePreferences(on: appDelegate, remainingRetries: 20)
-        case "usage-billing":
-            didScheduleScenario = true
-            configureUsageBilling(on: appDelegate, remainingRetries: 200)
         case let screen? where readerScenario(for: screen) != nil:
             didScheduleScenario = true
             configureReader(
@@ -247,22 +244,6 @@ final class NewsBlurUITestHarness {
         DispatchQueue.main.async {
             appDelegate.showPreferences()
         }
-    }
-
-    /// NewsBlurUITestHarness.swift opens UsageBillingView.swift over the fixture account once its profile has loaded.
-    private static func configureUsageBilling(on appDelegate: NewsBlurAppDelegate, remainingRetries: Int) {
-        guard remainingRetries > 0 else { return }
-        loadFixtureFeedList(on: appDelegate)
-        guard didFinishReaderFeedLoad, appDelegate.splitViewController?.viewIfLoaded?.window != nil else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                configureUsageBilling(on: appDelegate, remainingRetries: remainingRetries - 1)
-            }
-            return
-        }
-        appDelegate.feedsViewController.loadWorkItem?.cancel()
-        // UsageBillingFeature.swift holds billing out of the release; this scenario exists to show the billing screen.
-        UsageBillingFeature.isEnabled = true
-        appDelegate.showUsageBillingDialog()
     }
 
 

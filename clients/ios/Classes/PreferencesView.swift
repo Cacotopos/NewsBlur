@@ -2234,8 +2234,6 @@ struct AppIconPreferenceItemView: View {
         if isPremium {
             syncCurrentSelection()
             showChooser = true
-        } else {
-            viewModel.handleButtonAction("showPremium", key: "app_icon")
         }
     }
 

@@ -22,7 +22,6 @@
 #import "NBBarButtonItem.h"
 #import "UISearchBar+Field.h"
 #import "StoriesCollection.h"
-#import "PremiumManager.h"
 #import "MenuViewController.h"
 #import "NewsBlur-Swift.h"
 
@@ -1589,10 +1588,6 @@ static BOOL NBBoolPreferenceValue(id value) {
         appDelegate.premiumExpire = [premiumExpire integerValue];
     }
     
-    if (!appDelegate.premiumManager) {
-        appDelegate.premiumManager = [PremiumManager new];
-    }
-    
     // Set up dictSocialFeeds
     NSArray *socialFeedsArray = [results objectForKey:@"social_feeds"];
     NSMutableArray *socialFolder = [[NSMutableArray alloc] init];
@@ -1999,28 +1994,6 @@ static BOOL NBBoolPreferenceValue(id value) {
 
     [viewController startNewSection]; // FORK: social stripped (Interactions, Find Friends)
 
-    if (appDelegate.isPremium && appDelegate.isPremiumArchive) {
-        [viewController addFeedListTitle:[NBLocalization text:@"Premium Archive"] iconName:@"feed-menu-subscription" selectionShouldDismiss:YES handler:^{
-            [self.appDelegate showPremiumDialog];
-        }];
-    } else if (appDelegate.isPremium) {
-        [viewController addFeedListTitle:[NBLocalization text:@"Upgrade to Archive"] iconName:@"feed-menu-subscription" selectionShouldDismiss:YES handler:^{
-            [self.appDelegate showPremiumDialog];
-        }];
-    } else {
-        [viewController addFeedListTitle:[NBLocalization text:@"Upgrade to Premium"] iconName:@"feed-menu-subscription" selectionShouldDismiss:YES handler:^{
-            [self.appDelegate showPremiumDialog];
-        }];
-    }
-
-    // FeedsObjCViewController.m offers natural language classifier billing beside the subscription (UsageBillingView.swift),
-    // unless UsageBillingFeature.swift holds it out of this release.
-    if (UsageBillingFeature.isEnabled) {
-        [viewController addFeedListTitle:[NBLocalization text:@"Usage Billing"] iconName:@"icons8-prompt-100" selectionShouldDismiss:YES handler:^{
-            [self.appDelegate showUsageBillingDialog];
-        }];
-    }
-    
     [viewController addFeedListTitle:[NBLocalization text:@"Support Forum"] iconName:@"feed-menu-feedback" selectionShouldDismiss:YES handler:^{
         NSURL *url = [NSURL URLWithString:@"https://forum.newsblur.com"];
         [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
@@ -2536,9 +2509,7 @@ static BOOL NBBoolPreferenceValue(id value) {
             [AccountDeletionController presentFromController:self.appDelegate.splitViewController];
         }];
     } else if ([key isEqualToString:@"app_icon"]) {
-        [self.appDelegate.feedsNavigationController dismissViewControllerAnimated:YES completion:^{
-            [self.appDelegate showPremiumDialog];
-        }];
+        [self.appDelegate.feedsNavigationController dismissViewControllerAnimated:YES completion:nil];
     }
 }
 

@@ -325,11 +325,6 @@
                                 <menu anchor="com.apple.menu.close" id="WdP-hc-0fU">
                                     <menuOptions key="menuOptions" displayInline="YES"/>
                                     <children>
-                                        <command title="NewsBlur Premium" id="HGH-9Q-Dzh">
-                                            <connections>
-                                                <action selector="showPremium:" destination="J28-e1-gcC" id="adm-3i-APm"/>
-                                            </connections>
-                                        </command>
                                     </children>
                                 </menu>
                                 <menu anchor="com.apple.menu.close" id="cRW-qu-7aj">

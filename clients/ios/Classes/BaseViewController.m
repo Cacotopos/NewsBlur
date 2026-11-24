@@ -532,10 +532,6 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
     [self.appDelegate openNotificationsWithFeed:nil];
 }
 
-- (IBAction)showPremium:(id)sender {
-    [self.appDelegate showPremiumDialog];
-}
-
 - (IBAction)showSupportForum:(id)sender {
     NSURL *url = [NSURL URLWithString:@"https://forum.newsblur.com"];
     [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];

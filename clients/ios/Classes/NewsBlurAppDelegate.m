@@ -14,7 +14,6 @@
 #import "NotificationsViewController.h"
 #import "OriginalStoryViewController.h"
 #import "FontSettingsViewController.h"
-#import "PremiumViewController.h"
 #import "TUSafariActivity.h"
 #import "ARChromeActivity.h"
 #import "NBCopyLinkActivity.h"
@@ -145,7 +144,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 @synthesize feedsNavigationController;
 @synthesize modalNavigationController;
 @synthesize notificationsNavigationController;
-@synthesize premiumNavigationController;
 //@synthesize masterContainerViewController;
 @synthesize detailViewController;
 @synthesize feedsViewController;
@@ -156,7 +154,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 @synthesize notificationsViewController;
 @synthesize originalStoryViewController;
 @synthesize originalStoryViewNavController;
-@synthesize premiumViewController;
 
 
 @synthesize networkManager;
@@ -997,50 +994,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     NSLog(@"...shown");
 }
 
-- (void)showPremiumDialog {
-    [self showPremiumDialogScrollTo:nil];
-}
-
-- (void)showPremiumDialogForArchive {
-    [self showPremiumDialogScrollTo:@"archive"];
-}
-
-- (void)showPremiumDialogForPro {
-    [self showPremiumDialogScrollTo:@"pro"];
-}
-
-- (void)showPremiumDialogScrollTo:(NSString *)section {
-    if (self.premiumNavigationController == nil) {
-        self.premiumNavigationController = [[UINavigationController alloc]
-                                            initWithRootViewController:self.premiumViewController];
-    }
-    self.premiumNavigationController.navigationBarHidden = YES;
-
-    BOOL scrollToArchive = [section isEqualToString:@"archive"];
-    BOOL scrollToPro = [section isEqualToString:@"pro"];
-    [self.premiumViewController configureScrollToArchive:scrollToArchive scrollToPro:scrollToPro];
-
-    [self.splitViewController dismissViewControllerAnimated:NO completion:nil];
-    premiumNavigationController.modalPresentationStyle = UIModalPresentationPageSheet;
-    if (premiumNavigationController.sheetPresentationController) {
-        premiumNavigationController.sheetPresentationController.detents = @[UISheetPresentationControllerDetent.largeDetent];
-        premiumNavigationController.sheetPresentationController.prefersGrabberVisible = YES;
-        premiumNavigationController.sheetPresentationController.preferredCornerRadius = 12.0;
-    }
-    [self.splitViewController presentViewController:premiumNavigationController animated:YES completion:nil];
-    [self.premiumViewController.view setNeedsLayout];
-}
-
-// NewsBlurAppDelegate.m opens natural language classifier billing (UsageBillingView.swift) from the settings menu,
-// the Premium screen and the trainer's billing banners, replacing whatever sheet or popover is showing. While
-// UsageBillingFeature.swift holds billing out of the release, nothing opens it, even a path that missed the switch.
-- (void)showUsageBillingDialog {
-    if (!UsageBillingFeature.isEnabled) return;
-    UIViewController *usageBilling = [UsageBillingViewController makePresentable];
-    [self.splitViewController dismissViewControllerAnimated:NO completion:nil];
-    [self.splitViewController presentViewController:usageBilling animated:YES completion:nil];
-}
-
 - (void)updateSplitBehavior:(BOOL)refresh {
     if (self.detailViewController.isDuoFullscreenReader) {
         [self.detailViewController updateDuoFullscreenSplitBehavior];
@@ -1409,7 +1362,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     self.moveSiteViewController = [MoveSiteViewController new];
     self.notificationsViewController = [NotificationsViewController new];
     self.fontSettingsViewController = [FontSettingsViewController new];
-    self.premiumViewController = [PremiumViewController new];
 
     NSUserDefaults *preferences = NSUserDefaults.standardUserDefaults;
     BOOL restoredDuoFullscreen = [self.detailViewController restoreDuoFullscreenReaderForAccount:[preferences stringForKey:@"active_username"]];

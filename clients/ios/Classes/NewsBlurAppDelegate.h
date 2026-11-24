@@ -36,8 +36,6 @@
 @class UnreadCounts;
 @class StoriesCollection;
 @class PINCache;
-@class PremiumManager;
-@class PremiumViewController;
 @class WKWebView;
 @class BGAppRefreshTask;
 @class FeedIconPreparationRequest;
@@ -50,7 +48,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
     UINavigationController *feedsNavigationController;
     UINavigationController *modalNavigationController;
     UINavigationController *notificationsNavigationController;
-    UINavigationController *premiumNavigationController;
     DetailViewController *detailViewController;
     
     
@@ -63,7 +60,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
     NotificationsViewController *notificationsViewController;
     OriginalStoryViewController *originalStoryViewController;
     UINavigationController *originalStoryViewNavController;
-    PremiumViewController *premiumViewController;
 
     AFHTTPSessionManager *networkManager;
 
@@ -143,7 +139,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 @property (nonatomic) IBOutlet UINavigationController *detailNavigationController;
 @property (nonatomic) UINavigationController *modalNavigationController;
 @property (nonatomic) UINavigationController *notificationsNavigationController;
-@property (nonatomic) UINavigationController *premiumNavigationController;
 @property (nonatomic) UINavigationController *originalStoryViewNavController;
 @property (nonatomic) IBOutlet DetailViewController *detailViewController;
 @property (nonatomic) IBOutlet FeedsViewController *feedsViewController;
@@ -156,8 +151,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 @property (nonatomic) IBOutlet NotificationsViewController *notificationsViewController;
 @property (nonatomic) IBOutlet OriginalStoryViewController *originalStoryViewController;
 @property (nonatomic) IBOutlet FontSettingsViewController *fontSettingsViewController;
-@property (nonatomic,  strong) PremiumManager *premiumManager;
-@property (nonatomic) IBOutlet PremiumViewController *premiumViewController;
 @property (nonatomic, strong) UINavigationController *fontSettingsNavigationController;
 @property (nonatomic, strong) MarkReadMenuViewController *markReadMenuViewController;
 @property (nonatomic, strong) FeedChooserViewController *feedChooserViewController;
@@ -295,10 +288,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 - (void)showOrganizeSites;
 - (void)showWidgetSites;
 - (void)showDashboardSites:(NSString *)selectedRiverId;
-- (void)showPremiumDialog;
-- (void)showPremiumDialogForArchive;
-- (void)showPremiumDialogForPro;
-- (void)showUsageBillingDialog;
 - (void)updateSplitBehavior:(BOOL)refresh;
 - (void)addSplitControlToMenuController:(MenuViewController *)menuViewController;
 - (void)showPreferences;

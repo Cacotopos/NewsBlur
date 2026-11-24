@@ -3677,14 +3677,6 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
                 
                 self.messageLabel.attributedText = attributedText;
                 
-                UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc]
-                                                                initWithTarget:self action:@selector(openPremiumDialog:)];
-                tapGestureRecognizer.numberOfTapsRequired = 1;
-                for (UIGestureRecognizer *recognizer in self.messageLabel.gestureRecognizers) {
-                    [self.messageLabel removeGestureRecognizer:recognizer];
-                }
-                [self.messageLabel addGestureRecognizer:tapGestureRecognizer];
-                self.messageLabel.userInteractionEnabled = YES;
             } else {
                 self.messageLabel.text = [results objectForKey:@"message"];
             }
@@ -3724,10 +3716,6 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
     
     [self hideFetchingBanner];
 
-}
-
-- (IBAction)openPremiumDialog:(id)sender {
-    [appDelegate showPremiumDialog];
 }
 
 #pragma mark -
@@ -4428,13 +4416,6 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
             premiumLabel.attributedText = attributedText;
             premiumLabel.numberOfLines = 2;
             premiumLabel.textAlignment = NSTextAlignmentCenter;
-            premiumLabel.userInteractionEnabled = YES;
-
-            UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc]
-                                                            initWithTarget:self action:@selector(openPremiumDialog:)];
-            tapGestureRecognizer.numberOfTapsRequired = 1;
-            [premiumLabel addGestureRecognizer:tapGestureRecognizer];
-
             [cell.contentView addSubview:premiumLabel];
             [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:premiumLabel
                                                                          attribute:NSLayoutAttributeCenterX
@@ -5391,9 +5372,6 @@ leadingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath {
         [appDelegate.detailViewController restoreStoryKeyboardFocusIfNeeded];
         //[collectionView selectItemAtIndexPath:self.selectedIndexPath animated:YES scrollPosition:UICollectionViewScrollPositionTop];
     } else if (location == storiesCollection.storyLocationsCount) {
-        if (!appDelegate.isPremium && storiesCollection.isRiverView && !storiesCollection.isDailyBriefing) {
-            [appDelegate showPremiumDialog];
-        }
     }
 }
 
