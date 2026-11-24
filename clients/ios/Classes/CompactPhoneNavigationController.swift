@@ -119,7 +119,7 @@ final class DetailNavigationController: UINavigationController {
         let detail = topViewController as? DetailViewController
         updateFeedsTitle(for: detail)
         verticalTitleLayout.update(navigation: self, controller: detail,
-                                   enabled: detail.map { !$0.isPhoneOrCompact && !$0.isDiscoverSitesVisible } ?? false,
+                                   enabled: detail.map { !$0.isPhoneOrCompact } ?? false, // FORK: discover stripped
                                    titleContent: feedsTitleView)
         scheduleTitleHeaderScrollingUpdate()
     }
@@ -156,7 +156,7 @@ final class DetailNavigationController: UINavigationController {
         // CompactPhoneNavigationController.swift resolves the current owner here so a queued update cannot attach a replaced list or Discover's old table.
         guard #available(iOS 27.0, *), !isLeavingTitleHeader,
               let detail = topViewController as? DetailViewController, detail.isPhone, !detail.isPhoneOrCompact,
-              !detail.isDiscoverSitesVisible, !isNavigationBarHidden,
+              !isNavigationBarHidden, // FORK: discover stripped
               let table = detail.feedDetailViewController?.storyTitlesTable,
               table.window != nil, table.window === view.window, table.isDescendant(of: detail.view),
               isVisibleTitleHeaderTable(table, in: detail.view) else {
@@ -236,7 +236,7 @@ final class DetailNavigationController: UINavigationController {
             return
         }
         guard let detail, detail.isPhone, !detail.isPhoneOrCompact,
-              !detail.isDiscoverSitesVisible, !isNavigationBarHidden else {
+              !isNavigationBarHidden else { // FORK: discover stripped
             restoreFeedsTitle()
             return
         }
@@ -630,7 +630,7 @@ final class CompactPhoneNavigationController: UINavigationController, UINavigati
 
     private func updateVerticalNavigationBackground() {
         let needsBackground = Utilities.usesSystemVerticalBar(traitCollection) && !isNavigationBarHidden &&
-            (topViewController is FeedDetailObjCViewController || topViewController is DiscoverSitesViewController)
+            topViewController is FeedDetailObjCViewController // FORK: discover stripped
         guard needsBackground,
               let color = navigationBar.barTintColor ?? navigationBar.standardAppearance.backgroundColor ?? navigationBar.backgroundColor else {
             if clearsVerticalBarBackground {

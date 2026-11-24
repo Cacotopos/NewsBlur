@@ -9,6 +9,23 @@
 import Foundation
 import Combine
 
+// FORK: add-site stripped; this environment abstraction moved here from AddSiteViewModel.swift,
+// the sole remaining consumer being this view model (shared with OnboardingViewController.swift).
+protocol AddSiteViewModelAppEnvironment: AnyObject {
+    var url: String? { get }
+    var dictFoldersArray: Any? { get }
+}
+
+final class DefaultAddSiteViewModelAppEnvironment: AddSiteViewModelAppEnvironment {
+    var url: String? {
+        NewsBlurAppDelegate.shared()?.url
+    }
+
+    var dictFoldersArray: Any? {
+        NewsBlurAppDelegate.shared()?.dictFoldersArray
+    }
+}
+
 @available(iOS 15.0, *)
 @MainActor
 class DiscoverSitesViewModel: ObservableObject {

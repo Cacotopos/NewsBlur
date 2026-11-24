@@ -56,7 +56,7 @@ class SplitViewDelegate: NSObject, UISplitViewControllerDelegate {
             return detailController.fullscreenSidebarPresentation == .fullscreen ? .secondaryOnly : .oneOverSecondary
         }
 
-        if detailController.isPhone, detailController.storyTitlesOnLeft, !detailController.isDiscoverSitesVisible {
+        if detailController.isPhone, detailController.storyTitlesOnLeft { // FORK: discover stripped
             // SplitViewDelegate.swift preserves the compact source screen before expansion reparents its navigation stack.
             if wasShowingFeeds {
                 return detailController.behavior == .overlay ? .oneOverSecondary : .oneBesideSecondary

@@ -45,7 +45,6 @@
 - (void)collectionView:(UICollectionView *)collectionView selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition;
 - (void)collectionView:(UICollectionView *)collectionView deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated;
 
-- (IBAction)newSite:(id)sender;
 - (IBAction)reloadFeeds:(id)sender;
 - (IBAction)showMuteSites:(id)sender;
 - (IBAction)showOrganizeSites:(id)sender;

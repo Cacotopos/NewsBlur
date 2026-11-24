@@ -9,12 +9,11 @@
 #import <WebKit/WebKit.h>
 #import "MarkReadMenuViewController.h"
 #import "LoginViewController.h"
-#import "AddSiteViewController.h"
+#import "FeedChooserViewController.h"
 #import "MoveSiteViewController.h"
 #import "NotificationsViewController.h"
 #import "OriginalStoryViewController.h"
 #import "FontSettingsViewController.h"
-#import "FeedChooserViewController.h"
 #import "PremiumViewController.h"
 #import "TUSafariActivity.h"
 #import "ARChromeActivity.h"
@@ -153,7 +152,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 @synthesize fontSettingsViewController;
 @synthesize storyDetailViewController;
 @synthesize loginViewController;
-@synthesize addSiteViewController;
 @synthesize moveSiteViewController;
 @synthesize notificationsViewController;
 @synthesize originalStoryViewController;
@@ -474,10 +472,8 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
         handled = NO;
     } else if ([type startsWith:prefix]) {
         type = [type substringFromIndex:[prefix length]];
-        if ([type isEqualToString:@"AddFeed"]) {
-            [self showFeedsListAnimated:NO];
-            [self performSelector:@selector(delayedAddSite) withObject:nil afterDelay:0.0];
-        } else if ([type isEqualToString:@"AllStories"]) {
+        if ([type isEqualToString:@"AllStories"]) { // FORK: add-site stripped
+
             [self showFeedsListAnimated:NO];
             [self.feedsViewController didSelectSectionHeaderWithTag:NewsBlurTopSectionAllStories];
         } else if ([type isEqualToString:@"Search"]) {
@@ -497,10 +493,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     }
     
     return handled;
-}
-
-- (void)delayedAddSite {
-    [self.feedsViewController tapAddSite:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -1066,11 +1058,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
         if (refresh) [self.storyPagesViewController refreshPages];
         return;
     }
-    if (self.detailViewController.isDiscoverSitesVisible && !self.detailViewController.isPhoneOrCompact) {
-        self.splitViewController.preferredSplitBehavior = UISplitViewControllerSplitBehaviorTile;
-        self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeOneBesideSecondary;
-        return;
-    }
+    // FORK: discover stripped
     NSString *behavior = self.detailViewController.behaviorString;
     
     if (self.detailViewController.storyTitlesOnLeft) {
@@ -1219,6 +1207,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
         }];
     }
 }
+
 
 - (void)showFeedChooserForOperation:(FeedChooserOperation)operation dashboardRiverId:(NSString *)dashboardRiverId {
     [self hidePopover];
@@ -1417,7 +1406,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     self.detailViewController = self.detailNavigationController.viewControllers.firstObject;
     self.storyDetailViewController = [StoryDetailViewController new];
     self.loginViewController = [OnboardingAccountViewController new];
-    self.addSiteViewController = [AddSiteViewController new];
     self.moveSiteViewController = [MoveSiteViewController new];
     self.notificationsViewController = [NotificationsViewController new];
     self.fontSettingsViewController = [FontSettingsViewController new];
@@ -1596,114 +1584,14 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     }
 }
 
-- (void)presentDiscoverFeedsController:(DiscoverFeedsViewController *)discoverVC sourceView:(UIView *)sourceView API_AVAILABLE(ios(15.0)) {
-    UINavigationController *presenter = self.navigationControllerForPopover;
-    CGSize presenterSize = presenter.view.bounds.size;
-    BOOL phoneLandscape = self.isPhone && presenterSize.width > presenterSize.height;
 
-    if (!self.isPhone || phoneLandscape) {
-        StoryTitlesHeaderBar *header = self.feedDetailViewController.storyTitlesHeaderBar;
-        UIView *anchorView = sourceView;
-        CGRect anchorRect = sourceView.bounds;
-        UIPopoverArrowDirection arrows = UIPopoverArrowDirectionAny;
-        if (sourceView.window && [sourceView isDescendantOfView:header.headerContainer]) {
-            // NewsBlurAppDelegate.m anchors Related Sites outside the glass so the footer stays available for dismissal.
-            anchorView = header.headerContainer;
-            CGRect buttonRect = [sourceView convertRect:sourceView.bounds toView:anchorView];
-            CGFloat anchorY = header.usesFloatingBottomBar
-                ? [header popoverSourceRectFor:anchorView].origin.y
-                : CGRectGetMaxY(buttonRect) + 8;
-            anchorRect = CGRectMake(CGRectGetMinX(buttonRect), anchorY, CGRectGetWidth(buttonRect), 1);
-            arrows = header.usesFloatingBottomBar ? UIPopoverArrowDirectionDown : UIPopoverArrowDirectionUp;
-        } else if (!sourceView.window) {
-            anchorView = presenter.view;
-            anchorRect = CGRectMake(CGRectGetMidX(anchorView.bounds), CGRectGetMaxY(anchorView.bounds) - 16, 1, 1);
-        }
-        [self showPopoverWithViewController:discoverVC contentSize:CGSizeMake(500, 550) sourceView:anchorView sourceRect:anchorRect permittedArrowDirections:arrows];
-        return;
-    }
 
-    UINavigationController *discoverNavController = [[UINavigationController alloc] initWithRootViewController:discoverVC];
-    discoverNavController.modalPresentationStyle = UIModalPresentationPageSheet;
-    discoverNavController.navigationBarHidden = YES;
-    discoverNavController.preferredContentSize = CGSizeMake(500, 550);
 
-    UISheetPresentationController *sheet = discoverNavController.sheetPresentationController;
-    sheet.detents = @[UISheetPresentationControllerDetent.mediumDetent, UISheetPresentationControllerDetent.largeDetent];
-    sheet.prefersGrabberVisible = YES;
-    sheet.prefersScrollingExpandsWhenScrolledToEdge = YES;
-    sheet.preferredCornerRadius = 12.0;
-    // NewsBlurAppDelegate.m keeps an already-open portrait sheet dismissible when the phone rotates.
-    sheet.prefersEdgeAttachedInCompactHeight = YES;
-    sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = YES;
 
-    [presenter presentViewController:discoverNavController animated:YES completion:nil];
-}
 
-- (void)openDiscoverFeedsDialog:(NSString *)feedId {
-    [self openDiscoverFeedsDialogFromSettingsButton:feedId];
-}
 
-- (void)openDiscoverFeedsDialogFromSettingsButton:(NSString *)feedId {
-    [self openDiscoverFeedsDialogFromSettingsButton:feedId sourceView:self.feedDetailViewController.storyTitlesHeaderBar.discoverPill];
-}
 
-- (void)openDiscoverFeedsDialogFromSettingsButton:(NSString *)feedId sourceView:(UIView *)sourceView {
-    if (@available(iOS 15.0, *)) {
-        DiscoverFeedsViewController *discoverVC = [[DiscoverFeedsViewController alloc] initWithFeedId:feedId];
-        [self presentDiscoverFeedsController:discoverVC sourceView:sourceView];
-    }
-}
 
-- (void)openDiscoverFeedsDialogFromSettingsButtonWithFeedIds:(NSArray *)feedIds {
-    [self openDiscoverFeedsDialogFromSettingsButtonWithFeedIds:feedIds sourceView:self.feedDetailViewController.storyTitlesHeaderBar.discoverPill];
-}
-
-- (void)openDiscoverFeedsDialogFromSettingsButtonWithFeedIds:(NSArray *)feedIds sourceView:(UIView *)sourceView {
-    if (@available(iOS 15.0, *)) {
-        NSMutableArray *feedIdStrings = [NSMutableArray array];
-        for (id feedId in feedIds) {
-            [feedIdStrings addObject:[NSString stringWithFormat:@"%@", feedId]];
-        }
-        DiscoverFeedsViewController *discoverVC = [[DiscoverFeedsViewController alloc] initWithFeedIds:feedIdStrings];
-        [self presentDiscoverFeedsController:discoverVC sourceView:sourceView];
-    }
-}
-
-- (void)openDiscoverFeedsDialogWithFeedIds:(NSArray *)feedIds {
-    [self openDiscoverFeedsDialogFromSettingsButtonWithFeedIds:feedIds];
-}
-
-- (void)openAddSiteWithFeedAddress:(NSString *)feedAddress {
-    if (@available(iOS 16.0, *)) {
-        AddSiteSheetViewController *addSiteVC = [[AddSiteSheetViewController alloc] init];
-        addSiteVC.initialFeedAddress = feedAddress;
-        addSiteVC.onSuccess = ^{
-            [self reloadFeedsView:NO];
-        };
-
-        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:addSiteVC];
-        nav.modalPresentationStyle = UIModalPresentationPageSheet;
-        nav.navigationBarHidden = YES;
-
-        UISheetPresentationController *sheet = nav.sheetPresentationController;
-        [addSiteVC setSheetController:sheet];
-
-        [self.feedsNavigationController presentViewController:nav animated:YES completion:nil];
-    }
-}
-
-- (void)openDiscoverSitesView {
-    if (@available(iOS 15.0, *)) {
-        if (self.detailViewController.canReturnToDiscoverSites) {
-            [self.detailViewController returnToDiscoverSites];
-            return;
-        }
-        DiscoverSitesViewController *discoverVC = [[DiscoverSitesViewController alloc] init];
-
-        [self.detailViewController showDiscoverSites:discoverVC];
-    }
-}
 
 - (void)dismissAskAIOnTap:(UITapGestureRecognizer *)gesture {
     UIViewController *presentedVC = self.feedsNavigationController.presentedViewController;
@@ -2369,7 +2257,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     storiesCollection.isRiverView = NO;
 
     // NewsBlurAppDelegate.m keeps subscribed and unsubscribed Discovery previews under the same sidebar heading.
-    if (self.isTryFeedView || self.detailViewController.canReturnToDiscoverSites) {
+    if (self.isTryFeedView) { // FORK: discover stripped
         [self addTryFeedToSidebar:feed];
     }
 
@@ -2400,15 +2288,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
         }
     }
 
-    self.skipTryFeedCleanup = YES;
-    if (@available(iOS 15.0, *)) {
-        if ([self.feedsNavigationController.topViewController isKindOfClass:DiscoverSitesViewController.class] ||
-            self.detailViewController.canReturnToDiscoverSites) {
-            // NewsBlurAppDelegate.m keeps Discover beneath its preview instead of starting a competing pop to root.
-            [self loadFeedDetailView];
-            return;
-        }
-    }
+    self.skipTryFeedCleanup = YES; // FORK: discover stripped
     [self presentFeedDetailAfterFeedSelection];
 }
 
@@ -2445,9 +2325,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 - (void)removeTryFeedFromSidebar {
     NSString *feedIdStr = self.tryFeedFeedId;
     NSIndexPath *selectedRow = self.feedsViewController.currentRowAtIndexPath;
-    BOOL selectedPreview = selectedRow && selectedRow.section < self.dictFoldersArray.count &&
-        [self.dictFoldersArray[selectedRow.section] isEqualToString:@"discover_sites"];
-
     // NewsBlurAppDelegate.m also removes the legacy section when replacing an older preview.
     [self.dictFoldersArray removeObject:@"try_feed"];
 
@@ -2464,9 +2341,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
         }
     }
 
-    if (selectedPreview) {
-        [self.feedsViewController highlightDiscoverySelection];
-    }
     [self.feedsViewController reloadFeedTitlesTable];
 }
 
@@ -3276,14 +3150,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     }
 }
 
-- (UINavigationController *)addSiteNavigationController {
-    if (!_addSiteNavigationController) {
-        self.addSiteNavigationController = [[UINavigationController alloc] initWithRootViewController:self.addSiteViewController];
-        self.addSiteNavigationController.delegate = self;
-    }
-    
-    return _addSiteNavigationController;
-}
 
 - (UINavigationController *)fontSettingsNavigationController {
     if (!_fontSettingsNavigationController) {

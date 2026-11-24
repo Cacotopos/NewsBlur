@@ -230,7 +230,7 @@ class FeedDetailViewController: FeedDetailObjCViewController {
               !collection.inSearch, (!app.inFindingStoryMode || app.tryFeedStoryId == nil),
               !collection.isRiverView, !collection.isSocialView,
               !collection.isSavedView, !collection.isReadView, !collection.isWidgetView,
-              app.isTryFeedView || app.detailViewController?.canReturnToDiscoverSites == true,
+              app.isTryFeedView, // FORK: discover stripped
               let feedID = collection.activeFeed?["id"],
               let previewID = app.tryFeedFeedId,
               String(describing: feedID) == previewID else { return nil }

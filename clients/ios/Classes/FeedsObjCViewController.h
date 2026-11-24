@@ -154,7 +154,6 @@ UIGestureRecognizerDelegate, UITextFieldDelegate> {
 - (IBAction)showSettingsPopover:(id)sender;
 - (void)fadeSelectedCell;
 - (void)fadeFeed:(NSString *)feedId;
-- (IBAction)tapAddSite:(id)sender;
 
 - (void)reloadFeedTitlesTable;
 - (void)refreshVisibleFeedCounts;
@@ -181,5 +180,4 @@ UIGestureRecognizerDelegate, UITextFieldDelegate> {
 - (void)showDoneNotifier;
 - (void)hideNotifier;
 
-- (void)highlightDiscoverySelection;
 @end

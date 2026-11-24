@@ -16,7 +16,6 @@
 #import "NSObject+SBJSON.h"
 #import "StringHelper.h"
 #import "Utilities.h"
-#import "AddSiteViewController.h"
 #import "UIBarButtonItem+Image.h"
 #import "MarkReadMenuViewController.h"
 #import "NBLoadingCell.h"
@@ -1174,7 +1173,6 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
         appDelegate.detailViewController.storiesNavigationItem.leftItemsSupplementBackButton = YES;
         appDelegate.detailViewController.storiesNavigationItem.leftBarButtonItems = storiesItems;
     }
-    [appDelegate.detailViewController addDiscoverPreviewBackButton];
     // FeedDetailObjCViewController.m reconciles the independently owned Duo heading after updating the shared navigation item.
     UINavigationController *detailNavigation = appDelegate.detailViewController.navigationController;
     if ([detailNavigation isKindOfClass:DetailNavigationController.class]) {
@@ -1431,11 +1429,13 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
         if (self.verticalDiscoverItem.hidden != self.storyTitlesHeaderBar.discoverPill.hidden) {
             self.verticalDiscoverItem.hidden = self.storyTitlesHeaderBar.discoverPill.hidden;
         }
-        NSString *discoverTitle = storiesCollection.isDailyBriefing ? [NBLocalization text:@"Daily Briefing Settings"] : [NBLocalization text:@"Related Sites"];
-        if (![self.verticalDiscoverItem.title isEqualToString:discoverTitle]) {
+        NSString *discoverTitle = storiesCollection.isDailyBriefing ? [NBLocalization text:@"Daily Briefing Settings"] : @""; // FORK: discover stripped
+        if (!storiesCollection.isDailyBriefing) {
+            self.verticalDiscoverItem.hidden = YES;
+        } else if (![self.verticalDiscoverItem.title isEqualToString:discoverTitle]) {
             self.verticalDiscoverItem.title = discoverTitle;
             self.verticalDiscoverItem.accessibilityLabel = discoverTitle;
-            self.verticalDiscoverItem.image = [UIImage systemImageNamed:storiesCollection.isDailyBriefing ? @"slider.horizontal.3" : @"sparkle.magnifyingglass"];
+            self.verticalDiscoverItem.image = [UIImage systemImageNamed:@"slider.horizontal.3"];
         }
         if (![self.verticalOptionsItem.accessibilityLabel isEqualToString:self.storyTitlesHeaderBar.optionsPill.accessibilityLabel]) {
             self.verticalOptionsItem.accessibilityLabel = self.storyTitlesHeaderBar.optionsPill.accessibilityLabel;
@@ -4073,7 +4073,7 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
     subscribeButton.backgroundColor = [UIColor colorWithRed:0.416 green:0.659 blue:0.310 alpha:1.0]; // #6AA84F
     subscribeButton.layer.cornerRadius = 6;
     subscribeButton.contentEdgeInsets = UIEdgeInsetsMake(6, 16, 6, 16);
-    [subscribeButton addTarget:self action:@selector(subscribeTryFeed) forControlEvents:UIControlEventTouchUpInside];
+    // FORK: add-site stripped; subscribe banner button inert
 
     // Text stack (title + subtitle)
     UIStackView *textStack = [[UIStackView alloc] initWithArrangedSubviews:@[titleLabel, subtitleLabel]];
@@ -4167,14 +4167,6 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
     } completion:^(BOOL finished) {
         [banner removeFromSuperview];
     }];
-}
-
-- (void)subscribeTryFeed {
-    NSString *feedAddress = storiesCollection.activeFeed[@"feed_address"];
-    if (!feedAddress) return;
-
-    [self hideTryFeedSubscribeBanner];
-    [appDelegate openAddSiteWithFeedAddress:feedAddress];
 }
 
 // MARK: - Fetching Banner
@@ -6707,21 +6699,9 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
             [self instafetchFeed];
         }];
 
-        [viewController addTitle:[NBLocalization text:@"Discover related sites"] iconName:@"discover" iconColor:UIColorFromRGB(0x95968F) selectionShouldDismiss:YES handler:^{
-            NSString *feedId = [NSString stringWithFormat:@"%@",
-                [self.appDelegate.storiesCollection.activeFeed objectForKey:@"id"]];
-            [self.appDelegate openDiscoverFeedsDialogFromSettingsButton:feedId];
-        }];
     }
 
-    if (appDelegate.storiesCollection.isRiverView && !everything && !infrequent && !saved && !read && !social && !widget && !dashboard) {
-        NSArray *folderFeedIds = appDelegate.storiesCollection.activeFolderFeeds;
-        if (folderFeedIds.count > 0) {
-            [viewController addTitle:[NBLocalization text:@"Discover related sites"] iconName:@"discover" iconColor:UIColorFromRGB(0x95968F) selectionShouldDismiss:YES handler:^{
-                [self.appDelegate openDiscoverFeedsDialogFromSettingsButtonWithFeedIds:folderFeedIds];
-            }];
-        }
-    }
+    // FORK: discover stripped
 
     [viewController startNewSection];
 
@@ -6964,41 +6944,13 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
         return;
     }
 
-    UIView *pillView = self.storyTitlesHeaderBar.discoverPill;
-
-    if ([sender isKindOfClass:[UIBarButtonItem class]]) {
-        if (storiesCollection.isDailyBriefing) {
-            [(FeedDetailViewController *)self openDailyBriefingSettingsFromBarButton:sender];
-        } else if (@available(iOS 15.0, *)) {
-            DiscoverFeedsViewController *discover = nil;
-            if (!storiesCollection.isRiverView && storiesCollection.activeFeed) {
-                discover = [[DiscoverFeedsViewController alloc] initWithFeedId:[NSString stringWithFormat:@"%@", storiesCollection.activeFeed[@"id"]]];
-            } else if (storiesCollection.activeFolderFeeds.count > 0) {
-                NSMutableArray<NSString *> *feedIds = [NSMutableArray array];
-                for (id feedId in storiesCollection.activeFolderFeeds) {
-                    [feedIds addObject:[NSString stringWithFormat:@"%@", feedId]];
-                }
-                discover = [[DiscoverFeedsViewController alloc] initWithFeedIds:feedIds];
-            }
-            if (discover) {
-                [appDelegate showPopoverWithViewController:discover contentSize:CGSizeMake(500, 550) barButtonItem:sender];
-            }
-        }
-        return;
-    }
-
+    // FORK: discover stripped; the pill only handles Daily Briefing settings now
     if (storiesCollection.isDailyBriefing) {
-        [(FeedDetailViewController *)self openDailyBriefingSettingsFrom:pillView];
-        return;
-    }
-
-    if (!storiesCollection.isRiverView && storiesCollection.activeFeed) {
-        NSString *feedId = [NSString stringWithFormat:@"%@", [storiesCollection.activeFeed objectForKey:@"id"]];
-        [appDelegate openDiscoverFeedsDialogFromSettingsButton:feedId sourceView:pillView];
-    } else if (storiesCollection.isRiverView) {
-        NSArray *folderFeedIds = storiesCollection.activeFolderFeeds;
-        if (folderFeedIds.count > 0) {
-            [appDelegate openDiscoverFeedsDialogFromSettingsButtonWithFeedIds:folderFeedIds sourceView:pillView];
+        UIView *pillView = self.storyTitlesHeaderBar.discoverPill;
+        if ([sender isKindOfClass:[UIBarButtonItem class]]) {
+            [(FeedDetailViewController *)self openDailyBriefingSettingsFromBarButton:sender];
+        } else {
+            [(FeedDetailViewController *)self openDailyBriefingSettingsFrom:pillView];
         }
     }
 }

@@ -61,11 +61,6 @@ class AppMenuHelper: NSObject {
         let closeMenus = originalChildren.compactMap { $0 as? UIMenu }.filter { $0.identifier == .close }
         return [
             UIMenu(title: "", options: .displayInline, children: [
-                UIKeyCommand(title: NBLocalization.text("New Site"),
-                             image: UIImage(systemName: "plus"),
-                             action: #selector(BaseViewController.newSite(_:)),
-                             input: "n",
-                             modifierFlags: [.command, .alternate]),
                 UIKeyCommand(title: NBLocalization.text("Reload Sites"),
                              image: UIImage(systemName: "arrow.clockwise"),
                              action: #selector(BaseViewController.reloadFeeds(_:)),

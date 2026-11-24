@@ -15,7 +15,6 @@
 #import "NBNotifier.h"
 #import "Utilities.h"
 #import "UIBarButtonItem+Image.h"
-#import "AddSiteViewController.h"
 #import "FMDatabase.h"
 #import "FMDatabaseAdditions.h"
 #import "PINDiskCache.h"
@@ -447,7 +446,6 @@ static BOOL NBBoolPreferenceValue(id value) {
     [self addKeyCommandWithInput:UIKeyInputUpArrow modifierFlags:UIKeyModifierShift action:@selector(selectPreviousFolder:) discoverabilityTitle:@"Previous Folder" wantPriority:YES];
     [self addKeyCommandWithInput:@"d" modifierFlags:UIKeyModifierCommand action:@selector(selectDashboard:) discoverabilityTitle:@"Open Dashboard"];
     [self addKeyCommandWithInput:@"e" modifierFlags:UIKeyModifierCommand action:@selector(selectEverything:) discoverabilityTitle:@"Open All Stories"];
-    [self addKeyCommandWithInput:@"a" modifierFlags:UIKeyModifierCommand action:@selector(tapAddSite:) discoverabilityTitle:@"Add Site"];
     [self addKeyCommandWithInput:@"a" modifierFlags:UIKeyModifierShift action:@selector(doMarkAllRead:) discoverabilityTitle:@"Mark All as Read"];
 }
 
@@ -579,11 +577,6 @@ static BOOL NBBoolPreferenceValue(id value) {
 #if !TARGET_OS_MACCATALYST && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
     if (@available(iOS 27.1, *)) {
         if (!self.verticalFeedToolbarItems) {
-            UIBarButtonItem *add = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"plus"]
-                                                                 style:UIBarButtonItemStylePlain
-                                                                target:self action:@selector(tapAddSite:)];
-            add.title = [NBLocalization text:@"Add Site"];
-            add.accessibilityIdentifier = @"feed-list-add";
             UIBarButtonItem *settings = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"gearshape"]
                                                                       style:UIBarButtonItemStylePlain
                                                                      target:self action:@selector(showSettingsPopover:)];
@@ -1967,10 +1960,6 @@ static BOOL NBBoolPreferenceValue(id value) {
     @throw [NSException exceptionWithName:@"Missing fullFolderPathForFolderTitle: implementation" reason:@"This is implemented in the Swift subclass, so should never reach here." userInfo:nil];
 }
 
-- (IBAction)tapAddSite:(id)sender {
-    [self.appDelegate showFeedsListAnimated:NO];
-    [self.appDelegate openAddSiteWithFeedAddress:@""];
-}
 
 - (IBAction)showSettingsPopover:(id)sender {
     if (self.presentedViewController) {
@@ -2816,28 +2805,7 @@ static BOOL NBBoolPreferenceValue(id value) {
     if (appDelegate.hasNoSites) {
         return;
     }
-    NSString *previewFolder = appDelegate.dictFoldersArray[indexPath.section];
-    if (!appDelegate.detailViewController.isPhoneOrCompact &&
-        [previewFolder isEqualToString:@"discover_sites"] &&
-        (appDelegate.detailViewController.canReturnToDiscoverSites || appDelegate.detailViewController.isDiscoverSitesVisible)) {
-        NSString *previewFeedId = [NSString stringWithFormat:@"%@", appDelegate.dictFolders[previewFolder][indexPath.row]];
-        NSString *activeFeedId = [NSString stringWithFormat:@"%@", appDelegate.storiesCollection.activeFeed[@"id"]];
-        if ([previewFeedId isEqualToString:appDelegate.tryFeedFeedId] && [previewFeedId isEqualToString:activeFeedId]) {
-            // FeedsObjCViewController.m resumes the retained preview without resetting its titles, selected story, or Discover page.
-            [appDelegate.detailViewController beginDiscoverPreview];
-            [self clearSelectedHeader];
-            if (self.currentRowAtIndexPath && ![self.currentRowAtIndexPath isEqual:indexPath]) {
-                [self fadeCellWithIndexPath:self.currentRowAtIndexPath];
-            }
-            self.currentRowAtIndexPath = indexPath;
-            self.currentSection = -1;
-            self.lastRowAtIndexPath = indexPath;
-            self.lastSection = -1;
-            [[tableView cellForRowAtIndexPath:indexPath] setNeedsDisplay];
-            return;
-        }
-    }
-    [appDelegate.detailViewController dismissDiscoverSites];
+    NSString *previewFolder = appDelegate.dictFoldersArray[indexPath.section]; // FORK: discover stripped
     
     [self.appDelegate.feedDetailViewController beginExplicitFeedSelection];
     [self.appDelegate.feedDetailViewController cancelMarkStoryReadTimer];
@@ -3184,17 +3152,6 @@ static BOOL NBBoolPreferenceValue(id value) {
     }
 }
 
-- (void)highlightDiscoverySelection {
-    [self clearSelectedHeader];
-    if (self.currentRowAtIndexPath) {
-        [self.feedTitlesTable deselectRowAtIndexPath:self.currentRowAtIndexPath animated:NO];
-    }
-    self.currentRowAtIndexPath = nil;
-    self.currentSection = NewsBlurTopSectionDiscoverSites;
-    self.lastRowAtIndexPath = nil;
-    self.lastSection = NewsBlurTopSectionDiscoverSites;
-    [self highlightSelection];
-}
 
 - (CGFloat)tableView:(UITableView *)tableView
 heightForHeaderInSection:(NSInteger)section {
@@ -3279,9 +3236,7 @@ heightForHeaderInSection:(NSInteger)section {
 }
 
 - (void)didSelectSectionHeaderWithTag:(NSInteger)tag {
-    if (tag != NewsBlurTopSectionDiscoverSites) {
-        [appDelegate.detailViewController dismissDiscoverSites];
-    }
+    // FORK: discover stripped
     if (self.currentRowAtIndexPath != nil) {
         [self fadeCellWithIndexPath:self.currentRowAtIndexPath];
     }
@@ -3312,14 +3267,13 @@ heightForHeaderInSection:(NSInteger)section {
     if ([folder isEqualToString:@"dashboard"]) {
         appDelegate.detailViewController.storyTitlesInDashboard = YES;
         [self loadDashboard];
-    } else if ([folder isEqualToString:@"discover_sites"]) {
-        [appDelegate openDiscoverSitesView];
-    } else {
+    } else { // FORK: discover stripped
+
         [self.appDelegate.feedDetailViewController beginExplicitFeedSelection];
         [appDelegate loadRiverFeedDetailView:appDelegate.feedDetailViewController withFolder:folder];
     }
 
-    if (![folder isEqualToString:@"discover_sites"]) {
+    if (YES) { // FORK: discover stripped
         if (!appDelegate.detailViewController.isPhoneOrCompact) {
             [appDelegate.feedDetailViewController viewWillAppear:NO];
             [appDelegate.feedDetailViewController viewDidAppear:NO];

@@ -63,6 +63,79 @@ enum DiscoverTab: String, CaseIterable, Identifiable {
     }
 }
 
+// FORK: add-site/discover stripped; these types moved here from deleted AddSiteViewModel.swift and DiscoverFeedsModels.swift.
+
+struct AutocompleteResult: Identifiable {
+    let id: String
+    let label: String
+    let value: String
+    let numSubscribers: Int
+    let favicon: String?
+    let lastStorySecondsAgo: Int?
+    let lastStoryDate: String?
+
+    init(dict: [String: Any]) {
+        self.label = dict["feed_title"] as? String ?? dict["label"] as? String ?? ""
+        self.value = dict["feed_address"] as? String ?? dict["value"] as? String ?? ""
+        self.numSubscribers = dict["num_subscribers"] as? Int ?? dict["subs"] as? Int ?? 0
+        self.favicon = dict["favicon"] as? String
+        self.lastStorySecondsAgo = dict["last_story_seconds_ago"] as? Int
+        self.lastStoryDate = dict["last_story_date"] as? String
+        self.id = self.value
+    }
+}
+
+struct DiscoverStory: Identifiable {
+    let id: String
+    let title: String
+    let excerpt: String
+    let authors: String
+    let date: Date?
+    let permalink: String
+    let imageUrls: [String]
+
+    init?(dict: [String: Any]) {
+        guard let hash = dict["story_hash"] as? String else { return nil }
+        self.id = hash
+        self.title = Self.previewText(from: dict["story_title"] as? String ?? "")
+        self.excerpt = Self.previewText(from: dict["story_content"] as? String ?? "")
+        self.authors = dict["story_authors"] as? String ?? ""
+        self.permalink = dict["story_permalink"] as? String ?? ""
+
+        if let dateString = dict["story_date"] as? String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(identifier: "UTC")
+            self.date = formatter.date(from: dateString)
+        } else {
+            self.date = nil
+        }
+
+        if let images = dict["image_urls"] as? [String] {
+            self.imageUrls = images
+        } else {
+            self.imageUrls = []
+        }
+    }
+
+    private static func previewText(from html: String) -> String {
+        guard !html.isEmpty else { return "" }
+
+        // DiscoverFeedsModels.swift bounds preview parsing and reuses NSString+HTML's non-rendering scanner.
+        let visibleHTML = String(html.prefix(12_000))
+            .replacingOccurrences(of: "(?is)<(script|style)\\b[^>]*>.*?(?:</\\1\\s*>|\\z)",
+                                  with: " ", options: .regularExpression)
+            .replacingOccurrences(of: "(?i)<(?:br|hr)\\b[^>]*>",
+                                  with: " ", options: .regularExpression)
+            .replacingOccurrences(of: "<(?=\\s|\\d)", with: "&lt;", options: .regularExpression)
+        let plainText = (visibleHTML as NSString).convertingHTMLToPlainText() ?? ""
+        let normalized = plainText.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return String(normalized.prefix(500))
+    }
+}
+
 struct DiscoverPopularFeed: Identifiable {
     let id: String
     let feedTitle: String

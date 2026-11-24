@@ -167,7 +167,6 @@ extension FeedsViewController: UIContextMenuInteractionDelegate {
             tools = [
                 action("statistics", NBLocalization.text("Statistics"), "chart.bar") { app.openStatistics(withFeed: feedID, sender: source) },
                 action("notifications", NBLocalization.text("Notifications"), "bell") { app.openNotifications(withFeed: feedID, sender: source) },
-                action("related", NBLocalization.text("Related sites"), "sparkles") { app.openDiscoverFeedsDialog(fromSettingsButton: feedID, sourceView: source) }
             ]
             organize.append(action("rename", NBLocalization.text("Rename site…"), "pencil") { [weak self] in
                 self?.renameMenuTarget(title: title, path: "/reader/rename_feed", parameters: ["feed_id": feedID], nameKey: "feed_title")

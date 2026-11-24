@@ -27,12 +27,11 @@
 @class DetailViewController;
 @class StoryPagesViewController;
 @class StoryDetailViewController;
+@class FeedChooserViewController;
 @class LoginViewController;
-@class AddSiteViewController;
 @class MoveSiteViewController;
 @class NotificationsViewController;
 @class OriginalStoryViewController;
-@class FeedChooserViewController;
 @class MenuViewController;
 @class UnreadCounts;
 @class StoriesCollection;
@@ -60,7 +59,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
     
     StoryDetailViewController *storyDetailViewController;
     LoginViewController *loginViewController;
-    AddSiteViewController *addSiteViewController;
     MoveSiteViewController *moveSiteViewController;
     NotificationsViewController *notificationsViewController;
     OriginalStoryViewController *originalStoryViewController;
@@ -154,8 +152,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 @property (nonatomic, readonly) StoryPagesViewController *storyPagesViewController;
 @property (nonatomic) IBOutlet StoryDetailViewController *storyDetailViewController;
 @property (nonatomic) IBOutlet LoginViewController *loginViewController;
-@property (nonatomic, strong) UINavigationController *addSiteNavigationController;
-@property (nonatomic) IBOutlet AddSiteViewController *addSiteViewController;
 @property (nonatomic) IBOutlet MoveSiteViewController *moveSiteViewController;
 @property (nonatomic) IBOutlet NotificationsViewController *notificationsViewController;
 @property (nonatomic) IBOutlet OriginalStoryViewController *originalStoryViewController;
@@ -320,14 +316,6 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 - (void)openStatisticsWithFeed:(NSString *)feedId sender:(id)sender;
 - (void)openAskAIDialog:(NSDictionary *)story;
 - (void)openAskAIDialog:(NSDictionary *)story sourceRect:(NSValue *)sourceRectValue;
-- (void)openDiscoverFeedsDialog:(NSString *)feedId;
-- (void)openDiscoverFeedsDialogFromSettingsButton:(NSString *)feedId;
-- (void)openDiscoverFeedsDialogFromSettingsButton:(NSString *)feedId sourceView:(UIView *)sourceView;
-- (void)openDiscoverFeedsDialogWithFeedIds:(NSArray *)feedIds;
-- (void)openDiscoverFeedsDialogFromSettingsButtonWithFeedIds:(NSArray *)feedIds;
-- (void)openDiscoverFeedsDialogFromSettingsButtonWithFeedIds:(NSArray *)feedIds sourceView:(UIView *)sourceView;
-- (void)openAddSiteWithFeedAddress:(NSString *)feedAddress;
-- (void)openDiscoverSitesView;
 - (void)cleanUpTryFeed;
 - (void)loadFeedDetailView;
 - (void)loadFeedDetailView:(BOOL)transition;

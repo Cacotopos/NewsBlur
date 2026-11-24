@@ -1060,18 +1060,9 @@ class StoryTitlesHeaderBar: NSObject {
         }
     }
 
-    /// Shows or hides the discover pill based on feed type and user preference.
+    /// FORK: discover stripped; the pill stays hidden (Daily Briefing unhides it in FeedDetailObjC).
     func updateDiscoverVisibility(isRiver: Bool, isEverything: Bool, isSocial: Bool, isSaved: Bool, isRead: Bool, isWidget: Bool, isInfrequent: Bool) {
-        let discoverDisplay = UserDefaults.standard.string(forKey: "discover_display") ?? "with_icons"
-        if discoverDisplay == "hidden" {
-            discoverPill.isHidden = true
-            relayoutPills()
-            return
-        }
-
-        // Hide on all special views regardless of river mode
-        let shouldHide = isEverything || isSocial || isSaved || isRead || isWidget || isInfrequent
-        discoverPill.isHidden = shouldHide
+        discoverPill.isHidden = true
         relayoutPills()
     }
 

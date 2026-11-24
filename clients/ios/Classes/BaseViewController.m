@@ -512,10 +512,6 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
 #pragma mark -
 #pragma mark File menu
 
-- (IBAction)newSite:(id)sender {
-    [appDelegate.feedsViewController tapAddSite:nil];
-}
-
 - (IBAction)reloadFeeds:(id)sender {
     [appDelegate reloadFeedsView:NO];
 }

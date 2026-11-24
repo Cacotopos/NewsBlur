@@ -111,47 +111,12 @@ final class NewsBlurUITestHarness {
         let onboardingConfiguration = URLSessionConfiguration.ephemeral
         onboardingConfiguration.protocolClasses = [DiscoverSitesUITestURLProtocol.self]
         OnboardingAPI.session = URLSession(configuration: onboardingConfiguration)
-        DiscoverFeedsViewController.viewModelFactory = { feedId, feedIds in
-            let configuration = URLSessionConfiguration.ephemeral
-            configuration.protocolClasses = [DiscoverSitesUITestURLProtocol.self]
-            let session = URLSession(configuration: configuration)
-            if let feedIds {
-                return DiscoverFeedsViewModel(feedIds: feedIds, session: session,
-                                              baseURL: ReaderUITestFixtures.baseURL.absoluteString)
-            }
-            return DiscoverFeedsViewModel(feedId: feedId ?? ReaderUITestFixtures.swiftFeedId,
-                                          session: session, baseURL: ReaderUITestFixtures.baseURL.absoluteString)
-        }
-        DiscoverFeedsViewController.cardActionsFactory = {
-            let configuration = URLSessionConfiguration.ephemeral
-            configuration.protocolClasses = [DiscoverSitesUITestURLProtocol.self]
-            return DiscoverSitesViewModel(appEnvironment: AddSiteUITestEnvironment(),
-                                          session: URLSession(configuration: configuration))
-        }
 
         switch requestedScreen {
         case "onboarding", "onboarding-account", "account-deletion", "account-deletion-confirm", "account-deletion-notice":
             didScheduleScenario = true
             configureOnboarding(on: appDelegate, remainingRetries: 100)
-        case "discover-sites":
-            didScheduleScenario = true
-            DiscoverSitesViewController.viewModelFactory = {
-                let configuration = URLSessionConfiguration.ephemeral
-                configuration.protocolClasses = [DiscoverSitesUITestURLProtocol.self]
-                return DiscoverSitesViewModel(appEnvironment: AddSiteUITestEnvironment(),
-                                              session: URLSession(configuration: configuration))
-            }
-            configureDiscoverSites(on: appDelegate, remainingRetries: 100)
-        case "add-site":
-            didScheduleScenario = true
-            AddSiteSheetViewController.viewModelFactory = { makeAddSiteViewModel() }
-            DiscoverSitesViewController.viewModelFactory = {
-                let configuration = URLSessionConfiguration.ephemeral
-                configuration.protocolClasses = [DiscoverSitesUITestURLProtocol.self]
-                return DiscoverSitesViewModel(appEnvironment: AddSiteUITestEnvironment(),
-                                              session: URLSession(configuration: configuration))
-            }
-            configureAddSite(on: appDelegate, remainingRetries: 100)
+        // FORK: discover/add-site stripped; "discover-sites" and "add-site" scenarios removed
         case "preferences":
             didScheduleScenario = true
             configurePreferences(on: appDelegate, remainingRetries: 20)
@@ -253,95 +218,13 @@ final class NewsBlurUITestHarness {
         appDelegate.showFeedsList(animated: false)
     }
 
-    private static func presentAddSite(on appDelegate: NewsBlurAppDelegate, remainingRetries: Int) {
-        guard remainingRetries > 0 else { return }
-        guard let feedsNavigationController = appDelegate.feedsNavigationController else { return }
-        guard feedsNavigationController.viewIfLoaded?.window != nil else {
-            retryPresentingAddSite(on: appDelegate, remainingRetries: remainingRetries)
-            return
-        }
-        guard feedsNavigationController.presentedViewController == nil else {
-            retryPresentingAddSite(on: appDelegate, remainingRetries: remainingRetries)
-            return
-        }
 
-        let addSiteViewController = AddSiteSheetViewController()
-        addSiteViewController.shouldReloadFeedsOnSuccess = false
 
-        let navigationController = UINavigationController(rootViewController: addSiteViewController)
-        navigationController.modalPresentationStyle = .pageSheet
-        navigationController.navigationBar.isHidden = true
 
-        if let sheet = navigationController.sheetPresentationController {
-            addSiteViewController.setSheetController(sheet)
-        }
 
-        feedsNavigationController.present(navigationController, animated: false)
-    }
 
-    private static func configureDiscoverSites(on appDelegate: NewsBlurAppDelegate, remainingRetries: Int) {
-        guard remainingRetries > 0 else { return }
-        // DetailViewController.swift hosts Discovery even when the iPad feed sidebar is hidden.
-        guard let navigation = appDelegate.feedsNavigationController,
-              navigation.viewIfLoaded?.window != nil || appDelegate.detailViewController.viewIfLoaded?.window != nil else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                configureDiscoverSites(on: appDelegate, remainingRetries: remainingRetries - 1)
-            }
-            return
-        }
-        if let presented = navigation.presentedViewController {
-            presented.dismiss(animated: false) {
-                configureDiscoverSites(on: appDelegate, remainingRetries: remainingRetries - 1)
-            }
-            return
-        }
-        loadFixtureFeedList(on: appDelegate)
-        guard didFinishReaderFeedLoad else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                configureDiscoverSites(on: appDelegate, remainingRetries: remainingRetries - 1)
-            }
-            return
-        }
-        // FeedsViewController.swift schedules startup navigation after publishing the feed list.
-        appDelegate.feedsViewController.loadWorkItem?.cancel()
-        appDelegate.openDiscoverSitesView()
-    }
 
-    private static func configureAddSite(on appDelegate: NewsBlurAppDelegate, remainingRetries: Int) {
-        guard remainingRetries > 0 else { return }
-        prepareFixtureFeedSidebar(on: appDelegate)
-        guard let feedsNavigationController = appDelegate.feedsNavigationController else { return }
-        guard feedsNavigationController.viewIfLoaded?.window != nil else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                configureAddSite(on: appDelegate, remainingRetries: remainingRetries - 1)
-            }
-            return
-        }
 
-        if let presentedViewController = feedsNavigationController.presentedViewController {
-            presentedViewController.dismiss(animated: false) {
-                configureAddSite(on: appDelegate, remainingRetries: remainingRetries - 1)
-            }
-            return
-        }
-
-        loadFixtureFeedList(on: appDelegate)
-        guard didFinishReaderFeedLoad else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                configureAddSite(on: appDelegate, remainingRetries: remainingRetries - 1)
-            }
-            return
-        }
-        // NewsBlurUITestHarness.swift presents only after the fixture account and its folder choices are installed.
-        appDelegate.feedsViewController.loadWorkItem?.cancel()
-        presentAddSite(on: appDelegate, remainingRetries: remainingRetries)
-    }
-
-    private static func retryPresentingAddSite(on appDelegate: NewsBlurAppDelegate, remainingRetries: Int) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            presentAddSite(on: appDelegate, remainingRetries: remainingRetries - 1)
-        }
-    }
 
     private static func configurePreferences(on appDelegate: NewsBlurAppDelegate, remainingRetries: Int) {
         guard remainingRetries > 0 else { return }
@@ -579,15 +462,6 @@ final class NewsBlurUITestHarness {
         }
     }
 
-    private static func makeAddSiteViewModel() -> AddSiteViewModel {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [AddSiteUITestURLProtocol.self]
-
-        return AddSiteViewModel(
-            appEnvironment: AddSiteUITestEnvironment(),
-            session: URLSession(configuration: configuration)
-        )
-    }
 }
 
 private enum ReaderUITestFixtures {
@@ -1696,80 +1570,7 @@ private final class ReaderUITestURLProtocol: URLProtocol {
     override func stopLoading() {}
 }
 
-private final class AddSiteUITestEnvironment: AddSiteViewModelAppEnvironment {
-    let url: String? = "https://ui-test.newsblur.example"
-    let dictFoldersArray: Any? = [
-        "Tech",
-        "Tech \u{25B8} Swift"
-    ]
-}
 
-private final class AddSiteUITestURLProtocol: URLProtocol {
-    override class func canInit(with request: URLRequest) -> Bool {
-        true
-    }
-
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        request
-    }
-
-    override func startLoading() {
-        do {
-            let (response, data) = try mockedResponse(for: request)
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-            client?.urlProtocol(self, didFailWithError: error)
-        }
-    }
-
-    override func stopLoading() {}
-
-    private func mockedResponse(for request: URLRequest) throws -> (HTTPURLResponse, Data) {
-        guard let url = request.url else {
-            throw URLError(.badURL)
-        }
-
-        let response = HTTPURLResponse(
-            url: url,
-            statusCode: 200,
-            httpVersion: nil,
-            headerFields: ["Content-Type": "application/json"]
-        )!
-
-        switch url.path {
-        case "/rss_feeds/feed_autocomplete":
-            let term = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                .queryItems?
-                .first(where: { $0.name == "term" })?
-                .value ?? ""
-            let payload: [String: Any] = [
-                "term": term,
-                "feeds": [
-                    [
-                        "feed_title": "Swift UI Test Feed",
-                        "feed_address": "https://ui-test.newsblur.example/swift.xml",
-                        "num_subscribers": 42,
-                        "last_story_seconds_ago": 3600
-                    ],
-                    [
-                        "feed_title": "Engineering UI Test Feed",
-                        "feed_address": "https://ui-test.newsblur.example/engineering.xml",
-                        "num_subscribers": 17,
-                        "last_story_seconds_ago": 7200
-                    ]
-                ]
-            ]
-            return (response, try JSONSerialization.data(withJSONObject: payload))
-        case "/reader/add_url":
-            let payload: [String: Any] = ["code": 1]
-            return (response, try JSONSerialization.data(withJSONObject: payload))
-        default:
-            throw URLError(.unsupportedURL)
-        }
-    }
-}
 
 // NewsBlurUITestHarness.swift intercepts every Discover request, including mutations and unexpected URLs.
 private final class DiscoverSitesUITestURLProtocol: URLProtocol {

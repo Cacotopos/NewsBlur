@@ -50,3 +50,15 @@ Every removal keeps a `// FORK:` marker where the call site mattered. These are 
 - FeedsObjC (headless engine): social imports dropped; `showUserProfile`, `showInteractionsPopover`, Interactions/Find Friends feed-menu rows, profile-swipe branch removed; avatar button is display-only. `dictSocialProfile`/`dictSocialFeeds` still populated from `/reader/feeds` — harmless data.
 - Kept (not social): `NotificationsViewController`/`NotificationFeedCell` = per-feed push-notification settings (`/notifications/feed/`); `NBNotifier` = toast; `ProfileBadge` untouched.
 - Misc: `AuthorizeServicesViewController` `fromStory` share-composer return removed; `BridgingHeader.h` cell imports dropped; `ThemeManager` activities theme call dropped; `RealtimeUpdates.refreshVisibleInteractions` stubbed to no-op.
+
+### S3 — First-run wizard (2026-11-25, df9b304079)
+
+- Deleted (15 files): `FirstTimeUser*` view controllers + xibs (Add Friends, Add Sites, Import News, Import Sites, Sites, Welcome), `AuthorizeServicesViewController` + xib, `MoveSiteViewController`, `FeedDetailViewController_iPad.xib` leftovers.
+- Live onboarding (`OnboardingViewController`/`OnboardingAccountViewController`, SwiftUI) is the post-login path that actually runs; the old `FirstTimeUser*` flow was vestigial — never presented.
+- Cut plumbing: delegate `showConnectToService` (dead), `FeedsObjC` import/wizard refs, `FeedSubscriptionCoordinator` leftovers, storyboard references.
+
+### S4 — Add Site / Discover / Try-feed cluster (2026-11-25)
+
+- Deleted: `Classes/AddSite/` (sheet/view/view-model + ObjC AddSiteViewController + autocomplete/table cells), `Classes/DiscoverFeeds/` (view/controller/view-model/models), `Classes/DiscoverSites/` view/controller/tab/component files, `SubscribeTryFeedViewController` paths, the `discover_sites` sidebar section logic, `delayedAddSite`, `doOpenDiscoverFromPill`, `isDiscoverSitesVisible`/`canReturnToDiscoverSites`/`dismissDiscoverSites`/`addDiscoverPreviewBackButton` on `DetailViewController` + call-site guards in `SplitViewDelegate`, `CompactPhoneNavigationController`, `StoryPagesObjC`, `FeedSubscriptionCoordinator`, `FeedDetailObjC`; `newSite:` File-menu item (`AppMenuHelper`/`BaseViewController`); `AddFeed` shortcut item in Info.plist; `finishSubscribeToFeed`/`subscribeToFeed`-driven add-site flows in the delegate.
+- Kept: `FeedChooserViewController` + `showFeedChooserForOperation:dashboardRiverId:` — backs Mute Sites / Organize Sites / Dashboard Sites (live rows). `DiscoverSitesViewModel.swift` + `DiscoverSitesModels.swift` (with `DiscoverStory`/`AutocompleteResult` merged in and `AddSiteViewModelAppEnvironment` extracted) + `Components/DiscoverColors.swift` + `Components/DiscoverFeedCardView.swift` — the live SwiftUI onboarding embeds them. `FeedSubscriptionCoordinator`/`Subscribe` extension bridge kept (Subscribe Extension decision parked for the extension pass).
+- Harness: `configureDiscoverSites`/`configureAddSite`/AddSite UITestURLProtocol+Environment removed; `DiscoverSitesUITestURLProtocol` kept for the onboarding scenario.

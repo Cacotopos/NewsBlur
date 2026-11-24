@@ -1051,7 +1051,7 @@
     UINavigationController *navigation = self.navigationController;
     UIViewController *owner = self.isPhoneOrCompact ? self : appDelegate.detailViewController;
     BOOL readerHidden = [self hasHiddenReaderAncestor];
-    BOOL ownsNavigationChrome = navigation.topViewController == owner && !readerHidden && !appDelegate.detailViewController.isDiscoverSitesVisible;
+    BOOL ownsNavigationChrome = navigation.topViewController == owner && !readerHidden; // FORK: discover stripped
     if (!ownsNavigationChrome && self.verticalToolbarOwner.toolbarItems == self.verticalReaderToolbarItems && self.verticalReaderToolbarItems) {
         self.verticalToolbarOwner.toolbarItems = nil;
         if (self.verticalToolbarOwner == navigation.topViewController) [navigation setToolbarHidden:YES animated:NO];
@@ -1921,7 +1921,7 @@
 - (void)updateReaderNavigationBarAppearance {
     UINavigationController *navigation = self.navigationController;
     UIViewController *owner = self.isPhoneOrCompact ? self : appDelegate.detailViewController;
-    if (!navigation || navigation.topViewController != owner || [self hasHiddenReaderAncestor] || appDelegate.detailViewController.isDiscoverSitesVisible) return;
+    if (!navigation || navigation.topViewController != owner || [self hasHiddenReaderAncestor]) return; // FORK: discover stripped
     BOOL vertical = self.usesVerticalReaderToolbar;
     BOOL transparentHeader = vertical || (self.isPhone && !self.isPhoneOrCompact);
     UIColor *toolbarButtonTint = UIColorFromLightSepiaMediumDarkRGB(0x8F918B, 0x8B7B6B, 0xAEAFAF, 0xAEAFAF);
@@ -3779,7 +3779,7 @@
     self.fullScreenPopGesture.enabled = self.isPhoneOrCompact && swipeEnabled && !self.isHorizontal;
     UIViewController *owner = self.isPhoneOrCompact ? self : appDelegate.detailViewController;
     // StoryPagesObjCViewController.m must not apply a retained reader's preference to another screen's Back gesture.
-    if (navController.topViewController != owner || appDelegate.detailViewController.isDiscoverSitesVisible) return;
+    if (navController.topViewController != owner) return; // FORK: discover stripped
     navController.interactivePopGestureRecognizer.enabled = self.isPhoneOrCompact && swipeEnabled && self.isHorizontal;
 }
 
