@@ -140,7 +140,8 @@ class FeedsViewController: FeedsObjCViewController {
         var site: String?
         if source.hasPrefix("feed:") {
             let id = String(source.dropFirst("feed:".count))
-            let path = ClassifierFolderPath.serverPath(forFeed: id, appDelegate: appDelegate)
+            let path = ClassifierFolderPath.serverPath(forFeed: id, folderOrder: folders,
+                                                     folders: (appDelegate.dictFolders as? [String: Any]) ?? [:])
             folder = folders.first { ClassifierFolderPath.serverPath(fromNative: $0) == path } ?? "everything"
             site = id
         } else if source.hasPrefix("folder:") {

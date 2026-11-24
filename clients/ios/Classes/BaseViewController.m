@@ -228,11 +228,9 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
         [self addReaderShortcutWithInput:@"m" modifierFlags:0 readerAction:@selector(toggleStoryUnread:) discoverabilityTitle:@"Toggle Read/Unread"];
         [self addReaderShortcutWithInput:@"o" modifierFlags:0 readerAction:@selector(showOriginalSubview:) discoverabilityTitle:@"Open in Browser"];
         [self addReaderShortcutWithInput:@"v" modifierFlags:0 readerAction:@selector(showOriginalSubview:) discoverabilityTitle:@"Open in Browser"];
-        [self addReaderShortcutWithInput:@"t" modifierFlags:0 readerAction:@selector(openStoryTrainerFromKeyboard:) discoverabilityTitle:@"Open Story Trainer"];
         [self addReaderShortcutWithInput:@"\r" modifierFlags:UIKeyModifierShift readerAction:@selector(toggleTextView:) discoverabilityTitle:@"Text View"];
         [self addReaderShortcutWithInput:@" " modifierFlags:0 readerAction:@selector(scrollPageDown:) discoverabilityTitle:@"Page Down"];
         [self addReaderShortcutWithInput:@" " modifierFlags:UIKeyModifierShift readerAction:@selector(scrollPageUp:) discoverabilityTitle:@"Page Up"];
-        [self addReaderShortcutWithInput:@"c" modifierFlags:0 readerAction:@selector(scrolltoComment) discoverabilityTitle:@"Scroll to Comments"];
         [self addReaderShortcutWithInput:@"s" modifierFlags:UIKeyModifierShift readerAction:@selector(openShareDialog) discoverabilityTitle:@"Share This Story"];
     }
 }
@@ -400,9 +398,7 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
         return self.isFeedShown && !self.isGrid;
     } else if (action == @selector(chooseGridColumns:) || action == @selector(chooseGridHeight:)) {
         return self.isFeedShown && self.isGrid;
-    } else if (action == @selector(openTrainSite) ||
-        action == @selector(openTrainSite:) ||
-        action == @selector(openNotifications:) ||
+    } else if (action == @selector(openNotifications:) ||
         action == @selector(openStatistics:) ||
         action == @selector(moveSite:) ||
         action == @selector(openRenameSite:) ||
@@ -415,7 +411,6 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
                action == @selector(doMarkAllRead:)) {
         return self.isFeedShown && !self.isDashboard;
     } else if (action == @selector(showSendTo:) ||
-               action == @selector(showTrain:) ||
                action == @selector(showShare:) ||
                action == @selector(nextUnreadStory:) ||
                action == @selector(nextStory:) ||
@@ -539,10 +534,6 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
 
 - (IBAction)showNotifications:(id)sender {
     [self.appDelegate openNotificationsWithFeed:nil];
-}
-
-- (IBAction)showFindFriends:(id)sender {
-    [self.appDelegate showFindFriends];
 }
 
 - (IBAction)showPremium:(id)sender {
@@ -793,10 +784,6 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
     [[NSUserDefaults standardUserDefaults] setObject:string forKey:@"default_mark_read_filter"];
 }
 
-- (IBAction)openTrainSite:(id)sender {
-    [self.appDelegate.feedDetailViewController openTrainSite];
-}
-
 - (IBAction)openNotifications:(id)sender {
     [self.appDelegate.feedDetailViewController openNotifications:sender];
 }
@@ -851,10 +838,6 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
 
 - (IBAction)showSendTo:(id)sender {
     [appDelegate showSendTo:self sender:sender];
-}
-
-- (IBAction)showTrain:(id)sender {
-    [self.appDelegate.storyPagesViewController openStoryTrainerFromKeyboard:sender];
 }
 
 - (IBAction)showShare:(id)sender {

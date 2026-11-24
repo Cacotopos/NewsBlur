@@ -10,8 +10,8 @@ import Foundation
         (UserDefaults.standard.string(forKey: "long_press_story_title") ?? "show_actions") == "show_actions"
     }
 
-    static let feedActions = ["read", "trainer", "notifications", "statistics"]
-    static let feedActionTitles = ["Mark all stories read", "Train intelligence", "Notifications", "Statistics"]
+    static let feedActions = ["read", "notifications", "statistics"] // FORK: trainer stripped
+    static let feedActionTitles = ["Mark all stories read", "Notifications", "Statistics"]
 
     @objc static var feedsEnabled: Bool {
         let defaults = UserDefaults.standard
@@ -38,7 +38,7 @@ import Foundation
         switch action {
         case "notifications": return "menu_icn_notifications.png"
         case "statistics": return "menu_icn_statistics.png"
-        default: return "train.png"
+        default: return "menu_icn_statistics.png" // FORK: trainer stripped
         }
     }
 
@@ -60,7 +60,7 @@ import Foundation
         // GesturePreferences.swift preserves the legacy setting's actual rightward gesture despite its old name.
         if explicit("feed_title_swipe_right") == nil,
            let action = explicit("feed_swipe_left") as? String {
-            defaults.set(feedActions.contains(action) ? action : "trainer", forKey: "feed_title_swipe_right")
+            defaults.set(feedActions.contains(action) ? action : "read", forKey: "feed_title_swipe_right")
         }
         defaults.removeObject(forKey: "enable_feed_cell_swipe")
         defaults.removeObject(forKey: "feed_swipe_left")

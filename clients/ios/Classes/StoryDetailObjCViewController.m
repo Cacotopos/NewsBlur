@@ -11,8 +11,6 @@
 #import "StoryDetailObjCViewController.h"
 #import "NewsBlurAppDelegate.h"
 #import "FontSettingsViewController.h"
-#import "UserProfileViewController.h"
-#import "ShareViewController.h"
 #import "Utilities.h"
 #import "NSString+HTML.h"
 #import "DataUtilities.h"
@@ -363,8 +361,6 @@
     if (isOwnedActiveArticle && (isVisibleCompactReader || isOwnedExpandedReader)) return;
     
     if (!appDelegate.showingSafariViewController &&
-        appDelegate.feedsNavigationController.visibleViewController != (UIViewController *)appDelegate.shareViewController &&
-        appDelegate.feedsNavigationController.visibleViewController != (UIViewController *)appDelegate.trainerViewController &&
         appDelegate.feedsNavigationController.visibleViewController != (UIViewController *)appDelegate.originalStoryViewController) {
         [self clearStory];
     }
@@ -515,7 +511,6 @@
     self.noStoryMessage.hidden = YES;
     self.inTextView = NO;
 
-    [appDelegate hideShareView:NO];
 }
 
 - (void)loadHTMLString:(NSString *)html {
@@ -769,8 +764,8 @@
         self.appDelegate.feedDetailViewController.storyHeight = 200;
     }
     
-    NSString *shareBarString = [self getShareBar];
-    NSString *commentString = [self getComments];
+    NSString *shareBarString = @""; // FORK: social stripped
+    NSString *commentString = @"";
     NSString *clusterStoriesString = [self clusterStoriesHTML];
     NSString *headerString;
     NSString *sharingHtmlString;
@@ -1346,7 +1341,6 @@
 - (void)showStory {
     id storyId = [self.activeStory objectForKey:@"story_hash"];
     [appDelegate.storiesCollection pushReadStory:storyId];
-    [appDelegate resetShareComments];
 }
 
 - (void)clearStory {
@@ -1569,9 +1563,8 @@
                                  objectForKey:@"authors"]
                                 objectForKey:author] intValue];
             NSString *authorIcon = [self scoreIconHtml:authorScore];
-            storyAuthor = [NSString stringWithFormat:@"<span class=\"NB-middot\">&middot;</span><a href=\"http://ios.newsblur.com/classify-author/%@\" "
-                           "class=\"NB-story-author %@\" id=\"NB-story-author\"><div class=\"NB-highlight\"></div>%@%@</a>",
-                           author,
+            storyAuthor = [NSString stringWithFormat:@"<span class=\"NB-middot\">&middot;</span><span "
+                           "class=\"NB-story-author %@\" id=\"NB-story-author\">%@%@</span>", // FORK: training stripped
                            authorScore > 0 ? @"NB-story-author-positive" : authorScore < 0 ? @"NB-story-author-negative" : @"",
                            author,
                            authorIcon];
@@ -1587,9 +1580,8 @@
                                   objectForKey:@"tags"]
                                  objectForKey:tag] intValue];
                 NSString *tagIcon = [self scoreIconHtml:tagScore];
-                NSString *tagHtml = [NSString stringWithFormat:@"<a href=\"http://ios.newsblur.com/classify-tag/%@\" "
-                                     "class=\"NB-story-tag %@\"><div class=\"NB-highlight\"></div>%@%@</a>",
-                                     tag,
+                NSString *tagHtml = [NSString stringWithFormat:@"<span "
+                                     "class=\"NB-story-tag %@\">%@%@</span>", // FORK: training stripped
                                      tagScore > 0 ? @"NB-story-tag-positive" : tagScore < 0 ? @"NB-story-tag-negative" : @"",
                                      tag,
                                      tagIcon];
@@ -1610,26 +1602,7 @@
                         [[NSString stringWithFormat:[NBLocalization text:@"Saved on %@"],
                           [self.activeStory objectForKey:@"starred_date"]] stringByEncodingHTMLEntities]];
         
-        if ([self.activeStory objectForKey:@"user_tags"]) {
-            NSArray *tagArray = [self.activeStory objectForKey:@"user_tags"];
-            if ([tagArray count] > 0) {
-                for (NSString *tag in tagArray) {
-                    NSString *tagHtml = [NSString stringWithFormat:@"<a href=\"http://ios.newsblur.com/remove-user-tag/%@\" "
-                                         "class=\"NB-user-tag\"><div class=\"NB-highlight\"></div>%@</a>",
-                                         tag,
-                                         tag];
-                    [tagStrings addObject:tagHtml];
-                }
-            }
-        }
 
-        storyUserTags = [NSString
-                         stringWithFormat:@"<div id=\"NB-user-tags\" class=\"NB-user-tags\">"
-                         "%@"
-                         "<a class=\"NB-user-tag NB-add-user-tag\" href=\"http://ios.newsblur.com/add-user-tag/add-user-tag/\"><div class=\"NB-highlight\"></div>%@</a>"
-                         "</div>",
-                         [tagStrings componentsJoinedByString:@""],
-                         [[NBLocalization text:@"Add Tag"] stringByEncodingHTMLEntities]];
 
     }
     
@@ -1872,455 +1845,10 @@
     return sideOptions;
 }
 
-- (NSString *)getAvatars:(NSString *)key {
-    NSString *avatarString = @"";
-    NSArray *shareUserIds = [self.activeStory objectForKey:key];
-    
-    for (int i = 0; i < shareUserIds.count; i++) {
-        NSDictionary *user = [appDelegate getUser:[[shareUserIds objectAtIndex:i] intValue]];
-        NSString *avatarClass = @"NB-user-avatar";
-        if ([key isEqualToString:@"commented_by_public"] ||
-            [key isEqualToString:@"shared_by_public"]) {
-            avatarClass = @"NB-public-user NB-user-avatar";
-        }
-        NSString *avatar = [NSString stringWithFormat:@
-                            "<div class=\"NB-story-share-profile\"><div class=\"%@\">"
-                            "<a id=\"NB-user-share-bar-%@\" class=\"NB-show-profile\" "
-                            " href=\"http://ios.newsblur.com/show-profile/%@\">"
-                            "<div class=\"NB-highlight\"></div>"
-                            "<img src=\"%@\" />"
-                            "</a>"
-                            "</div></div>",
-                            avatarClass,
-                            [user objectForKey:@"user_id"],
-                            [user objectForKey:@"user_id"],
-                            [user objectForKey:@"photo_url"]];
-        avatarString = [avatarString stringByAppendingString:avatar];
-    }
 
-    return avatarString;
-}
 
-- (NSString *)getComments {
-    NSString *comments = @"";
 
-    if ([self.activeStory objectForKey:@"share_count"] != [NSNull null] &&
-        [[self.activeStory objectForKey:@"share_count"] intValue] > 0) {
-        NSDictionary *story = self.activeStory;
-        NSArray *friendsCommentsArray =  [story objectForKey:@"friend_comments"];   
-        NSArray *friendsShareArray =  [story objectForKey:@"friend_shares"];
-        NSArray *publicCommentsArray =  [story objectForKey:@"public_comments"];
-        
-        if ([[story objectForKey:@"comment_count_friends"] intValue] > 0 ) {
-            comments = [comments stringByAppendingString:@"<div class=\"NB-story-comments-group NB-story-comment-friend-comments\">"];
-            NSString *commentHeader = [NSString stringWithFormat:@
-                                       "<div class=\"NB-story-comments-friends-header-wrapper\">"
-                                       "  <div class=\"NB-story-comments-friends-header\">%@</div>"
-                                       "</div>",
-                                       [[NBLocalization plural:@"%@ comments" groupedCount:[[story objectForKey:@"comment_count_friends"] integerValue]] stringByEncodingHTMLEntities]];
-            comments = [comments stringByAppendingString:commentHeader];
-            
-            // add friends comments
-            comments = [comments stringByAppendingFormat:@"<div class=\"NB-feed-story-comments\">"];
-            for (int i = 0; i < friendsCommentsArray.count; i++) {
-                NSString *comment = [self getComment:[friendsCommentsArray objectAtIndex:i]];
-                comments = [comments stringByAppendingString:comment];
-            }
-            comments = [comments stringByAppendingString:@"</div>"];
-            comments = [comments stringByAppendingString:@"</div>"];
-        }
-        
-        NSInteger sharedByFriendsCount = [[story objectForKey:@"shared_by_friends"] count];
-        if (sharedByFriendsCount > 0 ) {
-            comments = [comments stringByAppendingString:@"<div class=\"NB-story-comments-group NB-story-comment-friend-shares\">"];
-            NSString *commentHeader = [NSString stringWithFormat:@
-                                       "<div class=\"NB-story-comments-friend-shares-header-wrapper\">"
-                                       "  <div class=\"NB-story-comments-friends-header\">%@</div>"
-                                       "</div>",
-                                       [[NBLocalization plural:@"%@ shares" groupedCount:sharedByFriendsCount] stringByEncodingHTMLEntities]];
-            comments = [comments stringByAppendingString:commentHeader];
-            
-            // add friend shares
-            comments = [comments stringByAppendingFormat:@"<div class=\"NB-feed-story-comments\">"];
-            for (int i = 0; i < friendsShareArray.count; i++) {
-                NSString *comment = [self getComment:[friendsShareArray objectAtIndex:i]];
-                comments = [comments stringByAppendingString:comment];
-            }
-            comments = [comments stringByAppendingString:@"</div>"];
-            comments = [comments stringByAppendingString:@"</div>"];
-        }
-        
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"show_public_comments"] boolValue] &&
-            [[story objectForKey:@"comment_count_public"] intValue] > 0 ) {
-            comments = [comments stringByAppendingString:@"<div class=\"NB-story-comments-group NB-story-comment-public-comments\">"];
-            NSString *publicCommentHeader = [NSString stringWithFormat:@
-                                             "<div class=\"NB-story-comments-public-header-wrapper\">"
-                                             "  <div class=\"NB-story-comments-public-header\">%@</div>"
-                                             "</div>",
-                                             [[NBLocalization plural:@"%@ public comments" groupedCount:[[story objectForKey:@"comment_count_public"] integerValue]] stringByEncodingHTMLEntities]];
-            
-            comments = [comments stringByAppendingString:publicCommentHeader];
-            comments = [comments stringByAppendingFormat:@"<div class=\"NB-feed-story-comments\">"];
-            
-            // add public comments
-            for (int i = 0; i < publicCommentsArray.count; i++) {
-                NSString *comment = [self getComment:[publicCommentsArray objectAtIndex:i]];
-                comments = [comments stringByAppendingString:comment];
-            }
-            comments = [comments stringByAppendingString:@"</div>"];
-            comments = [comments stringByAppendingString:@"</div>"];
-        }
-    }
-    
-    return comments;
-}
 
-- (NSString *)getShareBar {
-    NSString *comments = @"<div id=\"NB-share-bar-wrapper\">";
-    NSString *commentLabel = @"";
-    NSString *shareLabel = @"";
-    
-    if (![[self.activeStory objectForKey:@"comment_count"] isKindOfClass:[NSNull class]] &&
-        [[self.activeStory objectForKey:@"comment_count"] intValue]) {
-        commentLabel = [commentLabel stringByAppendingString:[NSString stringWithFormat:@
-                                                              "<div class=\"NB-story-comments-label\">"
-                                                                "%@" // comment count
-                                                                //"%@" // reply count
-                                                              "</div>"
-                                                              "<div class=\"NB-story-share-profiles NB-story-share-profiles-comments\">"
-                                                                "%@" // friend avatars
-                                                                "%@" // public avatars
-                                                              "</div>",
-                                                              [NSString stringWithFormat:@"<b>%@</b>",
-                                                               [[NBLocalization plural:@"%@ comments" groupedCount:[[self.activeStory objectForKey:@"comment_count"] integerValue]] stringByEncodingHTMLEntities]],
-                                                              
-                                                              //replyStr,
-                                                              [self getAvatars:@"commented_by_friends"],
-                                                              [self getAvatars:@"commented_by_public"]]];
-    }
-    
-    if (![[self.activeStory objectForKey:@"share_count"] isKindOfClass:[NSNull class]] &&
-        [[self.activeStory objectForKey:@"share_count"] intValue]) {
-        shareLabel = [shareLabel stringByAppendingString:[NSString stringWithFormat:@
-
-                                                              "<div class=\"NB-right\">"
-                                                                "<div class=\"NB-story-share-profiles NB-story-share-profiles-shares\">"
-                                                                  "%@" // friend avatars
-                                                                  "%@" // public avatars
-                                                                "</div>"
-                                                                "<div class=\"NB-story-share-label\">"
-                                                                  "%@" // comment count
-                                                                "</div>"
-                                                              "</div>",
-                                                              [self getAvatars:@"shared_by_public"],
-                                                              [self getAvatars:@"shared_by_friends"],
-                                                              [NSString stringWithFormat:@"<b>%@</b>",
-                                                               [[NBLocalization plural:@"%@ shares" groupedCount:[[self.activeStory objectForKey:@"share_count"] integerValue]] stringByEncodingHTMLEntities]]]];
-    }
-    
-    if ([self.activeStory objectForKey:@"share_count"] != [NSNull null] &&
-        [[self.activeStory objectForKey:@"share_count"] intValue] > 0) {
-        
-        comments = [comments stringByAppendingString:[NSString stringWithFormat:@
-                                                      "<div class=\"NB-story-shares\">"
-                                                        "<div class=\"NB-story-comments-shares-teaser-wrapper\">"
-                                                          "<div class=\"NB-story-comments-shares-teaser\">"
-                                                            "%@"
-                                                            "%@"
-                                                          "</div>"
-                                                        "</div>"
-                                                      "</div>",
-                                                      commentLabel,
-                                                      shareLabel
-                                                      ]];
-    }
-    comments = [comments stringByAppendingString:[NSString stringWithFormat:@"</div>"]];
-    return comments;
-}
-
-- (NSString *)getComment:(NSDictionary *)commentDict {
-    NSDictionary *user = [appDelegate getUser:[[commentDict objectForKey:@"user_id"] intValue]];
-    NSString *userAvatarClass = @"NB-user-avatar";
-    NSString *userReshareString = @"";
-    NSString *userEditButton = @"";
-    NSString *userLikeButton = @"";
-    NSString *commentUserId = [NSString stringWithFormat:@"%@", [commentDict objectForKey:@"user_id"]];
-    NSString *currentUserId = [NSString stringWithFormat:@"%@", [appDelegate.dictSocialProfile objectForKey:@"user_id"]];
-    NSArray *likingUsersArray = [commentDict objectForKey:@"liking_users"];
-    NSString *likingUsers = @"";
-    
-    if ([likingUsersArray count]) {
-        likingUsers = @"<div class=\"NB-story-comment-likes-icon\"></div>";
-        for (NSNumber *likingUser in likingUsersArray) {
-            NSDictionary *sourceUser = [appDelegate getUser:[likingUser intValue]];
-            NSString *likingUserString = [NSString stringWithFormat:@
-                                          "<div class=\"NB-story-comment-likes-user\">"
-                                          "    <div class=\"NB-user-avatar\"><img src=\"%@\"></div>"
-                                          "</div>",
-                                          [sourceUser objectForKey:@"photo_url"]];
-            likingUsers = [likingUsers stringByAppendingString:likingUserString];
-        }
-    }
-    
-    if ([commentUserId isEqualToString:currentUserId]) {
-        userEditButton = [NSString stringWithFormat:@
-                          "<div class=\"NB-story-comment-edit-button NB-story-comment-share-edit-button NB-button\">"
-                            "<a href=\"http://ios.newsblur.com/edit-share/%@\"><div class=\"NB-story-comment-edit-button-wrapper\">"
-                                "%@"
-                            "</div></a>"
-                          "</div>",
-                          commentUserId,
-                          [[NBLocalization text:@"Edit"] stringByEncodingHTMLEntities]];
-    } else {
-        BOOL isInLikingUsers = NO;
-        for (int i = 0; i < likingUsersArray.count; i++) {
-            if ([[[likingUsersArray objectAtIndex:i] stringValue] isEqualToString:currentUserId]) {
-                isInLikingUsers = YES;
-                break;
-            }
-        }
-        
-        if (isInLikingUsers) {
-            userLikeButton = [NSString stringWithFormat:@
-                              "<div class=\"NB-story-comment-like-button NB-button selected\">"
-                              "<a href=\"http://ios.newsblur.com/unlike-comment/%@\"><div class=\"NB-story-comment-like-button-wrapper\">"
-                              "<span class=\"NB-favorite-icon\"></span>"
-                              "</div></a>"
-                              "</div>",
-                              commentUserId]; 
-        } else {
-            userLikeButton = [NSString stringWithFormat:@
-                              "<div class=\"NB-story-comment-like-button NB-button\">"
-                              "<a href=\"http://ios.newsblur.com/like-comment/%@\"><div class=\"NB-story-comment-like-button-wrapper\">"
-                              "<span class=\"NB-favorite-icon\"></span>"
-                              "</div></a>"
-                              "</div>",
-                              commentUserId]; 
-        }
-
-    }
-
-    if ([commentDict objectForKey:@"source_user_id"] != [NSNull null]) {
-        userAvatarClass = @"NB-user-avatar NB-story-comment-reshare";
-
-        NSDictionary *sourceUser = [appDelegate getUser:[[commentDict objectForKey:@"source_user_id"] intValue]];
-        userReshareString = [NSString stringWithFormat:@
-                             "<div class=\"NB-story-comment-reshares\">"
-                             "    <div class=\"NB-story-share-profile\">"
-                             "        <div class=\"NB-user-avatar\"><img src=\"%@\"></div>"
-                             "    </div>"
-                             "</div>",
-                             [sourceUser objectForKey:@"photo_url"]];
-    } 
-    
-    NSString *commentContent = [self textToHtml:[commentDict objectForKey:@"comments"]];
-    
-    NSString *comment;
-    NSString *locationHtml = @"";
-    NSString *location = [NSString stringWithFormat:@"%@", [user objectForKey:@"location"]];
-    
-    if (location.length && ![[user objectForKey:@"location"] isKindOfClass:[NSNull class]]) {
-        locationHtml = [NSString stringWithFormat:@"<div class=\"NB-story-comment-location\">%@</div>", location];
-    }
-    
-    // StoryDetailObjCViewController.m words the server's relative time (already in the request language) as a whole
-    // translated sentence.
-    NSString *commentDate = [[NSString stringWithFormat:[NBLocalization text:@"%@ ago"],
-                              [commentDict objectForKey:@"shared_date"]] stringByEncodingHTMLEntities];
-    NSString *replyLabel = [[NBLocalization text:@"Reply"] stringByEncodingHTMLEntities];
-    if (!self.isPhoneOrCompact) {
-        comment = [NSString stringWithFormat:@
-                    "<div class=\"NB-story-comment\" id=\"NB-user-comment-%@\">"
-                    "<div class=\"%@\">"
-                    "<a class=\"NB-show-profile\" href=\"http://ios.newsblur.com/show-profile/%@\">"
-                    "<div class=\"NB-highlight\"></div>"
-                    "<img src=\"%@\" />"
-                    "</a>"
-                    "</div>"
-                    "<div class=\"NB-story-comment-author-container\">"
-                    "   %@"
-                    "    <div class=\"NB-story-comment-username\">%@</div>"
-                    "    <div class=\"NB-story-comment-date\">%@</div>"
-                    "    <div class=\"NB-story-comment-likes\">%@</div>"
-                    "</div>"
-                    "<div class=\"NB-story-comment-content\"%@>%@</div>"
-                    "%@" // location
-                    "<div class=\"NB-button-wrapper\">"
-                    "    <div class=\"NB-story-comment-reply-button NB-button\">"
-                    "        <a href=\"http://ios.newsblur.com/reply/%@/%@\"><div class=\"NB-story-comment-reply-button-wrapper\">"
-                    "            %@"
-                    "        </div></a>"
-                    "    </div>"
-                    "    %@" //User Like Button
-                    "    %@" //User Edit Button
-                    "</div>"
-                    "%@"
-                    "</div>",
-                    [commentDict objectForKey:@"user_id"],
-                    userAvatarClass,
-                    [commentDict objectForKey:@"user_id"],
-                    [user objectForKey:@"photo_url"],
-                    userReshareString,
-                    [user objectForKey:@"username"],
-                    commentDate,
-                    likingUsers,
-                    [self contentDirectionAttribute],
-                    commentContent,
-                    locationHtml,
-                    [commentDict objectForKey:@"user_id"],
-                    [user objectForKey:@"username"],
-                    replyLabel,
-                    userEditButton,
-                    userLikeButton,
-                    [self getReplies:[commentDict objectForKey:@"replies"] forUserId:[commentDict objectForKey:@"user_id"]]];
-    } else {
-        comment = [NSString stringWithFormat:@
-                   "<div class=\"NB-story-comment\" id=\"NB-user-comment-%@\">"
-                   "<div class=\"%@\">"
-                   "<a class=\"NB-show-profile\" href=\"http://ios.newsblur.com/show-profile/%@\">"
-                   "<div class=\"NB-highlight\"></div>"
-                   "<img src=\"%@\" />"
-                   "</a>"
-                   "</div>"
-                   "<div class=\"NB-story-comment-author-container\">"
-                   "    %@"
-                   "    <div class=\"NB-story-comment-username\">%@</div>"
-                   "    <div class=\"NB-story-comment-date\">%@</div>"
-                   "    <div class=\"NB-story-comment-likes\">%@</div>"
-                   "</div>"
-                   "<div class=\"NB-story-comment-content\"%@>%@</div>"
-                   "%@" // location
-                   "<div class=\"NB-button-wrapper\">"
-                   "    <div class=\"NB-story-comment-reply-button NB-button\">"
-                   "        <a href=\"http://ios.newsblur.com/reply/%@/%@\"><div class=\"NB-story-comment-reply-button-wrapper\">"
-                   "            %@"
-                   "        </div></a>"
-                   "    </div>"
-                   "    %@" // User Like Button
-                   "    %@" // User Edit Button
-                   "</div>"
-                   "%@"
-                   "</div>",
-                   [commentDict objectForKey:@"user_id"],
-                   userAvatarClass,
-                   [commentDict objectForKey:@"user_id"],
-                   [user objectForKey:@"photo_url"],
-                   userReshareString,
-                   [user objectForKey:@"username"],
-                   commentDate,
-                   likingUsers,
-                   [self contentDirectionAttribute],
-                   commentContent,
-                   locationHtml,
-                   [commentDict objectForKey:@"user_id"],
-                   [user objectForKey:@"username"],
-                   replyLabel,
-                   userEditButton,
-                   userLikeButton,
-                   [self getReplies:[commentDict objectForKey:@"replies"] forUserId:[commentDict objectForKey:@"user_id"]]]; 
-
-    }
-    
-    return comment;
-}
-
-- (NSString *)getReplies:(NSArray *)replies forUserId:(NSString *)commentUserId {
-    NSString *repliesString = @"";
-    if (replies.count > 0) {
-        repliesString = [repliesString stringByAppendingString:@"<div class=\"NB-story-comment-replies\">"];
-        for (int i = 0; i < replies.count; i++) {
-            NSDictionary *replyDict = [replies objectAtIndex:i];
-            NSDictionary *user = [appDelegate getUser:[[replyDict objectForKey:@"user_id"] intValue]];
-
-            NSString *userEditButton = @"";
-            NSString *replyUserId = [NSString stringWithFormat:@"%@", [replyDict objectForKey:@"user_id"]];
-            NSString *replyId = [replyDict objectForKey:@"reply_id"];
-            NSString *currentUserId = [NSString stringWithFormat:@"%@", [appDelegate.dictSocialProfile objectForKey:@"user_id"]];
-            
-            if ([replyUserId isEqualToString:currentUserId]) {
-                userEditButton = [NSString stringWithFormat:@
-                                  "<div class=\"NB-story-comment-edit-button NB-story-comment-share-edit-button NB-button\">"
-                                  "<a href=\"http://ios.newsblur.com/edit-reply/%@/%@/%@\">"
-                                  "<div class=\"NB-story-comment-edit-button-wrapper\">"
-                                  "%@"
-                                  "</div>"
-                                  "</a>"
-                                  "</div>",
-                                  commentUserId,
-                                  replyUserId,
-                                  replyId,
-                                  [[NBLocalization text:@"Edit"] stringByEncodingHTMLEntities]
-                                  ];
-            }
-            
-            NSString *replyContent = [self textToHtml:[replyDict objectForKey:@"comments"]];
-            
-            NSString *locationHtml = @"";
-            NSString *location = [NSString stringWithFormat:@"%@", [user objectForKey:@"location"]];
-            
-            if (location.length) {
-                locationHtml = [NSString stringWithFormat:@"<div class=\"NB-story-comment-location\">%@</div>", location];
-            }
-                        
-            NSString *reply;
-            NSString *replyDate = [[NSString stringWithFormat:[NBLocalization text:@"%@ ago"],
-                                    [replyDict objectForKey:@"publish_date"]] stringByEncodingHTMLEntities];
-            
-            if (!self.isPhoneOrCompact) {
-                reply = [NSString stringWithFormat:@
-                         "<div class=\"NB-story-comment-reply\" id=\"NB-user-comment-%@\">"
-                         "   <a class=\"NB-show-profile\" href=\"http://ios.newsblur.com/show-profile/%@\">"
-                         "       <div class=\"NB-highlight\"></div>"
-                         "       <img class=\"NB-story-comment-reply-photo\" src=\"%@\" />"
-                         "   </a>"
-                         "   <div class=\"NB-story-comment-username NB-story-comment-reply-username\">%@</div>"
-                         "   <div class=\"NB-story-comment-date NB-story-comment-reply-date\">%@</div>"
-                         "   <div class=\"NB-story-comment-reply-content\"%@>%@</div>"
-                         "   %@" // location
-                         "   <div class=\"NB-button-wrapper\">"
-                         "       %@" // edit
-                         "   </div>"
-                         "</div>",
-                         [replyDict objectForKey:@"reply_id"],
-                         [user objectForKey:@"user_id"],
-                         [user objectForKey:@"photo_url"],
-                         [user objectForKey:@"username"],
-                         replyDate,
-                         [self contentDirectionAttribute],
-                         replyContent,
-                         locationHtml,
-                         userEditButton];
-            } else {
-                reply = [NSString stringWithFormat:@
-                         "<div class=\"NB-story-comment-reply\" id=\"NB-user-comment-%@\">"
-                         "   <a class=\"NB-show-profile\" href=\"http://ios.newsblur.com/show-profile/%@\">"
-                         "       <div class=\"NB-highlight\"></div>"
-                         "       <img class=\"NB-story-comment-reply-photo\" src=\"%@\" />"
-                         "   </a>"
-                         "   <div class=\"NB-story-comment-username NB-story-comment-reply-username\">%@</div>"
-                         "   <div class=\"NB-story-comment-date NB-story-comment-reply-date\">%@</div>"
-                         "   <div class=\"NB-story-comment-reply-content\"%@>%@</div>"
-                         "   %@"
-                         "   <div class=\"NB-button-wrapper\">"
-                         "       %@" // edit
-                         "   </div>"
-                         "</div>",
-                         [replyDict objectForKey:@"reply_id"],
-                         [user objectForKey:@"user_id"],  
-                         [user objectForKey:@"photo_url"],
-                         [user objectForKey:@"username"],
-                         replyDate,
-                         [self contentDirectionAttribute],
-                         replyContent,
-                         locationHtml,
-                         userEditButton];
-            }
-            repliesString = [repliesString stringByAppendingString:reply];
-        }
-        repliesString = [repliesString stringByAppendingString:@"</div>"];
-    }
-    return repliesString;
-}
 
 #pragma mark - Scrolling
 
@@ -2758,78 +2286,6 @@
             return;
         }
 
-        // reset the active comment
-        appDelegate.activeComment = nil;
-        appDelegate.activeShareType = action;
-        
-        if ([action isEqualToString:@"reply"] || 
-            [action isEqualToString:@"edit-reply"] ||
-            [action isEqualToString:@"edit-share"] ||
-            [action isEqualToString:@"like-comment"] ||
-            [action isEqualToString:@"unlike-comment"]) {
-
-            // search for the comment from friends comments and shares
-            NSArray *friendComments = [self.activeStory objectForKey:@"friend_comments"];
-            for (int i = 0; i < friendComments.count; i++) {
-                NSString *userId = [NSString stringWithFormat:@"%@", 
-                                    [[friendComments objectAtIndex:i] objectForKey:@"user_id"]];
-                if([userId isEqualToString:[NSString stringWithFormat:@"%@", 
-                                            [urlComponents objectAtIndex:2]]]){
-                    appDelegate.activeComment = [friendComments objectAtIndex:i];
-                }
-            }
-            
-            
-            NSArray *friendShares = [self.activeStory objectForKey:@"friend_shares"];
-            for (int i = 0; i < friendShares.count; i++) {
-                NSString *userId = [NSString stringWithFormat:@"%@",
-                                    [[friendShares objectAtIndex:i] objectForKey:@"user_id"]];
-                if([userId isEqualToString:[NSString stringWithFormat:@"%@",
-                                            [urlComponents objectAtIndex:2]]]){
-                    appDelegate.activeComment = [friendShares objectAtIndex:i];
-                }
-            }
-            
-            if (appDelegate.activeComment == nil) {
-                NSArray *publicComments = [self.activeStory objectForKey:@"public_comments"];
-                for (int i = 0; i < publicComments.count; i++) {
-                    NSString *userId = [NSString stringWithFormat:@"%@", 
-                                        [[publicComments objectAtIndex:i] objectForKey:@"user_id"]];
-                    if([userId isEqualToString:[NSString stringWithFormat:@"%@", 
-                                                [urlComponents objectAtIndex:2]]]){
-                        appDelegate.activeComment = [publicComments objectAtIndex:i];
-                    }
-                }
-            }
-            
-            if (appDelegate.activeComment == nil) {
-                NSLog(@"PROBLEM! the active comment was not found in friend or public comments");
-                decisionHandler(WKNavigationActionPolicyCancel);
-                return;
-            }
-            
-            if ([action isEqualToString:@"reply"]) {
-                [appDelegate showShareView:@"reply"
-                                 setUserId:[NSString stringWithFormat:@"%@", [urlComponents objectAtIndex:2]]
-                               setUsername:[NSString stringWithFormat:@"%@", [urlComponents objectAtIndex:3]]
-                                setReplyId:nil];
-            } else if ([action isEqualToString:@"edit-reply"]) {
-                [appDelegate showShareView:@"edit-reply"
-                                 setUserId:[NSString stringWithFormat:@"%@", [urlComponents objectAtIndex:2]]
-                               setUsername:nil
-                                setReplyId:[NSString stringWithFormat:@"%@", [urlComponents objectAtIndex:4]]];
-            } else if ([action isEqualToString:@"edit-share"]) {
-                [appDelegate showShareView:@"edit-share"
-                                 setUserId:nil
-                               setUsername:nil
-                                setReplyId:nil];
-            } else if ([action isEqualToString:@"like-comment"]) {
-                [self toggleLikeComment:YES];
-            } else if ([action isEqualToString:@"unlike-comment"]) {
-                [self toggleLikeComment:NO];
-            }
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
         } else if ([action isEqualToString:@"togglechanges"]) {
             if (self.activeStory[@"story_changes"] != nil) {
                 [self.activeStory removeObjectForKey:@"story_changes"];
@@ -2875,43 +2331,8 @@
             [appDelegate openAskAIDialog:self.activeStory];
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
-        } else if ([action isEqualToString:@"train"] && [urlComponents count] > 5) {
-            [self openTrainingDialog:[[urlComponents objectAtIndex:2] intValue]
-                         yCoordinate:[[urlComponents objectAtIndex:3] intValue]
-                               width:[[urlComponents objectAtIndex:4] intValue]
-                              height:[[urlComponents objectAtIndex:5] intValue]];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        } else if ([action isEqualToString:@"train"]) {
-            // StoryDetailObjCViewController.m still opens the trainer if a header pill's tap arrives without coordinates.
-            [self openTrainingDialog:0 yCoordinate:0 width:0 height:0];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
         } else if ([action isEqualToString:@"save"]) {
-            BOOL isSaved = [appDelegate.storiesCollection toggleStorySaved:self.activeStory];
-            if (isSaved) {
-                [self openUserTagsDialog:[[urlComponents objectAtIndex:3] intValue]
-                             yCoordinate:[[urlComponents objectAtIndex:4] intValue]
-                                   width:[[urlComponents objectAtIndex:5] intValue]
-                                  height:[[urlComponents objectAtIndex:6] intValue]];
-            }
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        } else if ([action isEqualToString:@"remove-user-tag"] || [action isEqualToString:@"add-user-tag"]) {
-            [self openUserTagsDialog:[[urlComponents objectAtIndex:3] intValue]
-                         yCoordinate:[[urlComponents objectAtIndex:4] intValue]
-                               width:[[urlComponents objectAtIndex:5] intValue]
-                              height:[[urlComponents objectAtIndex:6] intValue]];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        } else if ([action isEqualToString:@"classify-author"]) {
-            NSString *author = [NSString stringWithFormat:@"%@", [urlComponents objectAtIndex:2]];
-            [self.appDelegate toggleAuthorClassifier:author feedId:feedId];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        } else if ([action isEqualToString:@"classify-tag"]) {
-            NSString *tag = [NSString stringWithFormat:@"%@", [urlComponents objectAtIndex:2]];
-            [self.appDelegate toggleTagClassifier:tag feedId:feedId];
+            [appDelegate.storiesCollection toggleStorySaved:self.activeStory]; // FORK: social stripped; no user-tags dialog
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
         } else if ([action isEqualToString:@"open-cluster-story"]) {
@@ -2940,26 +2361,7 @@
             [self.appDelegate showPremiumDialog];
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
-        } else if ([action isEqualToString:@"show-profile"] && [urlComponents count] > 6) {
-            appDelegate.activeUserProfileId = [NSString stringWithFormat:@"%@", [urlComponents objectAtIndex:2]];
-                        
-            for (int i = 0; i < appDelegate.storiesCollection.activeFeedUserProfiles.count; i++) {
-                NSString *userId = [NSString stringWithFormat:@"%@", [[appDelegate.storiesCollection.activeFeedUserProfiles objectAtIndex:i] objectForKey:@"user_id"]];
-                if ([userId isEqualToString:appDelegate.activeUserProfileId]){
-                    appDelegate.activeUserProfileName = [NSString stringWithFormat:@"%@", [[appDelegate.storiesCollection.activeFeedUserProfiles objectAtIndex:i] objectForKey:@"username"]];
-                    break;
-                }
-            }
-            
-            
-            [self showUserProfile:[urlComponents objectAtIndex:2]
-                      xCoordinate:[[urlComponents objectAtIndex:3] intValue] 
-                      yCoordinate:[[urlComponents objectAtIndex:4] intValue] 
-                            width:[[urlComponents objectAtIndex:5] intValue] 
-                           height:[[urlComponents objectAtIndex:6] intValue]];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        }
+
     } else if ([url.host hasSuffix:@"itunes.apple.com"]) {
         [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
         decisionHandler(WKNavigationActionPolicyCancel);
@@ -3031,28 +2433,6 @@
     }
 }
 
-- (void)showUserProfile:(NSString *)userId xCoordinate:(int)x yCoordinate:(int)y width:(int)width height:(int)height {
-    CGRect frame = CGRectZero;
-    if (!self.isPhoneOrCompact) {
-        // only adjust for the bar if user is scrolling
-        if (appDelegate.storiesCollection.isRiverView ||
-            appDelegate.storiesCollection.isSocialView ||
-            appDelegate.storiesCollection.isSavedView ||
-            appDelegate.storiesCollection.isWidgetView ||
-            appDelegate.storiesCollection.isReadView) {
-            if (self.webView.scrollView.contentOffset.y == -20) {
-                y = y + 20;
-            }
-        } else {
-            if (self.webView.scrollView.contentOffset.y == -9) {
-                y = y + 9;
-            }
-        }  
-        
-        frame = CGRectMake(x, y, width, height);
-    } 
-    [appDelegate showUserProfileModal:[NSValue valueWithCGRect:frame]];
-}
 
 - (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation {
     if (webView == self.webView && navigation && navigation == self.measuredFontWarmupNavigation) {
@@ -3398,17 +2778,7 @@
          [[self.activeStory objectForKey:@"story_hash"] isEqualToString:appDelegate.tryFeedStoryId])) {
         [MBProgressHUD hideHUDForView:appDelegate.storyPagesViewController.view animated:YES];
         
-        if ([appDelegate.tryFeedCategory isEqualToString:@"comment_like"] ||
-            [appDelegate.tryFeedCategory isEqualToString:@"comment_reply"]) {
-            NSString *currentUserId = [NSString stringWithFormat:@"%@", [appDelegate.dictSocialProfile objectForKey:@"user_id"]];
-            NSString *jsFlashString = [[NSString alloc] initWithFormat:@"slideToComment('%@', true, true);", currentUserId];
-            [self.webView evaluateJavaScript:jsFlashString completionHandler:nil];
-        } else if ([appDelegate.tryFeedCategory isEqualToString:@"story_reshare"] ||
-                   [appDelegate.tryFeedCategory isEqualToString:@"reply_reply"]) {
-            NSString *blurblogUserId = [NSString stringWithFormat:@"%@", [self.activeStory objectForKey:@"social_user_id"]];
-            NSString *jsFlashString = [[NSString alloc] initWithFormat:@"slideToComment('%@', true, true);", blurblogUserId];
-            [self.webView evaluateJavaScript:jsFlashString completionHandler:nil];
-        }
+        // FORK: social stripped; comment/reshare flash removed
         appDelegate.tryFeedCategory = nil;
     }
 }
@@ -3531,96 +2901,11 @@
 #pragma mark -
 #pragma mark Actions
 
-- (void)toggleLikeComment:(BOOL)likeComment {
-    [appDelegate.storyPagesViewController showShareHUD:[NBLocalization text:@"Favoriting"]];
-    NSString *urlString;
-    if (likeComment) {
-        urlString = [NSString stringWithFormat:@"%@/social/like_comment",
-                               self.appDelegate.url];
-    } else {
-        urlString = [NSString stringWithFormat:@"%@/social/remove_like_comment",
-                               self.appDelegate.url];
-    }
-    
-    NSMutableDictionary *params = [NSMutableDictionary dictionary];
-    [params setObject:[self.activeStory objectForKey:@"id"] forKey:@"story_id"];
-    [params setObject:[self.activeStory objectForKey:@"story_feed_id"] forKey:@"story_feed_id"];
-    [params setObject:[appDelegate.activeComment objectForKey:@"user_id"] forKey:@"comment_user_id"];
-    
-    [appDelegate POST:urlString parameters:params success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        [self finishLikeComment:responseObject];
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)task.response;
-        [self requestFailed:error statusCode:httpResponse.statusCode];
-    }];
-}
 
-- (void)finishLikeComment:(NSDictionary *)results {
-    // add the comment into the activeStory dictionary
-    NSDictionary *newStory = [DataUtilities updateComment:results for:appDelegate];
-
-    // update the current story and the activeFeedStories
-    appDelegate.activeStory = newStory;
-    [self setActiveStoryAtIndex:-1];
-    
-    NSMutableArray *newActiveFeedStories = [[NSMutableArray alloc] init];
-    
-    for (int i = 0; i < appDelegate.storiesCollection.activeFeedStories.count; i++)  {
-        NSDictionary *feedStory = [appDelegate.storiesCollection.activeFeedStories objectAtIndex:i];
-        NSString *storyId = [NSString stringWithFormat:@"%@", [feedStory objectForKey:@"story_hash"]];
-        NSString *currentStoryId = [NSString stringWithFormat:@"%@", [self.activeStory objectForKey:@"story_hash"]];
-        if ([storyId isEqualToString: currentStoryId]){
-            [newActiveFeedStories addObject:newStory];
-        } else {
-            [newActiveFeedStories addObject:[appDelegate.storiesCollection.activeFeedStories objectAtIndex:i]];
-        }
-    }
-    
-    appDelegate.storiesCollection.activeFeedStories = [NSArray arrayWithArray:newActiveFeedStories];
-    
-    [MBProgressHUD hideHUDForView:appDelegate.storyPagesViewController.view animated:NO];
-    [MBProgressHUD hideHUDForView:appDelegate.storyPagesViewController.currentPage.view animated:NO];
-    [self refreshComments:@"like"];
-} 
-
-
-- (void)requestFailed:(NSError *)error statusCode:(NSInteger)statusCode {
-    NSLog(@"Error in story detail: %@", error);
-    
-    [MBProgressHUD hideHUDForView:appDelegate.storyPagesViewController.view animated:NO];
-    [MBProgressHUD hideHUDForView:appDelegate.storyPagesViewController.currentPage.view animated:NO];
-
-    [self informError:error statusCode:statusCode];
-}
 
 - (void)openShareDialog {
-    // test to see if the user has commented
-    // search for the comment from friends comments
-    NSArray *friendComments = [self.activeStory objectForKey:@"friend_comments"];
-    
-    NSString *currentUserId = [NSString stringWithFormat:@"%@", [appDelegate.dictSocialProfile objectForKey:@"user_id"]];
-    for (int i = 0; i < friendComments.count; i++) {
-        NSString *userId = [NSString stringWithFormat:@"%@",
-                            [[friendComments objectAtIndex:i] objectForKey:@"user_id"]];
-        if([userId isEqualToString:currentUserId]){
-            appDelegate.activeComment = [friendComments objectAtIndex:i];
-            break;
-        } else {
-            appDelegate.activeComment = nil;
-        }
-    }
-    
-    if (appDelegate.activeComment == nil) {
-        [appDelegate showShareView:@"share"
-                         setUserId:nil
-                       setUsername:nil
-                        setReplyId:nil];
-    } else {
-        [appDelegate showShareView:@"edit-share"
-                         setUserId:nil
-                       setUsername:nil
-                        setReplyId:nil];
-    }
+    // FORK: social stripped; Share now opens the iOS share sheet (showSendTo).
+    [appDelegate showSendTo:self sender:self];
 }
 
 - (void)openShareDialog:(int)x yCoordinate:(int)y width:(int)width height:(int)height {
@@ -3644,72 +2929,11 @@
         frame = CGRectMake(x, y, width, height);
     }
 
-    // Find the active comment (same logic as openShareDialog)
-    NSArray *friendComments = [self.activeStory objectForKey:@"friend_comments"];
-    NSString *currentUserId = [NSString stringWithFormat:@"%@", [appDelegate.dictSocialProfile objectForKey:@"user_id"]];
-    for (int i = 0; i < friendComments.count; i++) {
-        NSString *userId = [NSString stringWithFormat:@"%@",
-                            [[friendComments objectAtIndex:i] objectForKey:@"user_id"]];
-        if([userId isEqualToString:currentUserId]){
-            appDelegate.activeComment = [friendComments objectAtIndex:i];
-            break;
-        } else {
-            appDelegate.activeComment = nil;
-        }
-    }
-
-    NSString *type = (appDelegate.activeComment == nil) ? @"share" : @"edit-share";
-    [appDelegate showShareView:type
-                     setUserId:nil
-                   setUsername:nil
-                    setReplyId:nil
-                    sourceRect:[NSValue valueWithCGRect:frame]];
+    // FORK: social stripped; Share now opens the iOS share sheet (showSendTo).
+    [appDelegate showSendTo:self sender:[NSValue valueWithCGPoint:frame.origin]];
 }
 
-- (void)openTrainingDialog:(int)x yCoordinate:(int)y width:(int)width height:(int)height {
-    CGRect frame = CGRectZero;
-    if (!self.isPhoneOrCompact) {
-        // only adjust for the bar if user is scrolling
-        if (appDelegate.storiesCollection.isRiverView ||
-            appDelegate.storiesCollection.isSocialView ||
-            appDelegate.storiesCollection.isSavedView ||
-            appDelegate.storiesCollection.isWidgetView ||
-            appDelegate.storiesCollection.isReadView) {
-            if (self.webView.scrollView.contentOffset.y == -20) {
-                y = y + 20;
-            }
-        } else {
-            if (self.webView.scrollView.contentOffset.y == -9) {
-                y = y + 9;
-            }
-        }
-        
-        frame = CGRectMake(x, y, width, height);
-    }
-    //    NSLog(@"Open trainer: %@ (%d/%d/%d/%d)", NSStringFromCGRect(frame), x, y, width, height);
-    [appDelegate openTrainStory:[NSValue valueWithCGRect:frame]];
-}
 
-- (void)openUserTagsDialog:(int)x yCoordinate:(int)y width:(int)width height:(int)height {
-    CGRect frame = CGRectZero;
-    // only adjust for the bar if user is scrolling
-    if (appDelegate.storiesCollection.isRiverView ||
-        appDelegate.storiesCollection.isSocialView ||
-        appDelegate.storiesCollection.isSavedView ||
-        appDelegate.storiesCollection.isReadView) {
-        if (self.webView.scrollView.contentOffset.y == -20) {
-            y = y + 20;
-        }
-    } else {
-        if (self.webView.scrollView.contentOffset.y == -9) {
-            y = y + 9;
-        }
-    }
-
-    frame = CGRectMake(x, y, width, height);
-
-    [appDelegate openUserTagsStory:[NSValue valueWithCGRect:frame]];
-}
 
 - (void)openAskAIDialog:(int)x yCoordinate:(int)y width:(int)width height:(int)height {
     CGRect frame = CGRectZero;
@@ -3828,73 +3052,8 @@
 # pragma mark -
 # pragma mark Subscribing to blurblog
 
-- (void)subscribeToBlurblog {
-    [appDelegate.storyPagesViewController showShareHUD:[NBLocalization text:@"Following" context:@"in progress"]];
-    NSString *urlString = [NSString stringWithFormat:@"%@/social/follow",
-                     self.appDelegate.url];
-    NSMutableDictionary *params = [NSMutableDictionary dictionary];
-    [params setObject:[appDelegate.storiesCollection.activeFeed
-                           objectForKey:@"user_id"] 
-                   forKey:@"user_id"];
 
-    [appDelegate POST:urlString parameters:params success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        [self finishSubscribeToBlurblog:responseObject];
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)task.response;
-        [self requestFailed:error statusCode:httpResponse.statusCode];
-    }];
-}
 
-- (void)finishSubscribeToBlurblog:(NSDictionary *)results {
-    [MBProgressHUD hideHUDForView:appDelegate.storyPagesViewController.view animated:NO];
-    self.storyHUD = [MBProgressHUD showHUDAddedTo:self.webView animated:YES];
-    self.storyHUD.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"37x-Checkmark.png"]];
-    self.storyHUD.mode = MBProgressHUDModeCustomView;
-    self.storyHUD.removeFromSuperViewOnHide = YES;  
-    self.storyHUD.labelText = [NBLocalization text:@"Followed"];
-    [self.storyHUD hide:YES afterDelay:1];
-    appDelegate.storyPagesViewController.navigationItem.leftBarButtonItem = nil;
-    [appDelegate reloadFeedsView:NO];
-}
-
-- (void)refreshComments:(NSString *)replyId {
-    NSString *shareBarString = [self getShareBar];  
-    
-    NSString *commentString = [self getComments];  
-    NSString *jsString = [[NSString alloc] initWithFormat:@
-                          "document.getElementById('NB-comments-wrapper').innerHTML = '%@';"
-                          "document.getElementById('NB-share-bar-wrapper').innerHTML = '%@';",
-                          commentString, 
-                          shareBarString];
-    NSString *shareType = appDelegate.activeShareType;
-    [self.webView evaluateJavaScript:jsString completionHandler:^(id result, NSError * _Nullable error) {
-        [self.webView evaluateJavaScript:@"attachFastClick(); newsblurRefreshStoryMotion();" completionHandler:^(id result, NSError * _Nullable error) {
-            // HACK to make the scroll event happen after the replace innerHTML event above happens.
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, .15 * NSEC_PER_SEC),
-                           dispatch_get_main_queue(), ^{
-                if (!replyId) {
-                    NSString *currentUserId = [NSString stringWithFormat:@"%@",
-                                               [self.appDelegate.dictSocialProfile objectForKey:@"user_id"]];
-                    NSString *jsFlashString = [[NSString alloc]
-                                               initWithFormat:@"slideToComment('%@', true);", currentUserId];
-                    [self.webView evaluateJavaScript:jsFlashString completionHandler:^(id result, NSError * _Nullable error) {
-                        [self flashCheckmarkHud:shareType];
-                        [self refreshSideOptions];
-                    }];
-                } else if ([replyId isEqualToString:@"like"]) {
-                    
-                } else {
-                    NSString *jsFlashString = [[NSString alloc]
-                                               initWithFormat:@"slideToComment('%@', true);", replyId];
-                    [self.webView evaluateJavaScript:jsFlashString completionHandler:^(id result, NSError * _Nullable error) {
-                        [self flashCheckmarkHud:shareType];
-                        [self refreshSideOptions];
-                    }];
-                }
-            });
-        }];
-    }];
-}
 
 - (void)flashCheckmarkHud:(NSString *)messageType {
     [MBProgressHUD hideHUDForView:self.webView animated:NO];
@@ -3904,18 +3063,8 @@
     self.storyHUD.mode = MBProgressHUDModeCustomView;
     self.storyHUD.removeFromSuperViewOnHide = YES;
     
-    if ([messageType isEqualToString:@"reply"]) {
-        self.storyHUD.labelText = [NBLocalization text:@"Replied"];
-    } else if ([messageType isEqualToString:@"edit-reply"]) {
-        self.storyHUD.labelText = [NBLocalization text:@"Edited Reply"];
-    } else if ([messageType isEqualToString:@"edit-share"]) {
-        self.storyHUD.labelText = [NBLocalization text:@"Edited Comment"];
-    } else if ([messageType isEqualToString:@"share"]) {
+    if ([messageType isEqualToString:@"share"]) {
         self.storyHUD.labelText = [NBLocalization text:@"Shared"];
-    } else if ([messageType isEqualToString:@"like-comment"]) {
-        self.storyHUD.labelText = [NBLocalization text:@"Favorited"];
-    } else if ([messageType isEqualToString:@"unlike-comment"]) {
-        self.storyHUD.labelText = [NBLocalization text:@"Unfavorited"];
     } else if ([messageType isEqualToString:@"saved"]) {
         self.storyHUD.labelText = [NBLocalization text:@"Saved"];
     } else if ([messageType isEqualToString:@"unsaved"]) {
@@ -3935,13 +3084,6 @@
 #pragma mark -
 #pragma mark Scrolling
 
-- (void)scrolltoComment {
-    NSString *currentUserId = [NSString stringWithFormat:@"%@", [appDelegate.dictSocialProfile objectForKey:@"user_id"]];
-    NSString *jsFlashString = [[NSString alloc] initWithFormat:@"slideToComment('%@', true);", currentUserId];
-    if ([self getComments].length) {
-        [self.webView evaluateJavaScript:jsFlashString completionHandler:nil];
-    }
-}
 
 - (void)tryScrollingDown:(BOOL)down {
     StoryPagesViewController *pages = appDelegate.storyPagesViewController;

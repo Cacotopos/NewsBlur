@@ -96,11 +96,6 @@ class AppMenuHelper: NSObject {
                              image: UIImage(systemName: "bell"),
                              action: #selector(BaseViewController.showNotifications(_:)),
                              input: "n",
-                             modifierFlags: [.command, .shift]),
-                UIKeyCommand(title: NBLocalization.text("Find Friends"),
-                             image: UIImage(systemName: "person.2"),
-                             action: #selector(BaseViewController.showFindFriends(_:)),
-                             input: "f",
                              modifierFlags: [.command, .shift])
             ]),
             
@@ -487,9 +482,6 @@ class AppMenuHelper: NSObject {
                           propertyList: "manually"),
             ]),
             UIMenu(title: "", options: .displayInline, children: [
-                UICommand(title: NBLocalization.text("Train…"),
-                          image: UIImage(systemName: "brain"),
-                          action: #selector(BaseViewController.openTrainSite(_:))),
                 UICommand(title: NBLocalization.text("Notifications…"),
                           image: UIImage(systemName: "bell"),
                           action: #selector(BaseViewController.openNotifications(_:))),
@@ -559,9 +551,6 @@ class AppMenuHelper: NSObject {
                 UICommand(title: NBLocalization.text("Send To…"),
                           image: UIImage(systemName: "paperplane"),
                           action: #selector(BaseViewController.showSendTo(_:))),
-                UICommand(title: NBLocalization.text("Train This Story…"),
-                          image: UIImage(systemName: "brain"),
-                          action: #selector(BaseViewController.showTrain(_:))),
                 UICommand(title: NBLocalization.text("Share This Story…"),
                           image: UIImage(systemName: "square.and.arrow.up"),
                           action: #selector(BaseViewController.showShare(_:))),

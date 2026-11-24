@@ -9,8 +9,6 @@
 #import "StoryPagesObjCViewController.h"
 #import "NewsBlurAppDelegate.h"
 #import "FontSettingsViewController.h"
-#import "UserProfileViewController.h"
-#import "ShareViewController.h"
 #import "Utilities.h"
 #import "NSString+HTML.h"
 #import "DataUtilities.h"
@@ -112,7 +110,6 @@
 @synthesize buttonSend;
 @synthesize fontSettingsButton;
 @synthesize originalStoryButton;
-@synthesize subscribeButton;
 @synthesize buttonBack;
 @synthesize bottomSize;
 @synthesize bottomSizeHeightConstraint;
@@ -420,15 +417,6 @@
                                                                     action:@selector(markAllRead:)];
     markReadBarButton.accessibilityLabel = [NBLocalization text:@"Mark all as read"];
 
-    UIBarButtonItem *subscribeBtn = [[UIBarButtonItem alloc]
-                                     initWithTitle:[NBLocalization text:@"Follow User"]
-                                     style:UIBarButtonItemStylePlain
-                                     target:self
-                                     action:@selector(subscribeToBlurblog)
-                                     ];
-    
-    self.subscribeButton = subscribeBtn;
-
     [self updateTheme];
     
     self.notifier = [[NBNotifier alloc] initWithTitle:[NBLocalization text:@"Fetching text..."]
@@ -528,7 +516,6 @@
     [self addKeyCommandWithInput:@"o" modifierFlags:0 action:@selector(showOriginalSubview:) discoverabilityTitle:@"Open in Browser"];
     [self addKeyCommandWithInput:@"v" modifierFlags:0 action:@selector(showOriginalSubview:) discoverabilityTitle:@"Open in Browser"];
     [self addKeyCommandWithInput:@"s" modifierFlags:UIKeyModifierShift action:@selector(openShareDialog) discoverabilityTitle:@"Share This Story"];
-    [self addKeyCommandWithInput:@"c" modifierFlags:0 action:@selector(scrolltoComment) discoverabilityTitle:@"Scroll to Comments"];
     [self addKeyCommandWithInput:@"t" modifierFlags:0 action:@selector(openStoryTrainerFromKeyboard:) discoverabilityTitle:@"Open Story Trainer"];
     [self addKeyCommandWithInput:@"a" modifierFlags:UIKeyModifierShift action:@selector(doMarkAllRead:) discoverabilityTitle:@"Mark All as Read"];
     [self addKeyCommandWithInput:UIKeyInputDownArrow modifierFlags:UIKeyModifierShift action:@selector(nextFolder:) discoverabilityTitle:@"Next Folder" wantPriority:YES];
@@ -730,14 +717,6 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
-    // set the subscribeButton flag
-    if (appDelegate.isTryFeedView && !self.isPhoneOrCompact &&
-        ![[appDelegate.storiesCollection.activeFeed objectForKey:@"username"] isKindOfClass:[NSNull class]] &&
-        [appDelegate.storiesCollection.activeFeed objectForKey:@"username"]) {
-        self.subscribeButton.title = [NSString stringWithFormat:[NBLocalization text:@"Follow %@"],
-                                      [appDelegate.storiesCollection.activeFeed objectForKey:@"username"]];
-        appDelegate.detailViewController.navigationItem.leftBarButtonItem = self.subscribeButton;
-    }
     appDelegate.isTryFeedView = NO;
     [self reorientPages];
     previousPage.view.hidden = NO;
@@ -2013,7 +1992,6 @@
     originalStoryButton.tintColor = toolbarButtonTint;
     markReadBarButton.tintColor = toolbarButtonTint;
     self.temporaryFullScreenButton.tintColor = toolbarButtonTint;
-    self.subscribeButton.tintColor = toolbarButtonTint;
     for (UIBarButtonItem *item in self.verticalReaderToolbarItems) item.tintColor = toolbarButtonTint;
     UIButton *settingsButton = (UIButton *)fontSettingsButton.customView;
     if ([settingsButton isKindOfClass:[UIButton class]]) {
@@ -3558,11 +3536,6 @@
     return self.usesVerticalReaderToolbar ? self.verticalSettingsButton : self.fontSettingsButton;
 }
 
-- (void)openStoryTrainerFromKeyboard:(id)sender {
-    // don't have a tap target for the popover, but the settings button at least doesn't move
-    [appDelegate openTrainStory:self.settingsPresentationBarButton];
-}
-
 - (void)finishMarkAsSaved:(NSDictionary *)params {
     [appDelegate.feedDetailViewController redrawUnreadStory];
     [self refreshHeaders];
@@ -3635,9 +3608,6 @@
 	[hud hide:YES afterDelay:0.8];
 }
 
-- (void)subscribeToBlurblog {
-    [self.currentPage subscribeToBlurblog];
-}
 
 - (IBAction)toggleTextView:(id)sender {
     [self endTouchDown:sender];
@@ -3670,10 +3640,6 @@
     [self.currentPage scrollPageUp:sender];
 }
 
-- (void)scrolltoComment {
-    [self.currentPage scrolltoComment];
-}
-
 - (void)openShareDialog {
     [self.currentPage openShareDialog];
 }
@@ -3689,7 +3655,6 @@
         action == @selector(toggleStorySaved:) ||
         action == @selector(showOriginalSubview:) ||
         action == @selector(openShareDialog) ||
-        action == @selector(scrolltoComment) ||
         action == @selector(openStoryTrainerFromKeyboard:)) {
         return (currentPage.pageIndex >= 0);
     }

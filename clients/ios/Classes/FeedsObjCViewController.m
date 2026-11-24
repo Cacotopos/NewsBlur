@@ -8,12 +8,7 @@
 
 #import "FeedsObjCViewController.h"
 #import "NewsBlurAppDelegate.h"
-#import "ActivitiesViewController.h"
-#import "InteractionsModule.h"
-#import "ActivityModule.h"
 #import "FeedTableCell.h"
-#import "ActivitiesViewController.h"
-#import "UserProfileViewController.h"
 #import "MBProgressHUD.h"
 #import "SBJson4.h"
 #import "NSObject+SBJSON.h"
@@ -1972,17 +1967,6 @@ static BOOL NBBoolPreferenceValue(id value) {
     @throw [NSException exceptionWithName:@"Missing fullFolderPathForFolderTitle: implementation" reason:@"This is implemented in the Swift subclass, so should never reach here." userInfo:nil];
 }
 
-- (void)showUserProfile {
-    appDelegate.activeUserProfileId = [NSString stringWithFormat:@"%@", [appDelegate.dictSocialProfile objectForKey:@"user_id"]];
-    appDelegate.activeUserProfileName = [NSString stringWithFormat:@"%@", [appDelegate.dictSocialProfile objectForKey:@"username"]];
-//    appDelegate.activeUserProfileName = @"You";
-#if TARGET_OS_MACCATALYST
-        [appDelegate showUserProfileModal:self.userAvatarButton];
-#else
-        [appDelegate showUserProfileModal:[self usesVerticalFeedToolbar] ? self.userAvatarButton : self.navigationItem.titleView];
-#endif
-}
-
 - (IBAction)tapAddSite:(id)sender {
     [self.appDelegate showFeedsListAnimated:NO];
     [self.appDelegate openAddSiteWithFeedAddress:@""];
@@ -2024,17 +2008,7 @@ static BOOL NBBoolPreferenceValue(id value) {
         [self.appDelegate openNotificationsWithFeed:nil];
     }];
 
-    [viewController startNewSection];
-
-    [viewController addFeedListTitle:[NBLocalization text:@"Interactions"] iconName:@"feed-menu-interactions" selectionShouldDismiss:YES handler:^{
-        [self showInteractionsPopover:nil];
-    }];
-
-    [viewController addFeedListTitle:[NBLocalization text:@"Find Friends"] iconName:@"feed-menu-friends" selectionShouldDismiss:YES handler:^{
-        [self.appDelegate showFindFriends];
-    }];
-    
-    [viewController startNewSection];
+    [viewController startNewSection]; // FORK: social stripped (Interactions, Find Friends)
 
     if (appDelegate.isPremium && appDelegate.isPremiumArchive) {
         [viewController addFeedListTitle:[NBLocalization text:@"Premium Archive"] iconName:@"feed-menu-subscription" selectionShouldDismiss:YES handler:^{
@@ -2155,33 +2129,6 @@ static BOOL NBBoolPreferenceValue(id value) {
     [appDelegate.feedsViewController presentViewController:alertController animated:YES completion:nil];
 }
 
-- (IBAction)showInteractionsPopover:(id)sender {
-    if (self.presentedViewController) {
-        [self.presentedViewController dismissViewControllerAnimated:YES completion:nil];
-        return;
-    }
-
-    if (!self.appDelegate.isPhone) {
-        CGSize size = CGSizeMake(self.view.frame.size.width - 36,
-                                 self.view.frame.size.height - 60);
-
-        // Use settings button as the popover anchor since activities button was removed from nav bar
-        [self.appDelegate showPopoverWithViewController:self.appDelegate.activitiesViewController contentSize:size barButtonItem:self.settingsBarButton];
-    } else {
-        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:self.appDelegate.activitiesViewController];
-        navController.navigationBarHidden = YES;
-        navController.modalPresentationStyle = UIModalPresentationPageSheet;
-        if (navController.sheetPresentationController) {
-            navController.sheetPresentationController.detents = @[UISheetPresentationControllerDetent.largeDetent];
-            navController.sheetPresentationController.prefersGrabberVisible = YES;
-            navController.sheetPresentationController.preferredCornerRadius = 12.0;
-        }
-        [self.appDelegate.feedsNavigationController presentViewController:navController animated:YES completion:nil];
-    }
-
-    [appDelegate.activitiesViewController refreshInteractions];
-    [appDelegate.activitiesViewController refreshActivity];
-}
 
 - (void)handleLongPress:(UILongPressGestureRecognizer *)gestureRecognizer {
     CGPoint p = [gestureRecognizer locationInView:self.feedTitlesTable];
@@ -3891,22 +3838,11 @@ heightForHeaderInSection:(NSInteger)section {
     NSString *swipe = state == MCSwipeTableViewCellState1 ? GesturePreferences.feedRightAction : GesturePreferences.feedLeftAction;
     if (![swipe isEqualToString:@"read"]) {
         
-        if (indexPath.section == 1) {
-            // Profile
-            NSDictionary *feed = [appDelegate.dictSocialFeeds objectForKey:feedId];
-            appDelegate.activeUserProfileId = [NSString stringWithFormat:@"%@", [feed objectForKey:@"user_id"]];
-            appDelegate.activeUserProfileName = [NSString stringWithFormat:@"%@", [feed objectForKey:@"username"]];
-            [appDelegate showUserProfileModal:cell];
-        } else {
-            if ([swipe isEqualToString:@"notifications"]) {
-                [appDelegate openNotificationsWithFeed:feedId sender:cell];
-            } else if ([swipe isEqualToString:@"statistics"]) {
-                [appDelegate openStatisticsWithFeed:feedId sender:cell];
-            } else {
-                // Train
-                appDelegate.storiesCollection.activeFeed = [appDelegate.dictFeeds objectForKey:feedId];
-                [appDelegate openTrainSiteWithFeedLoaded:NO from:cell];
-            }
+        // FORK: social/trainer stripped; only notification + statistics swipes remain
+        if ([swipe isEqualToString:@"notifications"]) {
+            [appDelegate openNotificationsWithFeed:feedId sender:cell];
+        } else if ([swipe isEqualToString:@"statistics"]) {
+            [appDelegate openStatisticsWithFeed:feedId sender:cell];
         }
     } else {
         // Mark read
@@ -4792,7 +4728,7 @@ heightForHeaderInSection:(NSInteger)section {
 
     userAvatarButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [userAvatarButton setImage:initialImage forState:UIControlStateNormal];
-    [userAvatarButton addTarget:self action:@selector(showUserProfile) forControlEvents:UIControlEventTouchUpInside];
+    // FORK: social stripped; avatar is display-only
     userAvatarButton.imageView.contentMode = UIViewContentModeScaleAspectFill;
     userAvatarButton.pointerInteractionEnabled = YES;
     userAvatarButton.accessibilityLabel = [NBLocalization text:@"User info"];

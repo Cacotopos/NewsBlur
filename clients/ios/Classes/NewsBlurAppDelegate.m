@@ -7,23 +7,16 @@
 
 #import "NewsBlurAppDelegate.h"
 #import <WebKit/WebKit.h>
-#import "ActivitiesViewController.h"
 #import "MarkReadMenuViewController.h"
 #import "FirstTimeUserViewController.h"
-#import "FriendsListViewController.h"
 #import "LoginViewController.h"
 #import "AddSiteViewController.h"
 #import "MoveSiteViewController.h"
 #import "NotificationsViewController.h"
-#import "UserTagsViewController.h"
 #import "OriginalStoryViewController.h"
-#import "ShareViewController.h"
 #import "FontSettingsViewController.h"
 #import "FeedChooserViewController.h"
-#import "UserProfileViewController.h"
 #import "PremiumViewController.h"
-#import "InteractionsModule.h"
-#import "ActivityModule.h"
 #import "FirstTimeUserViewController.h"
 #import "FirstTimeUserAddSitesViewController.h"
 #import "FirstTimeUserAddFriendsViewController.h"
@@ -158,28 +151,19 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 @synthesize ftuxNavigationController;
 @synthesize feedsNavigationController;
 @synthesize modalNavigationController;
-@synthesize shareNavigationController;
-@synthesize trainNavigationController;
 @synthesize notificationsNavigationController;
 @synthesize premiumNavigationController;
-@synthesize userProfileNavigationController;
 //@synthesize masterContainerViewController;
 @synthesize detailViewController;
-@synthesize activitiesViewController;
 @synthesize feedsViewController;
-@synthesize friendsListViewController;
 @synthesize fontSettingsViewController;
 @synthesize storyDetailViewController;
-@synthesize shareViewController;
 @synthesize loginViewController;
 @synthesize addSiteViewController;
 @synthesize moveSiteViewController;
-@synthesize trainerViewController;
 @synthesize notificationsViewController;
-@synthesize userTagsViewController;
 @synthesize originalStoryViewController;
 @synthesize originalStoryViewNavController;
-@synthesize userProfileViewController;
 @synthesize premiumViewController;
 
 @synthesize firstTimeUserViewController;
@@ -990,52 +974,8 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     return nil;
 }
 
-- (void)showUserProfileModal:(id)sender {
-    [self hidePopoverAnimated:NO];
-    UserProfileViewController *newUserProfile = [[UserProfileViewController alloc] init];
-    self.userProfileViewController = newUserProfile;
-    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:self.userProfileViewController];
-    self.userProfileNavigationController = navController;
-    self.userProfileNavigationController.navigationBar.translucent = NO;
 
-    newUserProfile.navigationItem.title = self.activeUserProfileName;
-    newUserProfile.navigationItem.backBarButtonItem.title = self.activeUserProfileName;
-    [newUserProfile getUserProfile];
-    if (!self.isPhone) {
-        // iPad: show as popover, tap outside to dismiss
-        [self showPopoverWithViewController:self.userProfileNavigationController contentSize:CGSizeMake(320, 454) sender:sender];
-    } else {
-        // iPhone: show as sheet with grabber, no Close button needed
-        navController.modalPresentationStyle = UIModalPresentationPageSheet;
-        if (navController.sheetPresentationController) {
-            navController.sheetPresentationController.prefersGrabberVisible = YES;
-        }
-        [self.feedsNavigationController presentViewController:navController animated:YES completion:nil];
-    }
 
-}
-
-- (void)pushUserProfile {
-    UserProfileViewController *userProfileView = [[UserProfileViewController alloc] init];
-
-    userProfileView.navigationItem.title = self.activeUserProfileName;
-    userProfileView.navigationItem.backBarButtonItem.title = self.activeUserProfileName;
-    [userProfileView getUserProfile];
-    if (self.modalNavigationController.view.window == nil) {
-        [self.userProfileNavigationController showViewController:userProfileView sender:self];
-    } else {
-        [self.modalNavigationController showViewController:userProfileView sender:self];
-    };
-    
-}
-
-- (void)hideUserProfileModal {
-    if (!self.isPhone) {
-        [self hidePopover];
-    } else {
-        [self.feedsNavigationController dismissViewControllerAnimated:YES completion:nil];
-    }
-}
 
 - (void)resizePreviewSize {
     [feedsViewController resizePreviewSize];
@@ -1332,27 +1272,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [self showFeedChooserForOperation:FeedChooserOperationDashboardSites dashboardRiverId:selectedRiverId];
 }
 
-- (void)showFindFriends {
-    [self hidePopover];
-    
-    FriendsListViewController *friendsBVC = [[FriendsListViewController alloc] init];
-    UINavigationController *friendsNav = [[UINavigationController alloc] initWithRootViewController:friendsBVC];
-    
-    self.friendsListViewController = friendsBVC;
-    self.modalNavigationController = friendsNav;
-    self.modalNavigationController.navigationBar.translucent = NO;
-    
-    [self.splitViewController dismissViewControllerAnimated:NO completion:nil];
-    self.modalNavigationController.modalPresentationStyle = UIModalPresentationPageSheet;
-    if (self.modalNavigationController.sheetPresentationController) {
-        self.modalNavigationController.sheetPresentationController.detents = @[UISheetPresentationControllerDetent.largeDetent];
-        self.modalNavigationController.sheetPresentationController.prefersGrabberVisible = YES;
-        self.modalNavigationController.sheetPresentationController.preferredCornerRadius = 12.0;
-    }
-    [self.splitViewController presentViewController:modalNavigationController animated:YES completion:nil];
-    
-    [self.friendsListViewController loadSuggestedFriendsList];
-}
 
 - (void)showSendTo:(UIViewController *)vc sender:(id)sender {
     NSString *authorName = [activeStory objectForKey:@"story_authors"];
@@ -1475,71 +1394,9 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     self.isPresentingActivities = YES;
 }
 
-- (void)showShareView:(NSString *)type
-            setUserId:(NSString *)userId
-          setUsername:(NSString *)username
-           setReplyId:(NSString *)replyId {
-    [self showShareView:type setUserId:userId setUsername:username setReplyId:replyId sourceRect:nil];
-}
 
-- (void)showShareView:(NSString *)type
-            setUserId:(NSString *)userId
-          setUsername:(NSString *)username
-           setReplyId:(NSString *)replyId
-           sourceRect:(NSValue *)sourceRectValue {
 
-    [self.shareViewController setCommentType:type];
 
-    if (!self.isPhone && sourceRectValue != nil) {
-        CGRect sourceRect = [sourceRectValue CGRectValue];
-        if (!CGRectIsEmpty(sourceRect)) {
-            [self.shareViewController loadViewIfNeeded];
-            [self.shareViewController setSiteInfo:type setUserId:userId setUsername:username setReplyId:replyId];
-            [self showPopoverWithViewController:self.shareViewController contentSize:CGSizeMake(380, 220) sourceView:self.storyPagesViewController.currentPage.webView sourceRect:sourceRect];
-            return;
-        }
-    }
-
-    if (self.shareNavigationController == nil) {
-        UINavigationController *shareNav = [[UINavigationController alloc]
-                                            initWithRootViewController:self.shareViewController];
-        self.shareNavigationController = shareNav;
-    }
-    self.shareNavigationController.navigationBarHidden = YES;
-    self.shareNavigationController.modalPresentationStyle = UIModalPresentationPageSheet;
-
-    UISheetPresentationController *sheet = self.shareNavigationController.sheetPresentationController;
-    sheet.detents = @[UISheetPresentationControllerDetent.largeDetent];
-    sheet.prefersGrabberVisible = YES;
-    sheet.preferredCornerRadius = 12.0;
-
-    [self.feedsNavigationController presentViewController:self.shareNavigationController animated:YES completion:^{
-        [self.shareViewController setSiteInfo:type setUserId:userId setUsername:username setReplyId:replyId];
-    }];
-}
-
-- (void)hideShareView:(BOOL)resetComment {
-    if (resetComment) {
-        self.shareViewController.commentField.text = @"";
-        self.shareViewController.currentType = nil;
-    }
-
-    if (!self.showingSafariViewController) {
-        // NewsBlurAppDelegate.m only closes the share composer; story preparation must leave other dialogs open.
-        if (self.shareViewController.presentingViewController &&
-            self.shareViewController.modalPresentationStyle == UIModalPresentationPopover) {
-            [self.shareViewController dismissViewControllerAnimated:YES completion:nil];
-        } else if (self.shareViewController && self.shareNavigationController.presentingViewController &&
-                   [self.shareNavigationController.viewControllers containsObject:self.shareViewController]) {
-            [self.shareNavigationController dismissViewControllerAnimated:YES completion:nil];
-        }
-        [self.shareViewController.commentField resignFirstResponder];
-    }
-}
-
-- (void)resetShareComments {
-    [shareViewController clearComments];
-}
 
 #pragma mark -
 #pragma mark Menus
@@ -1568,17 +1425,12 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     self.feedsViewController = self.feedsNavigationController.viewControllers.firstObject;
     self.detailNavigationController = (UINavigationController *)splitChildren[1];
     self.detailViewController = self.detailNavigationController.viewControllers.firstObject;
-    self.activitiesViewController = [ActivitiesViewController new];
-    self.friendsListViewController = [FriendsListViewController new];
     self.storyDetailViewController = [StoryDetailViewController new];
     self.loginViewController = [OnboardingAccountViewController new];
     self.addSiteViewController = [AddSiteViewController new];
     self.moveSiteViewController = [MoveSiteViewController new];
-    self.trainerViewController = [TrainerViewController new];
     self.notificationsViewController = [NotificationsViewController new];
-    self.shareViewController = [ShareViewController new];
     self.fontSettingsViewController = [FontSettingsViewController new];
-    self.userProfileViewController = [UserProfileViewController new];
     self.premiumViewController = [PremiumViewController new];
     self.firstTimeUserViewController = [FirstTimeUserViewController new];
     self.firstTimeUserAddSitesViewController = [FirstTimeUserAddSitesViewController new];
@@ -1641,8 +1493,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
         [self.feedsViewController.feedTitlesTable reloadData];
         [self.feedsViewController resetToolbar];
         
-        [self.activitiesViewController.interactionsModule.interactionsTable reloadData];
-        [self.activitiesViewController.activitiesModule.activitiesTable reloadData];
         
         NSUserDefaults *userPreferences = [NSUserDefaults standardUserDefaults];
         [userPreferences setInteger:-1 forKey:@"selectedIntelligence"];
@@ -1687,82 +1537,8 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [navController presentViewController:moveSiteViewController animated:YES completion:nil];
 }
 
-- (void)openTrainSite {
-    [self hidePopover];
-    // Needs a delay because the menu will close the popover.
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC),
-                   dispatch_get_main_queue(), ^{
-        [self
-         openTrainSiteWithFeedLoaded:YES
-         from:self.feedDetailViewController.settingsBarButton];
-    });
-}
 
-- (void)openTrainSiteWithFeedLoaded:(BOOL)feedLoaded from:(id)sender {
-    UINavigationController *navController = self.feedsNavigationController;
-    trainerViewController.isStoryTrainer = NO;
-    trainerViewController.isFeedLoaded = feedLoaded;
-    [trainerViewController reload];
-    
-    BOOL usesCompactPhonePresentation = self.isPhone && (!self.detailViewController || self.detailViewController.isPhoneOrCompact);
-    if (!usesCompactPhonePresentation) {
-        // NewsBlurAppDelegate.m preserves a trainer's existing navigation parent when reopening after a fold.
-        UIViewController *presentation = self.trainNavigationController ?: self.trainerViewController;
-        [self showPopoverWithViewController:presentation contentSize:CGSizeMake(500, 630) sender:sender];
-    } else {
-        if (self.trainNavigationController == nil) {
-            self.trainNavigationController = [[UINavigationController alloc]
-                                              initWithRootViewController:self.trainerViewController];
-        }
-        self.trainNavigationController.navigationBarHidden = YES;
-        self.trainNavigationController.modalPresentationStyle = UIModalPresentationPageSheet;
 
-        UISheetPresentationController *sheet = self.trainNavigationController.sheetPresentationController;
-        sheet.detents = @[UISheetPresentationControllerDetent.mediumDetent, UISheetPresentationControllerDetent.largeDetent];
-        sheet.prefersGrabberVisible = YES;
-        sheet.prefersScrollingExpandsWhenScrolledToEdge = YES;
-        sheet.preferredCornerRadius = 12.0;
-
-        [navController presentViewController:self.trainNavigationController animated:YES completion:nil];
-    }
-}
-
-- (void)openTrainStory:(id)sender {
-    UINavigationController *navController = self.feedsNavigationController;
-    trainerViewController.isStoryTrainer = YES;
-    trainerViewController.isFeedLoaded = YES;
-    [trainerViewController reload];
-
-    BOOL usesCompactPhonePresentation = self.isPhone && (!self.detailViewController || self.detailViewController.isPhoneOrCompact);
-    if (!usesCompactPhonePresentation) {
-        UIViewController *presentation = self.trainNavigationController ?: self.trainerViewController;
-        [self showPopoverWithViewController:presentation contentSize:CGSizeMake(500, 630) sender:sender];
-    } else {
-        // Dismiss any existing presented controller (e.g. font settings popover adapted to modal on iPhone)
-        void (^presentTrainer)(void) = ^{
-            if (self.trainNavigationController == nil) {
-                self.trainNavigationController = [[UINavigationController alloc]
-                                                  initWithRootViewController:self.trainerViewController];
-            }
-            self.trainNavigationController.navigationBarHidden = YES;
-            self.trainNavigationController.modalPresentationStyle = UIModalPresentationPageSheet;
-
-            UISheetPresentationController *sheet = self.trainNavigationController.sheetPresentationController;
-            sheet.detents = @[UISheetPresentationControllerDetent.mediumDetent, UISheetPresentationControllerDetent.largeDetent];
-            sheet.prefersGrabberVisible = YES;
-            sheet.prefersScrollingExpandsWhenScrolledToEdge = YES;
-            sheet.preferredCornerRadius = 12.0;
-
-            [navController presentViewController:self.trainNavigationController animated:YES completion:nil];
-        };
-
-        if (navController.presentedViewController) {
-            [navController.presentedViewController dismissViewControllerAnimated:NO completion:presentTrainer];
-        } else {
-            presentTrainer();
-        }
-    }
-}
 
 - (void)openAskAIDialog:(NSDictionary *)story {
     if (@available(iOS 15.0, *)) {
@@ -2065,15 +1841,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [self showInAppBrowser:url withCustomTitle:title fromSender:sender];
 }
 
-- (void)openUserTagsStory:(id)sender {
-    if (!self.userTagsViewController) {
-        self.userTagsViewController = [[UserTagsViewController alloc] init];
-    }
-    
-    [self.userTagsViewController view]; // Force viewDidLoad
-    CGRect frame = [sender CGRectValue];
-    [self showPopoverWithViewController:self.userTagsViewController contentSize:CGSizeMake(220, 382) sourceView:self.storyPagesViewController.view sourceRect:frame permittedArrowDirections:UIPopoverArrowDirectionUp | UIPopoverArrowDirectionDown];
-}
 
 #pragma mark - UIPopoverPresentationControllerDelegate
 
@@ -4386,11 +4153,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 }
 
 // NewsBlurAppDelegate.m reloads the interactions list when RealtimeUpdates.swift hears of a new one while it's showing.
-- (void)refreshVisibleInteractions {
-    InteractionsModule *interactions = self.activitiesViewController.interactionsModule;
-    if (!interactions.window || interactions.hidden) return;
-    [interactions fetchInteractionsDetail:1];
-}
 
 - (NSArray *)updateStarredStoryCounts:(NSDictionary *)results {
     if ([results objectForKey:@"starred_count"]) {
@@ -5404,9 +5166,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 // scores: StoryScoreRefresher.swift explains why a failed save refreshes too.
 - (void)failedClassifierSave:(NSURLSessionDataTask *)task feedId:(NSString *)feedId {
     BaseViewController *view;
-    if (self.trainerViewController.isViewLoaded && self.trainerViewController.view.window) {
-        view = self.trainerViewController;
-    } else {
+    {
         view = self.storyPagesViewController.currentPage;
     }
 
@@ -5444,7 +5204,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 }
 
 - (void)toggleAuthorClassifier:(NSString *)author feedId:(NSString *)feedId scope:(NSString *)scope folderName:(NSString *)folderName {
-    [self.trainerViewController restoreRetainedStoryClassifiers];
     int authorScore = [[[[storiesCollection.activeClassifiers objectForKey:feedId]
                          objectForKey:@"authors"]
                         objectForKey:author] intValue];
@@ -5470,9 +5229,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [authors setObject:[NSNumber numberWithInt:authorScore] forKey:author];
     [feedClassifiers setObject:authors forKey:@"authors"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
-    [self.trainerViewController captureRetainedStoryContext];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save",
                            self.url];
@@ -5519,7 +5276,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"author_regex"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -5562,7 +5318,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"author_regex"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -5595,7 +5350,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 }
 
 - (void)toggleTagClassifier:(NSString *)tag feedId:(NSString *)feedId scope:(NSString *)scope folderName:(NSString *)folderName {
-    [self.trainerViewController restoreRetainedStoryClassifiers];
     int tagScore = [[[[storiesCollection.activeClassifiers objectForKey:feedId]
                       objectForKey:@"tags"]
                      objectForKey:tag] intValue];
@@ -5621,9 +5375,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [tags setObject:[NSNumber numberWithInt:tagScore] forKey:tag];
     [feedClassifiers setObject:tags forKey:@"tags"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
-    [self.trainerViewController captureRetainedStoryContext];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save",
                            self.url];
@@ -5677,7 +5429,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:titles forKey:@"titles"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save",
                            self.url];
@@ -5727,7 +5478,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:feeds forKey:@"feeds"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
     
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save",
                            self.url];
@@ -5769,7 +5519,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"title_regex"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -5812,7 +5561,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"title_regex"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -5858,7 +5606,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"texts"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -5901,7 +5648,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"texts"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -5947,7 +5693,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"text_regex"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -5990,7 +5735,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"text_regex"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -6036,7 +5780,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"urls"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -6082,7 +5825,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"url_regex"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -6125,7 +5867,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"urls"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -6168,7 +5909,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [feedClassifiers setObject:items forKey:@"url_regex"];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -6200,7 +5940,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 // but the trainer keeps showing it as neutral until the classifiers reload so it can be turned back on.
 - (void)savePromptClassifier:(NSString *)prompt feedId:(NSString *)feedId score:(NSInteger)score includeImages:(BOOL)includeImages scope:(NSString *)scope folderName:(NSString *)folderName {
     if (!prompt.length || !feedId.length) return;
-    [self.trainerViewController restoreRetainedStoryClassifiers];
     NSString *classifierKey = includeImages ? @"image_prompts" : @"prompts";
     NSMutableDictionary *feedClassifiers = [[storiesCollection.activeClassifiers objectForKey:feedId]
                                             mutableCopy];
@@ -6220,9 +5959,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     [prompts setObject:[NSNumber numberWithInteger:score] forKey:prompt];
     [feedClassifiers setObject:prompts forKey:classifierKey];
     [storiesCollection.activeClassifiers setObject:feedClassifiers forKey:feedId];
-    [self.trainerViewController captureRetainedStoryContext];
     [self.storyPagesViewController refreshHeaders];
-    [self.trainerViewController reload];
 
     NSString *urlString = [NSString stringWithFormat:@"%@/classifier/save", self.url];
     [self startingClassifierSave:feedId changesScoresOnlyTheServerKnows:YES];
@@ -6294,9 +6031,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 - (void)failedRequest:(NSURLResponse *)response {
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
     BaseViewController *view;
-    if (self.trainerViewController.isViewLoaded && self.trainerViewController.view.window) {
-        view = self.trainerViewController;
-    } else {
+    {
         view = self.storyPagesViewController.currentPage;
     }
     if (httpResponse.statusCode == 503) {

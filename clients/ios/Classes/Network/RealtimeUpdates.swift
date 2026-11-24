@@ -841,7 +841,7 @@ struct RealtimeNewStoryBuffer {
     // MARK: - Interactions and the feed list
 
     private func refreshInteractionsIfVisible() {
-        appDelegate?.refreshVisibleInteractions()
+        // FORK: social stripped; no-op
     }
 
     private func scheduleFeedListReload() {

@@ -10,7 +10,6 @@
 #import "FeedDetailObjCViewController.h"
 #import "NewsBlurAppDelegate.h"
 #import "FeedDetailTableCell.h"
-#import "UserProfileViewController.h"
 #import "NSString+HTML.h"
 #import "MBProgressHUD.h"
 #import "SBJson4.h"
@@ -6408,9 +6407,6 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
     } else if ([longPressStoryTitle isEqualToString:@"save_story"]) {
         [storiesCollection toggleStorySaved:story];
         [self reloadIndexPath:indexPath withRowAnimation:UITableViewRowAnimationFade];
-    } else if ([longPressStoryTitle isEqualToString:@"train_story"]) {
-        appDelegate.activeStory = story;
-        [appDelegate openTrainStory:cell];
     }
 }
 
@@ -6432,10 +6428,6 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
     
     [items addObject:[self itemWithTitle:[NBLocalization text:@"Send This Story To..."] iconName:@"menu_icn_mail.png" handler:^{
         [self.appDelegate showSendTo:self sender:cell];
-    }]];
-    
-    [items addObject:[self itemWithTitle:[NBLocalization text:@"Train This Story"] iconName:@"menu_icn_train.png" handler:^{
-        [self.appDelegate openTrainStory:cell];
     }]];
     
     [self.appDelegate showMarkOlderNewerReadMenuWithStoriesCollection:self.storiesCollection story:story sourceView:self.storyTitlesTable sourceRect:rect extraItems:items completionHandler:^(BOOL marked) {
@@ -6692,10 +6684,7 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
     }
     
     if (!appDelegate.storiesCollection.isRiverView && !infrequent && !saved && !read && !social && !widget && !dashboard) {
-        [viewController addTitle:[NBLocalization text:@"Train this site"] iconName:@"menu_icn_train.png" selectionShouldDismiss:YES handler:^{
-            [self openTrainSite];
-        }];
-        
+        // FORK: trainer stripped; no "Train this site" row
         if ([appDelegate.storiesCollection.activeFeed[@"ng"] integerValue] > 0) {
             NSString *title =  appDelegate.storiesCollection.showHiddenStories ? [NBLocalization text:@"Hide hidden stories"] : [NBLocalization text:@"Show hidden stories"];
             
@@ -7517,10 +7506,6 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
     [menuNavigationController showViewController:viewController sender:self];
 }
 
-- (IBAction)openTrainSite {
-    [appDelegate openTrainSite];
-}
-
 - (void)toggleHiddenStories {
     appDelegate.storiesCollection.showHiddenStories = !appDelegate.storiesCollection.showHiddenStories;
     [appDelegate.storiesCollection calculateStoryLocations];
@@ -7576,14 +7561,6 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
     } else {
         [self presentViewController:alert animated:YES completion:nil];
     }
-}
-
-- (void)showUserProfile {
-    appDelegate.activeUserProfileId = [NSString stringWithFormat:@"%@",
-                                       [storiesCollection.activeFeed objectForKey:@"user_id"]];
-    appDelegate.activeUserProfileName = [NSString stringWithFormat:@"%@",
-                                         [storiesCollection.activeFeed objectForKey:@"username"]];
-    [appDelegate showUserProfileModal:titleImageBarButton];
 }
 
 - (void)changeActiveFeedDetailRow {

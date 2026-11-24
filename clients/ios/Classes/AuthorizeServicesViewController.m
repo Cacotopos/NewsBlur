@@ -11,7 +11,6 @@
 #import "NewsBlurAppDelegate.h"
 #import "FirstTimeUserAddSitesViewController.h"
 #import "FirstTimeUserAddFriendsViewController.h"
-#import "ShareViewController.h"
 
 @implementation AuthorizeServicesViewController
 
@@ -86,16 +85,8 @@
         [self.webView evaluateJavaScript:@"NEWSBLUR.error" completionHandler:^(id result, NSError *error) {
             NSString *errorString = result;
             
-            if (self.fromStory) {
-                [self.appDelegate refreshUserProfile:^{
-                    if (!isPhone) {
-                        [self.appDelegate.shareNavigationController viewWillAppear:YES];
-                        [self.appDelegate.modalNavigationController dismissViewControllerAnimated:YES completion:nil];
-                    } else {
-                        [self.navigationController popViewControllerAnimated:YES];
-                    }
-                }];
-            } else {
+            // FORK: social stripped; fromStory share-composer return removed
+            {
                 [self.navigationController popViewControllerAnimated:YES];
                 if ([self.type isEqualToString:@"facebook"]) {
                     if (errorString.length) {

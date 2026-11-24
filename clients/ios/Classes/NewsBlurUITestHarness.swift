@@ -382,27 +382,6 @@ final class NewsBlurUITestHarness {
         appDelegate.showUsageBillingDialog()
     }
 
-    /// NewsBlurUITestHarness.swift opens the story trainer once the AI classifier fixture story is on screen.
-    private static func openStoryTrainerWhenReady(on appDelegate: NewsBlurAppDelegate, deadline: TimeInterval) {
-        let page = appDelegate.storyPagesViewController?.currentPage
-        if appDelegate.activeStory?["story_hash"] as? String == "ui-story-swift-1",
-           page?.readyForPresentation == true, page?.viewIfLoaded?.window != nil {
-            appDelegate.openTrainStory(appDelegate.storyPagesViewController.settingsPresentationBarButton)
-            if ProcessInfo.processInfo.arguments.contains("-newsblur-ui-test-ai-draft") {
-                // NewsBlurUITestHarness.swift answers these prompt tests from its fixture server, never a real AI provider.
-                let prompts = appDelegate.trainerViewController.aiPrompts
-                prompts.setDraft("Apple earnings coverage", for: .content)
-                prompts.setDraft("Charts and graphs", for: .image)
-                prompts.runTest(.content, storyHash: "ui-story-swift-1", feedId: ReaderUITestFixtures.swiftFeedId)
-                prompts.runTest(.image, storyHash: "ui-story-swift-1", feedId: ReaderUITestFixtures.swiftFeedId)
-            }
-            return
-        }
-        guard ProcessInfo.processInfo.systemUptime < deadline else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            openStoryTrainerWhenReady(on: appDelegate, deadline: deadline)
-        }
-    }
 
     private static func configureReader(
         on appDelegate: NewsBlurAppDelegate,
@@ -534,9 +513,6 @@ final class NewsBlurUITestHarness {
             appDelegate.feedsViewController.selectFeed(ReaderUITestFixtures.swiftFeedId, inFolder: CookingMarketingFixtures.enabled ? "Cooking" : "Tech ▸ Swift")
         case .swiftStoryOne:
             appDelegate.loadFeed(ReaderUITestFixtures.swiftFeedId, withStory: CookingMarketingFixtures.enabled ? "cooking-pasta-1" : "ui-story-swift-1", animated: false)
-            if ProcessInfo.processInfo.arguments.contains("-newsblur-ui-test-open-trainer") {
-                openStoryTrainerWhenReady(on: appDelegate, deadline: ProcessInfo.processInfo.systemUptime + 60)
-            }
 #if DEBUG && targetEnvironment(simulator)
             if CookingMarketingFixtures.enabled && ProcessInfo.processInfo.arguments.contains("-newsblur-marketing-fullscreen") {
                 prepareMarketingFullscreenReader(on: appDelegate, deadline: ProcessInfo.processInfo.systemUptime + 60)

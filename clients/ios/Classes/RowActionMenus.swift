@@ -50,9 +50,6 @@ import UIKit
         case "open_send_to":
             app.activeStory = story.dictionary
             app.showSend(to: controller, sender: controller.view)
-        case "train_story":
-            app.activeStory = story.dictionary
-            app.openTrainStory(controller.view)
         case "ask":
             app.activeStory = story.dictionary
             app.showMarkOlderNewerReadMenu(with: controller.storiesCollection, story: story.dictionary,
@@ -112,18 +109,7 @@ import UIKit
                 }
             ]
         }
-        sharing.append(action("share-newsblur", story.isShared ? NBLocalization.text("Edit NewsBlur share…") : NBLocalization.text("Share on NewsBlur…"), "quote.bubble") {
-            // ShareViewController.m reads the active story and comment when the composer opens and submits.
-            app.activeStory = dictionary
-            let userID = app.dictSocialProfile?["user_id"].map { String(describing: $0) }
-            let comments = dictionary["friend_comments"] as? [[String: Any]] ?? []
-            app.activeComment = comments.first { comment in
-                guard let userID, let author = comment["user_id"] else { return false }
-                return String(describing: author) == userID
-            }
-            app.showShareView(app.activeComment == nil ? "share" : "edit-share", setUserId: nil,
-                              setUsername: nil, setReplyId: nil)
-        })
+        // FORK: social stripped; no NewsBlur share row (system share sheet only)
         var tools: [RowMenuAction] = []
         if !dashboard && collection.isRiverView && !collection.isSavedView && !collection.isSocialView,
            let id = dictionary["story_feed_id"], let feed = app.getFeed(String(describing: id)), !feed.isEmpty {
@@ -131,10 +117,6 @@ import UIKit
                 app.loadFeed(String(describing: id), withStory: nil, animated: true)
             })
         }
-        tools.append(action("train", NBLocalization.text("Train intelligence…"), "slider.horizontal.3") {
-            app.activeStory = dictionary
-            app.openTrainStory(source)
-        })
         let defaults = UserDefaults.standard
         if defaults.object(forKey: "show_ask_ai") == nil || defaults.bool(forKey: "show_ask_ai") {
             tools.append(action("ask-ai", NBLocalization.text("Ask AI…"), "sparkles") {
@@ -185,10 +167,6 @@ extension FeedsViewController: UIContextMenuInteractionDelegate {
             tools = [
                 action("statistics", NBLocalization.text("Statistics"), "chart.bar") { app.openStatistics(withFeed: feedID, sender: source) },
                 action("notifications", NBLocalization.text("Notifications"), "bell") { app.openNotifications(withFeed: feedID, sender: source) },
-                action("train", NBLocalization.text("Train intelligence…"), "slider.horizontal.3") { [weak self] in
-                    self?.selectFeed(feedID, inFolder: folder)
-                    app.openTrainSite(withFeedLoaded: true, from: source)
-                },
                 action("related", NBLocalization.text("Related sites"), "sparkles") { app.openDiscoverFeedsDialog(fromSettingsButton: feedID, sourceView: source) }
             ]
             organize.append(action("rename", NBLocalization.text("Rename site…"), "pencil") { [weak self] in

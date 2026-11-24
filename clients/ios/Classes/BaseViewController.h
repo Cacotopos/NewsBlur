@@ -51,7 +51,6 @@
 - (IBAction)showOrganizeSites:(id)sender;
 - (IBAction)showWidgetSites:(id)sender;
 - (IBAction)showNotifications:(id)sender;
-- (IBAction)showFindFriends:(id)sender;
 - (IBAction)showPremium:(id)sender;
 - (IBAction)showSupportForum:(id)sender;
 - (IBAction)showManageAccount:(id)sender;
@@ -81,7 +80,6 @@
 - (IBAction)muteSite:(id)sender;
 - (IBAction)deleteSite:(id)sender;
 - (IBAction)chooseMarkRead:(id)sender;
-- (IBAction)openTrainSite:(id)sender;
 - (IBAction)openNotifications:(id)sender;
 - (IBAction)openStatistics:(id)sender;
 - (IBAction)instaFetchFeed:(id)sender;
@@ -96,7 +94,6 @@
 - (IBAction)openAllStories:(id)sender;
 
 - (IBAction)showSendTo:(id)sender;
-- (IBAction)showTrain:(id)sender;
 - (IBAction)showShare:(id)sender;
 - (IBAction)nextUnreadStory:(id)sender;
 - (IBAction)nextStory:(id)sender;

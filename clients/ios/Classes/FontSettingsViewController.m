@@ -42,15 +42,16 @@
 
 // FontSettingsViewController.m groups actions independently of optional rows and phone-only controls.
 - (NSArray<NSArray<NSNumber *> *> *)menuGroups {
-    NSMutableArray *training = [NSMutableArray arrayWithObject:@3];
-    if ([self isAskAIEnabled]) [training addObject:@5];
-    if ([self isGoToFeedEnabled]) [training addObject:@6];
-    [training addObject:@14];
+    // FORK: social/trainer stripped; rows 3 (train) and 4 (share-on-NewsBlur) no longer emitted
+    NSMutableArray *actions = [NSMutableArray array];
+    if ([self isAskAIEnabled]) [actions addObject:@5];
+    if ([self isGoToFeedEnabled]) [actions addObject:@6];
+    [actions addObject:@14];
     NSInteger last = UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone ? 13 : 12;
     NSMutableArray *appearance = [NSMutableArray array];
     for (NSInteger row = 7; row <= last; row++) [appearance addObject:@(row)];
     NSMutableArray *reading = [NSMutableArray arrayWithArray:@[@1, @0]]; // FORK: Listen stripped
-    return @[reading, @[@2, @4], training, appearance];
+    return @[reading, @[@2], actions, appearance];
 }
 
 - (NSInteger)actionAtIndexPath:(NSIndexPath *)indexPath {
@@ -506,10 +507,8 @@
         [self.appDelegate.storyPagesViewController refreshHeaders];
     } else if (adjustedRow == 2) {
         [self.appDelegate.storyPagesViewController openSendToDialog:self.appDelegate.storyPagesViewController.settingsPresentationBarButton];
-    } else if (adjustedRow == 3) {
-        [self.appDelegate openTrainStory:self.appDelegate.storyPagesViewController.settingsPresentationBarButton];
-    } else if (adjustedRow == 4) {
-        [self.appDelegate.storyPagesViewController.currentPage openShareDialog];
+    } else if (adjustedRow == 3) { // FORK: trainer stripped; row 3 no longer emitted
+    } else if (adjustedRow == 4) { // FORK: social stripped; row 4 no longer emitted
     } else if (adjustedRow == 5) {
         [self.appDelegate openAskAIDialog:self.appDelegate.activeStory];
     } else if (adjustedRow == 6) {

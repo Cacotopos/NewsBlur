@@ -151,9 +151,7 @@ UIGestureRecognizerDelegate, UITextFieldDelegate> {
 - (void)refreshFeedList;
 - (void)refreshFeedList:(id)feedId;
 - (void)loadOfflineFeeds:(BOOL)failed;
-- (void)showUserProfile;
 - (IBAction)showSettingsPopover:(id)sender;
-- (IBAction)showInteractionsPopover:(id)sender;
 - (void)fadeSelectedCell;
 - (void)fadeFeed:(NSString *)feedId;
 - (IBAction)tapAddSite:(id)sender;

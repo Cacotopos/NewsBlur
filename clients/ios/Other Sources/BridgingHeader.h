@@ -26,8 +26,6 @@
 #import "StoryPagesObjCViewController.h"
 #import "StoryDetailObjCViewController.h"
 #import "OriginalStoryViewController.h"
-#import "ActivityCell.h"
-#import "InteractionCell.h"
 #import "ProfileBadge.h"
 
 #import "LoginViewController.h"

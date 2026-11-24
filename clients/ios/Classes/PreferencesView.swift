@@ -1227,8 +1227,8 @@ class PreferencesViewModel: ObservableObject {
                 swipe("right", onFeeds: false),
                 PreferenceItem(title: NBLocalization.text("Long press"), icon: "hand.raised", iconColor: .orange,
                                type: .multiValue(key: "long_press_story_title",
-                                                 titles: [NBLocalization.text("Show actions"), NBLocalization.text("Mark older or newer stories read"), NBLocalization.text("Share"), NBLocalization.text("Mark as unread"), NBLocalization.text("Save story"), NBLocalization.text("Train intelligence"), NBLocalization.text("Do nothing")],
-                                                 values: ["show_actions", "ask", "open_send_to", "mark_unread", "save_story", "train_story", "nothing"],
+                                                 titles: [NBLocalization.text("Show actions"), NBLocalization.text("Mark older or newer stories read"), NBLocalization.text("Share"), NBLocalization.text("Mark as unread"), NBLocalization.text("Save story"), NBLocalization.text("Do nothing")], // FORK: trainer stripped
+                                                 values: ["show_actions", "ask", "open_send_to", "mark_unread", "save_story", "nothing"],
                                                  defaultValue: "show_actions"), pickerTitle: NBLocalization.text("Long press on story titles"))
             ]),
             PreferenceGroup(title: NBLocalization.text("Reading a story"), footer: nil, items: [
