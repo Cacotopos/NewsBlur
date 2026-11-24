@@ -437,17 +437,11 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 }
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession options:(UISceneConnectionOptions *)options {
-    if ([options.userActivities.anyObject.activityType isEqualToString:@"aux"]) {
-        UISceneConfiguration *configuration = [UISceneConfiguration configurationWithName:@"Default Configuration" sessionRole:connectingSceneSession.role];
-        configuration.delegateClass = [AuxSceneDelegate class];
-        configuration.storyboard = [UIStoryboard storyboardWithName:@"AuxInterface" bundle:[NSBundle mainBundle]];
-        return configuration;
-    } else {
-        UISceneConfiguration *configuration = [UISceneConfiguration configurationWithName:@"Default Configuration" sessionRole:connectingSceneSession.role];
-        configuration.delegateClass = [SceneDelegate class];
-        configuration.storyboard = [UIStoryboard storyboardWithName:@"MainInterface" bundle:[NSBundle mainBundle]];
-        return configuration;
-    }
+    // FORK: aux/Catalyst multiwindow stripped; every scene uses SceneDelegate + MainInterface.
+    UISceneConfiguration *configuration = [UISceneConfiguration configurationWithName:@"Default Configuration" sessionRole:connectingSceneSession.role];
+    configuration.delegateClass = [SceneDelegate class];
+    configuration.storyboard = [UIStoryboard storyboardWithName:@"MainInterface" bundle:[NSBundle mainBundle]];
+    return configuration;
 }
 
 - (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *restorableObjects))restorationHandler {
@@ -3015,8 +3009,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 
 - (void)showInAppBrowser:(NSURL *)url withCustomTitle:(NSString *)customTitle fromSender:(id)sender {
 #if TARGET_OS_MACCATALYST
-//    [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
-    [AuxSceneDelegate openWindowForURL:url customTitle:customTitle];
+    // FORK: AuxSceneDelegate stripped; Catalyst unsupported.
 #else
     if (!originalStoryViewController) {
         originalStoryViewController = [[OriginalStoryViewController alloc] init];

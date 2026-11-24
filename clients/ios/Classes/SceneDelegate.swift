@@ -25,15 +25,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private weak var connectedWindowScene: UIWindowScene?
 #endif
     
-    @objc(closeAuxWindows) class func closeAuxWindows() {
-        for window in UIApplication.shared.windows {
-            if window.windowScene?.delegate is AuxSceneDelegate, let session = window.windowScene?.session {
-                window.isHidden = true
-                UIApplication.shared.requestSceneSessionDestruction(session, options: .none)
-            }
-        }
-    }
-    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // SceneDelegate.swift gives the storyboard window the account language's direction before any view loads.
         if let windowScene = scene as? UIWindowScene {
