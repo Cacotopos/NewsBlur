@@ -311,6 +311,12 @@ msgstr[0] "%(count)s mes"
 msgstr[1] "%(count)s meses"
 
 #, python-format
+msgid "%(count)s new story"
+msgid_plural "%(count)s new stories"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
 msgid "%(count)s newsletter"
 msgid_plural "%(count)s newsletters"
 msgstr[0] "%(count)s boletín"
@@ -3197,12 +3203,6 @@ msgstr "Gratis + suscripción · Mac, iPhone &amp; iPad"
 msgid "Free + subscription · iPhone, iPad &amp; Mac"
 msgstr "Gratis + suscripción · iPhone, iPad &amp; Mac"
 
-msgid "Free beta · Mac, iPhone &amp; iPad"
-msgstr "Beta gratis · Mac, iPhone &amp; iPad"
-
-msgid "Free beta · iPhone, iPad &amp; Mac"
-msgstr "Beta gratis · iPhone, iPad &amp; Mac"
-
 msgid "Free · Android, iPhone, iPad &amp; Mac"
 msgstr "Gratis · Android, iPhone, iPad &amp; Mac"
 
@@ -4766,6 +4766,9 @@ msgstr "octubre"
 msgid "Off"
 msgstr "Desactivado"
 
+msgid "Offer them in an \"N new stories\" pill"
+msgstr ""
+
 msgid "Official NewsBlur Android App"
 msgstr "Aplicación oficial de Android de NewsBlur"
 
@@ -4883,6 +4886,9 @@ msgstr "Mostrar solo comentarios de amigos"
 
 msgid "Only show counts on collapsed folders"
 msgstr "Mostrar recuentos solo en carpetas contraídas"
+
+msgid "Only show them when the list reloads"
+msgstr ""
 
 msgid "Only truncate long shared stories in blurblogs"
 msgstr "Solo truncar artículos compartidos largos en blurblogs"
@@ -6270,6 +6276,9 @@ msgstr "Mostrar historial"
 
 msgid "Show more related stories"
 msgstr "Mostrar más artículos relacionados"
+
+msgid "Show new stories as they arrive"
+msgstr ""
 
 msgid "Show on Load"
 msgstr "Mostrar al cargar"

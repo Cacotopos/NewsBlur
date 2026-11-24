@@ -121,8 +121,10 @@
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    [audioSession setCategory:AVAudioSessionCategoryPlayback
-                        error:nil];
+    // Embedded videos need playback in silent mode. Preserve ListenPlayer.swift's mixing settings if it owns playback.
+    if (![audioSession.category isEqualToString:AVAudioSessionCategoryPlayback]) {
+        [audioSession setCategory:AVAudioSessionCategoryPlayback error:nil];
+    }
     
     WKWebViewConfiguration *configuration = [WKWebViewConfiguration new];
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
@@ -173,8 +175,7 @@
     tapGesture.numberOfTapsRequired = 1;
     tapGesture.delegate = self;
     [tapGesture requireGestureRecognizerToFail:doubleTapGesture];
-    // StoryDetailObjCViewController.m lets article scrolling win over a short image tap.
-    [tapGesture requireGestureRecognizerToFail:self.webView.scrollView.panGestureRecognizer];
+    // StoryDetailObjCViewController.m suppresses taps in scrollViewWillBeginDragging: so the article pan can reset independently.
     [self.webView addGestureRecognizer:tapGesture];
     
     UITapGestureRecognizer *doubleDoubleTapGesture = [[UITapGestureRecognizer alloc]
