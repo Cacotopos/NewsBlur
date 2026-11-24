@@ -1034,19 +1034,13 @@ class PreferencesViewModel: ObservableObject {
             ),
 
             // MARK: Story Buttons Section
-            // PreferencesView.swift's story button toggles sync across devices (Listen/ListenPreferences.swift).
+            // FORK: prefs sync via Fork/ForkStoryButtons.swift.
             PreferenceSection(
                 title: NBLocalization.text("Story Buttons"),
                 icon: "rectangle.grid.1x2",
                 iconColor: .orange,
                 footerText: NBLocalization.text("Choose the buttons shown below each story. Your choices sync to your other devices."),
                 items: [
-                    PreferenceItem(
-                        title: NBLocalization.text("Show Train"),
-                        icon: "brain",
-                        iconColor: .purple,
-                        type: .toggle(key: "show_sideoption_train", defaultValue: true)
-                    ),
                     PreferenceItem(
                         title: NBLocalization.text("Show Share"),
                         icon: "square.and.arrow.up",
@@ -1065,65 +1059,6 @@ class PreferencesViewModel: ObservableObject {
                         iconColor: Color(red: 0.85, green: 0.45, blue: 0.37),
                         type: .toggle(key: "show_ask_ai", defaultValue: true)
                     ),
-                    PreferenceItem(
-                        title: NBLocalization.text("Show Listen"),
-                        icon: "headphones",
-                        iconColor: Color(red: 0.55, green: 0.35, blue: 0.85),
-                        type: .toggle(key: "show_sideoption_listen", defaultValue: true)
-                    )
-                ]
-            ),
-
-            // MARK: Listen Section
-            PreferenceSection(
-                title: NBLocalization.text("Listen"),
-                icon: "headphones",
-                iconColor: Color(red: 0.55, green: 0.35, blue: 0.85),
-                items: [
-                    PreferenceItem(
-                        title: NBLocalization.text("Voice"),
-                        icon: "person.wave.2",
-                        iconColor: Color(red: 0.55, green: 0.35, blue: 0.85),
-                        type: .button(key: "listen_voice", action: "listenVoice")
-                    ),
-                    PreferenceItem(
-                        title: NBLocalization.text("Delivery"),
-                        icon: "waveform",
-                        iconColor: .indigo,
-                        type: .multiValue(
-                            key: ListenPreferences.deliveryKey,
-                            titles: [NBLocalization.text("Steady"), NBLocalization.text("Natural"),
-                                     NBLocalization.text("Expressive"), NBLocalization.text("Custom")],
-                            values: ["steady", "natural", "expressive", "custom"],
-                            defaultValue: "natural"
-                        )
-                    ),
-                    PreferenceItem(
-                        title: NBLocalization.text("Speed"),
-                        icon: "speedometer",
-                        iconColor: .orange,
-                        type: .multiValue(
-                            key: ListenPreferences.speedKey,
-                            titles: Self.listenSpeedChoices.map { ListenFormat.speed($0) },
-                            values: Self.listenSpeedChoices.map { ListenPreferences.speedString($0) },
-                            defaultValue: ListenPreferences.speedString(1)
-                        ),
-                        subtitle: NBLocalization.text("Set an exact speed under Voice")
-                    ),
-                    PreferenceItem(
-                        title: NBLocalization.text("Auto-continue"),
-                        icon: "forward.end",
-                        iconColor: .green,
-                        type: .toggle(key: ListenPreferences.autoContinueKey, defaultValue: true),
-                        subtitle: NBLocalization.text("Mark the story read and play the next unread story")
-                    ),
-                    PreferenceItem(
-                        title: NBLocalization.text("Follow along"),
-                        icon: "text.line.first.and.arrowtriangle.forward",
-                        iconColor: .yellow,
-                        type: .toggle(key: ListenPreferences.highlightKey, defaultValue: true),
-                        subtitle: NBLocalization.text("Highlight the paragraph being read")
-                    )
                 ]
             ),
 
@@ -1310,18 +1245,6 @@ class PreferencesViewModel: ObservableObject {
                                pickerTitle: NBLocalization.text("Swipe from the left edge while reading"))
             ])
         ])
-    }
-
-    /// The Listen speed presets, plus a speed tuned to the hundredth elsewhere so the row shows it
-    /// (Listen/ListenSpeedControl.swift).
-    private static var listenSpeedChoices: [Double] {
-        var choices = ListenSpeed.presets
-        let current = ListenPreferences.speed
-        if !choices.contains(where: { ListenSpeed.isSame($0, current) }) {
-            choices.append(current)
-            choices.sort()
-        }
-        return choices
     }
 
     private func getAppVersion() -> String {

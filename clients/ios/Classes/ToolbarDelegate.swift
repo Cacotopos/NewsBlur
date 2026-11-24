@@ -11,14 +11,6 @@ import UIKit
 #if targetEnvironment(macCatalyst)
 class ToolbarDelegate: NSObject {
     var fullScreenToolbarItem: NSToolbarItem?
-    var listenToolbarItem: NSToolbarItem?
-    private var listenObserver: NSObjectProtocol?
-
-    deinit {
-        if let listenObserver {
-            NotificationCenter.default.removeObserver(listenObserver)
-        }
-    }
 }
 
 extension NSToolbarItem.Identifier {
@@ -28,7 +20,6 @@ extension NSToolbarItem.Identifier {
     static let feedDetailSettings = NSToolbarItem.Identifier("com.newsblur.feedDetailSettings")
     static let storyPagesSettings = NSToolbarItem.Identifier("com.newsblur.storyPagesSettings")
     static let storyPagesBrowser = NSToolbarItem.Identifier("com.newsblur.storyPagesBrowser")
-    static let listenPlayPause = NSToolbarItem.Identifier("com.newsblur.listenPlayPause")
 }
 
 extension ToolbarDelegate: NSToolbarDelegate {
@@ -42,7 +33,6 @@ extension ToolbarDelegate: NSToolbarDelegate {
             .feedDetailUnread,
             .feedDetailSettings,
             .flexibleSpace,
-            .listenPlayPause,
             .storyPagesSettings,
             .storyPagesBrowser
         ]
@@ -89,23 +79,6 @@ extension ToolbarDelegate: NSToolbarDelegate {
                                        label: NBLocalization.text("Story Settings"),
                                        action: #selector(StoryPagesViewController.toggleFontSize(_:)))
 
-            case .listenPlayPause:
-                // ToolbarDelegate.swift plays and pauses Listen (Listen/ListenPlayer.swift); media keys work too.
-                let item = makeToolbarItem(itemIdentifier,
-                                           image: UIImage(systemName: "headphones"),
-                                           label: NBLocalization.text("Listen"),
-                                           action: #selector(BaseViewController.toggleListenPlayback(_:)))
-                listenToolbarItem = item
-                if listenObserver == nil {
-                    listenObserver = NotificationCenter.default.addObserver(forName: ListenPlayer.stateDidChange,
-                                                                            object: nil, queue: .main) { [weak self] _ in
-                        MainActor.assumeIsolated {
-                            self?.updateListenItem()
-                        }
-                    }
-                }
-                updateListenItem()
-                return item
 
             case .storyPagesBrowser:
                 return makeToolbarItem(itemIdentifier,
@@ -131,25 +104,6 @@ extension ToolbarDelegate: NSToolbarDelegate {
         item.target = target
 
         return item
-    }
-
-    @MainActor func updateListenItem() {
-        // ToolbarDelegate.swift: the item also plays and pauses a podcast (Listen/ListenMediaPlayer.swift).
-        let player = ListenPlayer.shared
-        let media = ListenMediaPlayer.shared
-        if media.isActive {
-            listenToolbarItem?.image = UIImage(systemName: media.wantsToPlay ? "pause.fill" : "play.fill")
-            listenToolbarItem?.label = media.wantsToPlay ? NBLocalization.text("Pause") : NBLocalization.text("Play")
-        } else if player.wantsToPlay {
-            listenToolbarItem?.image = UIImage(systemName: "pause.fill")
-            listenToolbarItem?.label = NBLocalization.text("Pause Listening")
-        } else if player.isActive {
-            listenToolbarItem?.image = UIImage(systemName: "play.fill")
-            listenToolbarItem?.label = NBLocalization.text("Resume Listening")
-        } else {
-            listenToolbarItem?.image = UIImage(systemName: "headphones")
-            listenToolbarItem?.label = NBLocalization.text("Listen")
-        }
     }
 
     @MainActor func updateFullScreenIcon(isFullScreen: Bool) {

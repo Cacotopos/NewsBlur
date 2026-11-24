@@ -804,8 +804,7 @@ static BOOL NBBoolPreferenceValue(id value) {
     }
     if (usesVerticalToolbar) {
         // FeedsObjCViewController.m manually reserves only the bottom safe area because this table disables automatic adjustment.
-        CGFloat bottomInset = MAX(0, self.view.safeAreaInsets.bottom) +
-            [ListenStoryBridge miniPlayerInsetForView:self.feedTitlesTable];
+        CGFloat bottomInset = MAX(0, self.view.safeAreaInsets.bottom); // FORK: Listen stripped
         UIEdgeInsets inset = self.feedTitlesTable.contentInset;
         if (inset.bottom != bottomInset) {
             inset.bottom = bottomInset;
@@ -847,9 +846,7 @@ static BOOL NBBoolPreferenceValue(id value) {
 #endif
     self.toolbarBottomConstraint.constant = -toolbarBottomGap;
     CGFloat toolbarHeight = CGRectGetHeight(self.feedViewToolbar.frame);
-    // FeedsObjCViewController.m also clears the Listen mini player (Listen/ListenMiniPlayer.swift) when it covers this list.
-    CGFloat totalBottomInset = MAX(toolbarHeight + toolbarBottomGap, safeAreaBottom) +
-        [ListenStoryBridge miniPlayerInsetForView:self.feedTitlesTable];
+    CGFloat totalBottomInset = MAX(toolbarHeight + toolbarBottomGap, safeAreaBottom); // FORK: Listen stripped
 
     UIEdgeInsets currentInset = self.feedTitlesTable.contentInset;
     if (currentInset.bottom != totalBottomInset) {
@@ -1589,8 +1586,8 @@ static BOOL NBBoolPreferenceValue(id value) {
     appDelegate.dictSocialProfile = [results objectForKey:@"social_profile"];
     appDelegate.dictUserProfile = [results objectForKey:@"user_profile"];
     [self syncStoryClusteringDefaultsFromUserProfile:appDelegate.dictUserProfile];
-    // Listen/ListenPreferences.swift adopts the synced Listen and story button preferences.
-    [ListenStoryBridge syncFromUserProfile:appDelegate.dictUserProfile];
+    // FORK: Listen stripped; story button prefs still sync (Fork/ForkStoryButtons.swift).
+    [ForkStoryButtons syncFromUserProfile:appDelegate.dictUserProfile];
     appDelegate.dictSocialServices = [results objectForKey:@"social_services"];
     appDelegate.userActivitiesArray = [results objectForKey:@"activities"];
     
@@ -2504,8 +2501,8 @@ static BOOL NBBoolPreferenceValue(id value) {
         }
     }
     
-    // Listen/ListenPreferences.swift sends Listen and story button preferences to the server.
-    if ([ListenStoryBridge preferenceDidChange:identifier]) return;
+    // FORK: Listen stripped; story button prefs still sync (Fork/ForkStoryButtons.swift).
+    if ([ForkStoryButtons preferenceDidChange:identifier]) return;
 
     if ([identifier isEqualToString:@"split_behavior"]) {
         [self.appDelegate updateSplitBehavior:YES];
@@ -2602,9 +2599,6 @@ static BOOL NBBoolPreferenceValue(id value) {
         [self.appDelegate.feedsNavigationController dismissViewControllerAnimated:YES completion:^{
             [AccountDeletionController presentFromController:self.appDelegate.splitViewController];
         }];
-    } else if ([key isEqualToString:@"listen_voice"]) {
-        UIViewController *presenter = [self.appDelegate.feedsNavigationController presentedViewController];
-        [ListenStoryBridge presentVoiceSettingsFrom:presenter];
     } else if ([key isEqualToString:@"app_icon"]) {
         [self.appDelegate.feedsNavigationController dismissViewControllerAnimated:YES completion:^{
             [self.appDelegate showPremiumDialog];

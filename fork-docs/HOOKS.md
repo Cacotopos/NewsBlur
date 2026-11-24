@@ -30,3 +30,14 @@ The feed column opens a story by setting upstream's `pendingNotificationStory` (
 ## Planned (from AUDIT.md section 6, not yet applied)
 - H3: not needed so far — `loadFeed:withStory:` works with the split held reader-only.
 - H4b: not needed. H6a/H6b replaced the xcconfig idea (target settings override an xcconfig).
+
+## Strip edits (upstream code removed, not just wrapped)
+
+Every removal keeps a `// FORK:` marker where the call site mattered. These are upstream-file edits — they will conflict on merge like any other hook; take our side.
+
+### S1 — Listen audio subsystem (2026-11-24)
+
+- Deleted: `Classes/Listen/` (24 files, ~8,700 lines), `NewsBlurTests/Listen*Tests.swift` (5 files), all pbxproj refs, `audio` from `UIBackgroundModes`, the podcast UI-test fixture in `NewsBlurUITestHarness.swift`.
+- Cut entry points: reader chrome (`StoryPagesObjCViewController` toolbar/vertical items + `y` key command, `StoryToolbar` button), story HTML bar button (`StoryDetailObjC`), Mac toolbar (`ToolbarDelegate`), Story menu items (`AppMenuHelper`), row menu (`RowActionMenus`), Font menu row 15 (`FontSettingsViewController`), Preferences Listen section + Show Listen/Show Train items (`PreferencesView`), keyboard shortcut list (`KeyboardShortcutsView`), media message bridge + tap-to-seek + follow-along (`StoryDetailObjC/ViewController`), account-change stops + insets (`NewsBlurAppDelegate`, `FeedsObjC`, `FeedDetailObjC`, `SplitViewController`, `VoiceRecorder`), test-harness now-playing/podcast fixture.
+- Kept via `Fork/ForkStoryButtons.swift`: `show_sideoption_*` story-button prefs (share/save/ask_ai) sync via `/profile/set_preference` — replaces `ListenPreferences`/`ListenStoryBridge` for `StoryDetailObjC` and `FeedsObjC`. Train and Listen removed from the button list entirely (Tom 2026-11-24: "training is web site stuff").
+- Left dormant: `storyDetailView.js`/CSS media-card styles (no config injected → never rendered), `NewsBlurUITestHarness` podcast arg names no longer exist.

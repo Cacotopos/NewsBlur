@@ -49,9 +49,7 @@
     NSInteger last = UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone ? 13 : 12;
     NSMutableArray *appearance = [NSMutableArray array];
     for (NSInteger row = 7; row <= last; row++) [appearance addObject:@(row)];
-    // FontSettingsViewController.m: action 15 adds the story to Listen's Up Next (Listen/ListenQueue.swift); 14 is Keyboard Shortcuts.
-    NSMutableArray *reading = [NSMutableArray arrayWithArray:@[@1, @0]];
-    if ([ListenStoryBridge offersQueueForStory:self.appDelegate.activeStory]) [reading addObject:@15];
+    NSMutableArray *reading = [NSMutableArray arrayWithArray:@[@1, @0]]; // FORK: Listen stripped
     return @[reading, @[@2, @4], training, appearance];
 }
 
@@ -433,11 +431,8 @@
             cell.imageView.image = [[UIImage systemImageNamed:@"sparkles"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         }
         cell.imageView.tintColor = UIColorFromRGB(0x709E5D);
-    } else if (adjustedRow == 15) {
-        BOOL isQueued = [ListenStoryBridge isQueued:self.appDelegate.activeStory];
-        cell.textLabel.text = [ListenStoryBridge queueMenuTitleForStory:self.appDelegate.activeStory];
-        cell.imageView.image = [[UIImage systemImageNamed:isQueued ? @"text.badge.minus" : @"text.badge.plus"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-        cell.imageView.tintColor = UIColorFromRGB(0x8C59D9);
+    } else if (adjustedRow == 15) { // FORK: Listen stripped; row 15 is no longer emitted
+        cell.textLabel.text = @"";
     } else if (adjustedRow == 6) {
         cell.textLabel.text = [NBLocalization text:@"Go to feed"];
         cell.imageView.image = [[UIImage systemImageNamed:@"newspaper"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
@@ -476,10 +471,6 @@
     NSInteger action = [self actionAtIndexPath:indexPath];
     if (action == 14) {
         return MAX(kMenuOptionHeight, [MenuTableViewCell heightForTitle:[NBLocalization text:@"Keyboard Shortcuts"] width:tableView.bounds.size.width]);
-    }
-    if (action == 15) {
-        NSString *queueTitle = [ListenStoryBridge queueMenuTitleForStory:self.appDelegate.activeStory];
-        return MAX(kMenuOptionHeight, [MenuTableViewCell heightForTitle:queueTitle width:tableView.bounds.size.width]);
     }
     if (action >= 8) return kMenuOptionHeight;
     NSArray *titles = @[[NBLocalization text:@"Unsave this story"], [NBLocalization text:@"Mark as unread"], [NBLocalization text:@"Send to…"], [NBLocalization text:@"Train this story"],
@@ -525,8 +516,6 @@
         [self goToFeed];
     } else if (adjustedRow == 7) {
         [self showFontList];
-    } else if (adjustedRow == 15) {
-        [ListenStoryBridge toggleQueueForStory:self.appDelegate.activeStory];
     }
 }
 

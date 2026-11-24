@@ -97,13 +97,6 @@ import UIKit
             collection.toggleStorySaved(dictionary)
             controller.reload()
         }]
-        if ListenStoryBridge.offersQueue(forStory: dictionary) {
-            // RowActionMenus.swift adds the pressed story to Listen's Up Next without opening it (Listen/ListenQueue.swift).
-            let queued = ListenStoryBridge.isQueued(dictionary)
-            saving.append(action("up-next", ListenStoryBridge.queueMenuTitle(forStory: dictionary), queued ? "text.badge.minus" : "text.badge.plus") {
-                ListenStoryBridge.toggleQueue(forStory: dictionary)
-            })
-        }
         var sharing: [RowMenuAction] = []
         if let permalink = dictionary["story_permalink"] as? String, let url = URL(string: permalink) {
             sharing = [

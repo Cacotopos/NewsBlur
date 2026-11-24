@@ -121,7 +121,7 @@
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    // Embedded videos need playback in silent mode. Preserve ListenPlayer.swift's mixing settings if it owns playback.
+    // Embedded videos need playback in silent mode.
     if (![audioSession.category isEqualToString:AVAudioSessionCategoryPlayback]) {
         [audioSession setCategory:AVAudioSessionCategoryPlayback error:nil];
     }
@@ -251,12 +251,10 @@
                 [self continueTapAtPoint:pt];
                 return;
             }
-            // Listen/ListenStoryBridge.swift jumps playback to a tapped paragraph of the story being read aloud.
-            [(StoryDetailViewController *)self listenHandleTapAt:pt completion:^(BOOL handled) {
-                if (!handled && generation == self.storyLoadGeneration && self.appDelegate.storyPagesViewController.currentPage == self) {
-                    [self continueTapAtPoint:pt];
-                }
-            }];
+            // FORK: Listen stripped.
+            if (generation == self.storyLoadGeneration && self.appDelegate.storyPagesViewController.currentPage == self) {
+                [self continueTapAtPoint:pt];
+            }
         }];
     }
 }
@@ -529,10 +527,6 @@
     [contentController removeScriptMessageHandlerForName:@"newsblurStoryImage"];
     [contentController addScriptMessageHandler:[[StoryReadyMessageHandler alloc] initWithPage:self]
                                          name:@"newsblurStoryImage"];
-    // Listen/ListenMediaStoryBridge.swift plays the story's audio cards in the app's player.
-    [contentController removeScriptMessageHandlerForName:@"newsblurStoryMedia"];
-    [contentController addScriptMessageHandler:[[StoryReadyMessageHandler alloc] initWithPage:self]
-                                         name:@"newsblurStoryMedia"];
     // Use HTTPS baseURL so YouTube embeds get a valid Referer header (fixes Error 153).
     // CSS/JS are inlined directly in the HTML to avoid custom scheme issues.
     static NSURL *baseURL;
@@ -936,10 +930,6 @@
     NSString *markJS = [assetCache textForResource:@"mark" ofType:@"js"];
     NSString *storyDetailJS = [assetCache textForResource:@"storyDetailView" ofType:@"js"];
     NSString *fastTouchJS = [assetCache textForResource:@"fastTouch" ofType:@"js"];
-    // Listen/ListenMediaStoryBridge.swift: labels and state for the audio cards storyDetailView.js draws. It goes
-    // ahead of the bundled scripts so those stay one unchanged run (StoryDetailAssetPerformanceTests.swift).
-    NSString *mediaConfigJS = [ListenMediaStoryBridge configScriptForStory:self.activeStory];
-
     // set up layout values based on iPad/iPhone
     headerString = [NSString stringWithFormat:@
                     "<style>%@</style><style id=\"NB-theme-style\">%@</style>"
@@ -951,9 +941,8 @@
                     "<script>%@</script>"
                     "<script>%@</script>"
                     "<script>%@</script>"
-                    "<script>%@</script>"
                     "<script>%@</script>",
-                    mediaConfigJS, zeptoJS, fitvidJS, markJS, storyDetailJS, fastTouchJS];
+                    zeptoJS, fitvidJS, markJS, storyDetailJS, fastTouchJS]; // FORK: Listen stripped
     
     sharingHtmlString = [self getSideOptions];
 
@@ -1823,13 +1812,10 @@
     BOOL isSaved = [[self.activeStory objectForKey:@"starred"] boolValue];
     BOOL isShared = [[self.activeStory objectForKey:@"shared"] boolValue];
 
-    // StoryDetailObjCViewController.m shows each story button unless it's hidden in preferences; the choices sync
-    // through the server's show_sideoption_* preferences (Listen/ListenPreferences.swift).
-    BOOL showTrain = [ListenStoryBridge showsStoryButton:@"train"];
-    BOOL showShare = [ListenStoryBridge showsStoryButton:@"share"];
-    BOOL showSave = [ListenStoryBridge showsStoryButton:@"save"];
-    BOOL showAskAI = [ListenStoryBridge showsStoryButton:@"ask_ai"];
-    BOOL showListen = [ListenStoryBridge showsStoryButton:@"listen"];
+    // FORK: Listen and Train stripped; remaining buttons' prefs sync via Fork/ForkStoryButtons.swift.
+    BOOL showShare = [ForkStoryButtons showsStoryButton:@"share"];
+    BOOL showSave = [ForkStoryButtons showsStoryButton:@"save"];
+    BOOL showAskAI = [ForkStoryButtons showsStoryButton:@"ask_ai"];
 
     // StoryDetailObjCViewController.m escapes the translated button labels for the story document. Each label is an
     // explicit NBLocalization call so localization/manage.py extracts it.
@@ -1838,15 +1824,6 @@
     };
 
     NSMutableArray<NSString *> *buttons = [NSMutableArray array];
-    if (showTrain) {
-        [buttons addObject:[NSString stringWithFormat:@
-                            "  <div class='NB-share-button NB-train-button NB-button'>"
-                            "    <a href=\"http://ios.newsblur.com/train\"><div>"
-                            "      <span class=\"NB-sideoption-text\">%@</span>"
-                            "      <span class=\"NB-icon\"></span>"
-                            "    </div></a>"
-                            "  </div>", label([NBLocalization text:@"Train"])]];
-    }
     if (showShare) {
         [buttons addObject:[NSString stringWithFormat:@
                             "  <div class='NB-share-button NB-share-share-button NB-button %@'>"
@@ -1878,10 +1855,6 @@
                             "    </div></a>"
                             "  </div>", label([NBLocalization text:@"Ask AI"])]];
     }
-    if (showListen) {
-        [buttons addObject:[ListenStoryBridge listenButtonHTMLForStory:self.activeStory]];
-    }
-
     if (!buttons.count) {
         return @"";
     }
@@ -2902,16 +2875,6 @@
             [appDelegate openAskAIDialog:self.activeStory];
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
-        } else if ([action isEqualToString:@"listen"]) {
-            // StoryDetailObjCViewController.m starts, pauses or resumes reading this story aloud (Listen/ListenPlayer.swift).
-            [ListenStoryBridge toggleListenForStory:self.activeStory];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        } else if ([action isEqualToString:@"listen-queue"]) {
-            // StoryDetailObjCViewController.m: the + beside Listen adds this story to Up Next, or takes it back off.
-            [ListenStoryBridge toggleQueueForStory:self.activeStory];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
         } else if ([action isEqualToString:@"train"] && [urlComponents count] > 5) {
             [self openTrainingDialog:[[urlComponents objectAtIndex:2] intValue]
                          yCoordinate:[[urlComponents objectAtIndex:3] intValue]
@@ -3298,10 +3261,6 @@
     [self changeWebViewWidth];
     [self scrollToLastPosition:YES];
     [self applyClassifierHighlights];
-    if ([self isKindOfClass:StoryDetailViewController.class]) {
-        // Listen/ListenStoryBridge.swift maps the story's paragraphs for follow-along when it's being read aloud.
-        [(StoryDetailViewController *)self listenStoryDidLoad];
-    }
     [self finishPreparingStoryPresentation];
 }
 

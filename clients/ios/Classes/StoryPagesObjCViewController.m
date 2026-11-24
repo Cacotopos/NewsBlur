@@ -73,9 +73,6 @@
 @property (nonatomic, strong) UIBarButtonItem *verticalOriginalButton;
 @property (nonatomic, strong) UIBarButtonItem *verticalMarkReadButton;
 @property (nonatomic, strong) UIBarButtonItem *verticalAutoscrollButton;
-@property (nonatomic, strong) UIBarButtonItem *verticalListenButton;
-@property (nonatomic, strong) UIBarButtonItem *listenBarButton;
-@property (nonatomic, strong) ListenToolbarButton *listenToolbarButton;
 @property (nonatomic, weak) UIViewController *verticalToolbarOwner;
 @property (nonatomic, strong) UINavigationBarAppearance *horizontalReaderNavigationAppearance;
 @property (nonatomic) BOOL hasPreparedToolbarPresentation;
@@ -158,9 +155,7 @@
 
 - (void)updateStoryTitleNavigationButtons {
     self.appDelegate = (NewsBlurAppDelegate *)[[UIApplication sharedApplication] delegate];
-    [self ensureTemporaryFullScreenButton];
-    [self.listenToolbarButton update];
-
+    [self ensureTemporaryFullScreenButton]; // FORK: Listen stripped
     if (self.usesVerticalReaderToolbar) {
         // StoryPagesObjCViewController.m places reader actions in the system bar instead of custom navigation views.
         self.appDelegate.detailViewController.storiesNavigationItem.rightBarButtonItems = nil;
@@ -172,9 +167,6 @@
     self.temporaryFullScreenButton.hidden = NO;
     [items addObject:originalStoryButton];
     [items addObject:fontSettingsButton];
-    if (!self.isMac && self.listenBarButton) {
-        [items addObject:self.listenBarButton];
-    }
 
     // Temporary full-screen toggle button (iPad only, not Mac).
     if (!self.isPhoneOrCompact && !self.isMac) {
@@ -428,16 +420,6 @@
                                                                     action:@selector(markAllRead:)];
     markReadBarButton.accessibilityLabel = [NBLocalization text:@"Mark all as read"];
 
-    // StoryPagesObjCViewController.m: Listen in the reader's chrome (Listen/ListenToolbarButton.swift) for the story on
-    // screen. The Mac keeps its own toolbar item (ToolbarDelegate.swift), so the bar item is only added off the Mac.
-    __weak __typeof(self) weakSelf = self;
-    self.listenToolbarButton = [[ListenToolbarButton alloc] initWithStory:^NSDictionary * _Nullable {
-        return weakSelf.currentPage.activeStory;
-    }];
-    self.listenBarButton = [self.listenToolbarButton makeBarItemWithTarget:self
-                                                                     action:@selector(toggleListen:)
-                                                                 identifier:@"reader-listen"];
-
     UIBarButtonItem *subscribeBtn = [[UIBarButtonItem alloc]
                                      initWithTitle:[NBLocalization text:@"Follow User"]
                                      style:UIBarButtonItemStylePlain
@@ -470,8 +452,6 @@
     toolbar.delegate = (id<StoryToolbarDelegate>)self;
     toolbar.hidden = YES;
     self.storyToolbar = toolbar;
-    [toolbar.listenButton addTarget:self action:@selector(toggleListen:) forControlEvents:UIControlEventTouchUpInside];
-    [self.listenToolbarButton attachButton:toolbar.listenButton];
 
     // Status bar background covers the area above the safe area so the toolbar
     // slides behind an opaque surface when translating upward, and so story
@@ -550,10 +530,6 @@
     [self addKeyCommandWithInput:@"s" modifierFlags:UIKeyModifierShift action:@selector(openShareDialog) discoverabilityTitle:@"Share This Story"];
     [self addKeyCommandWithInput:@"c" modifierFlags:0 action:@selector(scrolltoComment) discoverabilityTitle:@"Scroll to Comments"];
     [self addKeyCommandWithInput:@"t" modifierFlags:0 action:@selector(openStoryTrainerFromKeyboard:) discoverabilityTitle:@"Open Story Trainer"];
-    if (self.isPhone) {
-        // StoryPagesObjCViewController.m: iPad and Mac get Y from the Story menu (AppMenuHelper.swift).
-        [self addKeyCommandWithInput:@"y" modifierFlags:0 action:@selector(toggleListen:) discoverabilityTitle:@"Listen"];
-    }
     [self addKeyCommandWithInput:@"a" modifierFlags:UIKeyModifierShift action:@selector(doMarkAllRead:) discoverabilityTitle:@"Mark All as Read"];
     [self addKeyCommandWithInput:UIKeyInputDownArrow modifierFlags:UIKeyModifierShift action:@selector(nextFolder:) discoverabilityTitle:@"Next Folder" wantPriority:YES];
     [self addKeyCommandWithInput:UIKeyInputUpArrow modifierFlags:UIKeyModifierShift action:@selector(previousFolder:) discoverabilityTitle:@"Previous Folder" wantPriority:YES];
@@ -1049,8 +1025,6 @@
     self.verticalSettingsButton = [self readerBarButtonWithTitle:[NBLocalization text:@"Story settings"] symbol:@"textformat.size" identifier:@"reader-settings" action:@selector(toggleFontSize:)];
     self.verticalMarkReadButton = [self readerBarButtonWithTitle:[NBLocalization text:@"Mark all as read"] symbol:@"checkmark" identifier:@"reader-mark-read" action:@selector(markAllRead:)];
     self.verticalAutoscrollButton = [self readerBarButtonWithTitle:[NBLocalization text:@"Autoscroll"] symbol:@"arrow.down.circle" identifier:@"reader-autoscroll" action:nil];
-    self.verticalListenButton = [self readerBarButtonWithTitle:[NBLocalization text:@"Listen"] symbol:@"headphones" identifier:@"reader-listen" action:@selector(toggleListen:)];
-    [self.listenToolbarButton attachBarItem:self.verticalListenButton];
     [self ensureTemporaryFullScreenButton];
     self.temporaryFullScreenButton.accessibilityIdentifier = @"reader-fullscreen";
 #if !TARGET_OS_MACCATALYST && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
@@ -1062,7 +1036,7 @@
 #endif
     self.verticalReaderToolbarItems = @[self.temporaryFullScreenButton, self.verticalTextButton, self.verticalSendButton, self.verticalProgressButton,
         self.verticalPreviousButton, self.verticalNextButton, self.verticalOriginalButton, self.verticalSettingsButton,
-        self.verticalListenButton, self.verticalMarkReadButton, self.verticalAutoscrollButton];
+        self.verticalMarkReadButton, self.verticalAutoscrollButton];
 #if !TARGET_OS_MACCATALYST && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
     if (@available(iOS 27.1, *)) {
         self.verticalPreviousButton.sharesBackground = YES;
@@ -2055,8 +2029,6 @@
     }
     self.navigationController.navigationBar.tintColor = toolbarButtonTint;
     self.navigationController.toolbar.tintColor = toolbarButtonTint;
-    // StoryPagesObjCViewController.m: the loop above recolored the vertical Listen item too; Listen picks its own tint.
-    [self.listenToolbarButton update];
 }
 
 // allow keyboard commands
