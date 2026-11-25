@@ -1129,7 +1129,7 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 
         [presenter presentViewController:swiftUIPrefs animated:YES completion:^{
             if (!presentsOverLogin) {
-                [swiftUIPrefs configureDelegate:(id<PreferencesViewDelegate>)self.feedsViewController];
+                [swiftUIPrefs configureDelegate:(id<PreferencesViewDelegate>)self.feedEngine];
             }
             [[ThemeManager themeManager] addThemeGestureRecognizerToView:swiftUIPrefs.view];
         }];

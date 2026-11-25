@@ -183,7 +183,7 @@ import SwiftUI
         if session.hasSeen(key), view.layer.animation(forKey: "readerEntrance") != nil { return }
         guard let start = session.start(for: key, position: position, maximumDelay: scrolling ? 0.09 : 0.175)
             ?? session.ongoingStart(for: key) else { return }
-        let isFeedList = owner is FeedsObjCViewController
+        let isFeedList = owner is FeedsViewController
         animateEntrance(view, start: start, distance: scrolling ? 8 : (isFeedList ? 12 : 16),
                         fadeDuration: isFeedList ? 0.24 : 0.18)
     }
@@ -473,7 +473,7 @@ import SwiftUI
 
     static func screen(_ controller: UIViewController) {
         // ReaderMotion.swift leaves the reader's identity-based row and article choreography to its own hooks.
-        guard !(controller is FeedsObjCViewController), !(controller is FeedDetailObjCViewController),
+        guard !(controller is FeedsViewController), !(controller is FeedDetailObjCViewController),
               !(controller is StoryDetailObjCViewController), !(controller is StoryPagesObjCViewController),
               !(controller is MenuViewController) else { return }
         func sections(_ view: UIView, depth: Int) -> [UIView] {

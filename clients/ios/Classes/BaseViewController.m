@@ -211,7 +211,7 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
     [self addKeyCommandWithInput:@"/" modifierFlags:UIKeyModifierShift action:@selector(showKeyboardShortcuts:) discoverabilityTitle:@"Keyboard Shortcuts"];
 
     // BaseViewController.m keeps reader shortcuts available when UIKit focuses another split-view pane.
-    if ([self isKindOfClass:FeedsObjCViewController.class] ||
+    if ([self isKindOfClass:FeedsViewController.class] ||
         [self isKindOfClass:FeedDetailObjCViewController.class] ||
         [self isKindOfClass:DetailViewController.class]) {
         if (![self isKindOfClass:FeedDetailObjCViewController.class]) {

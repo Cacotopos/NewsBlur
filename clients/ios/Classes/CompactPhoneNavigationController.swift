@@ -555,7 +555,7 @@ final class CompactPhoneNavigationController: UINavigationController, UINavigati
             return false
         }
         return UIDevice.current.userInterfaceIdiom == .phone && traitCollection.verticalSizeClass == .compact &&
-            (topViewController is FeedsObjCViewController || topViewController is FeedDetailObjCViewController)
+            (topViewController is FeedsViewController || topViewController is FeedDetailObjCViewController)
     }
 
     override func viewDidLoad() {
@@ -772,7 +772,7 @@ final class CompactPhoneNavigationController: UINavigationController, UINavigati
     }
 
     private func synchronizeItems(from source: UINavigationItem) {
-        if topViewController is FeedsObjCViewController, let titleView = source.titleView {
+        if topViewController is FeedsViewController, let titleView = source.titleView {
             // CompactPhoneNavigationController.swift sizes the account header from its visible bar,
             // since the hidden managed bar can retain the previous orientation's width.
             var bounds = titleView.bounds

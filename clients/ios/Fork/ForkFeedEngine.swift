@@ -17,7 +17,7 @@ import UIKit
 
 @objc(ForkFeedEngine)
 @objcMembers
-final class ForkFeedEngine: NSObject {
+final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
 
     // Indices in appDelegate.dictFoldersArray; keep in sync with NewsBlurTopSection.
     private static let topSectionNames = [/* 0 */ "dashboard",
@@ -26,10 +26,10 @@ final class ForkFeedEngine: NSObject {
                                           /* 3 */ "infrequent",
                                           /* 4 */ "everything"]
 
-    private static let sectionDashboard = Int(NewsBlurTopSectionDashboard)
-    private static let sectionDiscoverSites = Int(NewsBlurTopSectionDiscoverSites)
-    private static let sectionInfrequent = Int(NewsBlurTopSectionInfrequentSiteStories)
-    private static let sectionAllStories = Int(NewsBlurTopSectionAllStories)
+    private static let sectionDashboard = 0
+    private static let sectionDiscoverSites = 1
+    private static let sectionInfrequent = 3
+    private static let sectionAllStories = 4
 
 #if DEBUG
     private static let backgroundRefreshSeconds: TimeInterval = 5
@@ -1819,11 +1819,9 @@ final class ForkFeedEngine: NSObject {
     /// the hidden VC's view and nobody sees them.
     @objc func refreshHeaderCounts() {
         if awaitingAuthenticatedFeedList || appDelegate.activeUsername == nil {
-            viewController?.userAvatarButton?.isHidden = true
             return
         }
 
-        viewController?.userAvatarButton?.isHidden = false
         appDelegate.folderCountCache.removeObject(forKey: "everything")
 
         guard let counts = appDelegate.splitUnreadCount(forFolder: "everything") else { return }
@@ -1960,7 +1958,7 @@ final class ForkFeedEngine: NSObject {
 
     // MARK: - PreferencesViewDelegate
 
-    @objc func preferencesButtonTapped(withKey key: String, action: String) {
+    @objc(preferencesButtonTappedWithKey:action:) func preferencesButtonTapped(key: String, action: String) {
         if key == "offline_cache_empty_stories" {
             if appDelegate.clearingOfflineCache { return }
             appDelegate.clearingOfflineCache = true
@@ -2018,7 +2016,7 @@ final class ForkFeedEngine: NSObject {
         }
     }
 
-    @objc func preferenceValueChanged(withKey key: String, value: Any) {
+    @objc(preferenceValueChangedWithKey:value:) func preferenceValueChanged(key: String, value: Any) {
         let notification = Notification(name: Notification.Name("PreferenceValueChanged"),
                                         object: key,
                                         userInfo: [key: value])

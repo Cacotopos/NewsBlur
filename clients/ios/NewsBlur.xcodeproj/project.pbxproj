@@ -544,7 +544,6 @@
 		175792382930605500490924 /* StoryPagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171B6FFC25C4C7C8008638A9 /* StoryPagesViewController.swift */; };
 		175792392930605500490924 /* NewsBlurAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* NewsBlurAppDelegate.m */; };
 		1757923A2930605500490924 /* FeedChooserTitleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 17432C851C5343C0003F8FD6 /* FeedChooserTitleView.m */; };
-		1757923B2930605500490924 /* FeedsObjCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* FeedsObjCViewController.m */; };
 		1757923C2930605500490924 /* NBURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = FFFF683C19D628000081904A /* NBURLCache.m */; };
 		1757923D2930605500490924 /* StoryDetailObjCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7842ECF611D44A530066CF9D /* StoryDetailObjCViewController.m */; };
 		1757923E2930605500490924 /* PINDiskCache.m in Sources */ = {isa = PBXBuildFile; fileRef = FF2924E21E932D2900FCFA63 /* PINDiskCache.m */; };
@@ -833,7 +832,6 @@
 		22305B510898CFFAC10C3CFD /* SimulatorTestTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5720EF61DD447AB2E099451A /* SimulatorTestTiming.swift */; };
 		23D61C6588FC28D1FD85FF07 /* OnboardingAccountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12856BDD296A53EE4BFE66EF /* OnboardingAccountViewController.swift */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
-		28D7ACF80DDB3853001CB0EB /* FeedsObjCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* FeedsObjCViewController.m */; };
 		3760BBBD8A783C01111C6CCF /* Icons in Resources */ = {isa = PBXBuildFile; fileRef = 590BE55851A65E0B7E5FE56D /* Icons */; };
 		388EFCA8B7015C3AE91E5742 /* AskAIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A97CCFF043172D5AEAC5EABF /* AskAIModels.swift */; };
 		3E31DFF31229F2DA26F382FA /* AskAIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A97CCFF043172D5AEAC5EABF /* AskAIModels.swift */; };
@@ -1743,8 +1741,6 @@
 		245E44A083A28A7825D81461 /* OnboardingViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
 		2598CBE21151BF7CA6FB0307 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		28D7ACF60DDB3853001CB0EB /* FeedsObjCViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedsObjCViewController.h; sourceTree = "<group>"; };
-		28D7ACF70DDB3853001CB0EB /* FeedsObjCViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = FeedsObjCViewController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		29329107639F95ED0E2DB9CD /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = uk; path = uk.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		2DEF293746216A8CA8A878F7 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		312DB80BBF7C77550D35C1B7 /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = id; path = id.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
@@ -2857,8 +2853,6 @@
 				8F9C85C1E2B069B65F539DFF /* PreferencesView.swift */,
 				BE80B5113F732D924A110755 /* NBLocalization.swift */,
 				KBSH0RTC1E2B069B65F53900 /* KeyboardShortcutsView.swift */,
-				28D7ACF60DDB3853001CB0EB /* FeedsObjCViewController.h */,
-				28D7ACF70DDB3853001CB0EB /* FeedsObjCViewController.m */,
 				17731A9C23DFAD3D00759A7D /* ImportExportPreferences.swift */,
 				FFDE35CA161B8F870034BFDE /* FolderTitleView.h */,
 				FFDE35CB161B8F870034BFDE /* FolderTitleView.m */,
@@ -5012,7 +5006,6 @@
 				175792392930605500490924 /* NewsBlurAppDelegate.m in Sources */,
 				17FBFA9B2A6AEA4100149651 /* SwipeRightToPopViewController.swift in Sources */,
 				1757923A2930605500490924 /* FeedChooserTitleView.m in Sources */,
-				1757923B2930605500490924 /* FeedsObjCViewController.m in Sources */,
 				1757923C2930605500490924 /* NBURLCache.m in Sources */,
 				1757923D2930605500490924 /* StoryDetailObjCViewController.m in Sources */,
 				1757923E2930605500490924 /* PINDiskCache.m in Sources */,
@@ -5210,7 +5203,6 @@
 				1D3623260D0F684500981E51 /* NewsBlurAppDelegate.m in Sources */,
 				17FBFA9A2A6AEA4100149651 /* SwipeRightToPopViewController.swift in Sources */,
 				17432C861C5343C0003F8FD6 /* FeedChooserTitleView.m in Sources */,
-				28D7ACF80DDB3853001CB0EB /* FeedsObjCViewController.m in Sources */,
 				FFFF683D19D628000081904A /* NBURLCache.m in Sources */,
 				7842ECF811D44A530066CF9D /* StoryDetailObjCViewController.m in Sources */,
 				FF2924E61E932D2900FCFA63 /* PINDiskCache.m in Sources */,

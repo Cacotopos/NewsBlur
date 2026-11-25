@@ -42,6 +42,16 @@
 @class FeedIconPreparationRequest;
 @class StoryScoreRefresher;
 
+// indices in appDelegate.dictFoldersArray and button tags; keep in sync with
+// ForkFeedEngine.topSectionNames (formerly NewsBlurTopSectionNames in FeedsObjCViewController).
+static enum {
+    NewsBlurTopSectionDashboard = 0,
+    NewsBlurTopSectionDiscoverSites = 1,
+    NewsBlurTopSectionDailyBriefing = 2,
+    NewsBlurTopSectionInfrequentSiteStories = 3,
+    NewsBlurTopSectionAllStories = 4
+} NewsBlurTopSection;
+
 @interface NewsBlurAppDelegate : BaseViewController
 <UIApplicationDelegate, UINavigationControllerDelegate, UIPopoverPresentationControllerDelegate,
 SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {

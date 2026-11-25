@@ -83,11 +83,11 @@ final class ReaderPerformance: NSObject {
     private func installProbes() {
         // ReaderPerformance.swift exchanges only the instrumented process's IMPs.
         // Production launches leave the original dispatch and timing untouched.
-        wrapCell(FeedsObjCViewController.self, metric: "cell.feed")
+        wrapCell(FeedsViewController.self, metric: "cell.feed")
         wrapCell(FeedDetailObjCViewController.self, metric: "cell.story")
         wrapHeight(FeedDetailObjCViewController.self, metric: "height.story")
         wrapVoid(NewsBlurAppDelegate.self, name: "prepareViewControllers", metric: "launch.prepare_views")
-        wrapVoid(FeedsObjCViewController.self, name: "reloadFeedTitlesTable", metric: "reload.feeds")
+        wrapVoid(ForkFeedEngine.self, name: "reloadFeedTitlesTable", metric: "reload.feeds")
         wrapVoid(FeedDetailObjCViewController.self, name: "reloadTable", metric: "reload.stories")
         wrapObject(FeedDetailObjCViewController.self, name: "renderStories:", metric: "render.stories")
         wrapVoid(StoryDetailObjCViewController.self, name: "drawStory", metric: "detail.prepare")
