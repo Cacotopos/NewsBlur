@@ -503,8 +503,6 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>NewsBlur uses the microphone to let you ask questions about stories using your voice.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>NewsBlur saves story images to Photos when you choose Save Image.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

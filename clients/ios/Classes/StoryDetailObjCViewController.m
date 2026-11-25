@@ -1788,7 +1788,6 @@
     // FORK: Listen and Train stripped; remaining buttons' prefs sync via Fork/ForkStoryButtons.swift.
     BOOL showShare = [ForkStoryButtons showsStoryButton:@"share"];
     BOOL showSave = [ForkStoryButtons showsStoryButton:@"save"];
-    BOOL showAskAI = [ForkStoryButtons showsStoryButton:@"ask_ai"];
 
     // StoryDetailObjCViewController.m escapes the translated button labels for the story document. Each label is an
     // explicit NBLocalization call so localization/manage.py extracts it.
@@ -1818,15 +1817,6 @@
                             "  </div>",
                             isSaved ? @"NB-button-active" : @"",
                             isSaved ? label([NBLocalization text:@"Saved"]) : label([NBLocalization text:@"Save"])]];
-    }
-    if (showAskAI) {
-        [buttons addObject:[NSString stringWithFormat:@
-                            "  <div class='NB-share-button NB-ask-ai-button NB-button'>"
-                            "    <a href=\"http://ios.newsblur.com/ask-ai\"><div>"
-                            "      <span class=\"NB-sideoption-text\">%@</span>"
-                            "      <span class=\"NB-icon\"></span>"
-                            "    </div></a>"
-                            "  </div>", label([NBLocalization text:@"Ask AI"])]];
     }
     if (!buttons.count) {
         return @"";
@@ -2318,17 +2308,6 @@
             return;
         } else if ([action isEqualToString:@"share"]) {
             [self openShareDialog];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        } else if ([action isEqualToString:@"ask-ai"] && [urlComponents count] > 5) {
-            [self openAskAIDialog:[[urlComponents objectAtIndex:2] intValue]
-                      yCoordinate:[[urlComponents objectAtIndex:3] intValue]
-                            width:[[urlComponents objectAtIndex:4] intValue]
-                           height:[[urlComponents objectAtIndex:5] intValue]];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        } else if ([action isEqualToString:@"ask-ai"]) {
-            [appDelegate openAskAIDialog:self.activeStory];
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
         } else if ([action isEqualToString:@"save"]) {
@@ -2930,29 +2909,6 @@
 }
 
 
-
-- (void)openAskAIDialog:(int)x yCoordinate:(int)y width:(int)width height:(int)height {
-    CGRect frame = CGRectZero;
-    if (!self.isPhoneOrCompact) {
-        // only adjust for the bar if user is scrolling
-        if (appDelegate.storiesCollection.isRiverView ||
-            appDelegate.storiesCollection.isSocialView ||
-            appDelegate.storiesCollection.isSavedView ||
-            appDelegate.storiesCollection.isWidgetView ||
-            appDelegate.storiesCollection.isReadView) {
-            if (self.webView.scrollView.contentOffset.y == -20) {
-                y = y + 20;
-            }
-        } else {
-            if (self.webView.scrollView.contentOffset.y == -9) {
-                y = y + 9;
-            }
-        }
-
-        frame = CGRectMake(x, y, width, height);
-    }
-    [appDelegate openAskAIDialog:self.activeStory sourceRect:[NSValue valueWithCGRect:frame]];
-}
 
 - (BOOL)isTag:(NSString *)tagName equalTo:(NSString *)tagValue {
     return [tagName isKindOfClass:[NSString class]] && [tagName isEqualToString:tagValue];

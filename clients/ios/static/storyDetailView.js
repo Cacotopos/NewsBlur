@@ -159,13 +159,6 @@ $('.NB-share-share-button').live('click', function () {
     return false;
 });
 
-$('.NB-ask-ai-button').live('click', function () {
-    var offset = $('a', this).offset();
-    var url = $('a', this).attr('href') + "/" + offset.left + "/" + (offset.top - window.pageYOffset) + "/" + offset.width + "/" + offset.height;
-    window.location = url;
-    return false;
-});
-
 // storyDetailView.js: the Listen button holds Listen itself and, while another story plays, the + for Up Next.
 $('.NB-listen-button').live('click', function (e) {
     var link = $(e.target).closest('a');
@@ -867,7 +860,7 @@ function newsblurAnimateStoryEntrance(reduceMotion) {
     var pending = Array.prototype.filter.call(elements, function(element) {
         // storyDetailView.js preserves identity when native refreshSideOptions/refreshComments replaces innerHTML.
         var classes = (element.className || '').split(/\s+/);
-        var action = classes.find(function(name) { return /^NB-(train|share-share|save|ask-ai|listen)-button$/.test(name); });
+        var action = classes.find(function(name) { return /^NB-(train|share-share|save|listen)-button$/.test(name); });
         var scope = [];
         for (var parent = element.parentElement; parent; parent = parent.parentElement) {
             if (parent.id && scope[scope.length - 1] !== parent.id) scope.push(parent.id);

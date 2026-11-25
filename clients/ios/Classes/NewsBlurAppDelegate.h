@@ -315,8 +315,8 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 - (void)updateNotifications:(NSDictionary *)params feed:(NSString *)feedId;
 - (void)checkForFeedNotifications;
 - (void)openStatisticsWithFeed:(NSString *)feedId sender:(id)sender;
-- (void)openAskAIDialog:(NSDictionary *)story;
-- (void)openAskAIDialog:(NSDictionary *)story sourceRect:(NSValue *)sourceRectValue;
+
+
 - (void)cleanUpTryFeed;
 - (void)loadFeedDetailView;
 - (void)loadFeedDetailView:(BOOL)transition;

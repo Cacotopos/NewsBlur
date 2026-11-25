@@ -414,7 +414,7 @@ import WebKit
         web.loadHTMLString("""
             <html><head><meta id="viewport" name="viewport" content="width=527, initial-scale=1.0"><style>\(css)</style></head>
             <body id="story_pane"><div id="NB-story" class="NB-story" style="height:1200px">Article</div>
-            <div class="NB-share-wrapper"><div class="NB-share-inner-wrapper" style="height:40px">Train Share Save Ask AI</div></div>
+            <div class="NB-share-wrapper"><div class="NB-share-inner-wrapper" style="height:40px">Train Share Save</div></div>
             <div id="NB-comments-wrapper"></div></body></html>
             """, baseURL: Bundle.main.resourceURL)
         await fulfillment(of: [loaded], timeout: SimulatorTestTiming.realWorkTimeout)
@@ -1880,7 +1880,7 @@ import WebKit
         let story = Story(index: 0, dictionary: dictionary)
         let previousStory = app.activeStory
         defer { app.activeStory = previousStory }
-        for actionID in ["train", "share-link", "share-story", "share-newsblur", "ask-ai"] {
+        for actionID in ["share-link", "share-story"] {
             try await dismissLiveDialog(in: window)
             let action = try XCTUnwrap(RowActionMenus.story(story, controller: controller, source: controller.view)
                 .flatMap { $0 }.first { $0.id == actionID })

@@ -24,15 +24,6 @@
 
 #define kMenuOptionHeight 48
 
-- (BOOL)isAskAIEnabled {
-    NSUserDefaults *userPreferences = [NSUserDefaults standardUserDefaults];
-    // Default to YES if the key doesn't exist
-    if ([userPreferences objectForKey:@"show_ask_ai"] == nil) {
-        return YES;
-    }
-    return [userPreferences boolForKey:@"show_ask_ai"];
-}
-
 - (BOOL)isGoToFeedEnabled {
     BOOL isRiver = self.appDelegate.storiesCollection.isRiverView ||
                    self.appDelegate.storiesCollection.isSocialRiverView;
@@ -42,16 +33,15 @@
 
 // FontSettingsViewController.m groups actions independently of optional rows and phone-only controls.
 - (NSArray<NSArray<NSNumber *> *> *)menuGroups {
-    // FORK: social/trainer stripped; rows 3 (train) and 4 (share-on-NewsBlur) no longer emitted
+    // FORK: rows 2 (send-to), 3 (train), 4 (share-on-NewsBlur) and 5 (Ask AI) stripped; no longer emitted
     NSMutableArray *actions = [NSMutableArray array];
-    if ([self isAskAIEnabled]) [actions addObject:@5];
     if ([self isGoToFeedEnabled]) [actions addObject:@6];
     [actions addObject:@14];
     NSInteger last = UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone ? 13 : 12;
     NSMutableArray *appearance = [NSMutableArray array];
     for (NSInteger row = 7; row <= last; row++) [appearance addObject:@(row)];
     NSMutableArray *reading = [NSMutableArray arrayWithArray:@[@1, @0]]; // FORK: Listen stripped
-    return @[reading, @[@2], actions, appearance];
+    return @[reading, actions, appearance];
 }
 
 - (NSInteger)actionAtIndexPath:(NSIndexPath *)indexPath {
@@ -494,7 +484,7 @@
         return;
     }
     if (adjustedRow != 7 && adjustedRow != 3) {
-        [self dismissViewControllerAnimated:adjustedRow != 4 && adjustedRow != 5 completion:nil];
+        [self dismissViewControllerAnimated:adjustedRow != 4 completion:nil];
     }
 
     if (adjustedRow == 0) {
@@ -505,12 +495,10 @@
         [self.appDelegate.storiesCollection toggleStoryUnread];
         [self.appDelegate.feedDetailViewController reloadWithSizing];
         [self.appDelegate.storyPagesViewController refreshHeaders];
-    } else if (adjustedRow == 2) {
-        [self.appDelegate.storyPagesViewController openSendToDialog:self.appDelegate.storyPagesViewController.settingsPresentationBarButton];
+    } else if (adjustedRow == 2) { // FORK: send-to stripped; row 2 no longer emitted
     } else if (adjustedRow == 3) { // FORK: trainer stripped; row 3 no longer emitted
     } else if (adjustedRow == 4) { // FORK: social stripped; row 4 no longer emitted
-    } else if (adjustedRow == 5) {
-        [self.appDelegate openAskAIDialog:self.appDelegate.activeStory];
+    } else if (adjustedRow == 5) { // FORK: Ask AI stripped; row 5 no longer emitted
     } else if (adjustedRow == 6) {
         [self goToFeed];
     } else if (adjustedRow == 7) {

@@ -707,59 +707,6 @@ private final class DuoSidebarResizePan: FeedsSidebarResizePanGestureRecognizer 
     override func viewDidLoad() {}
 }
 
-@MainActor final class Test_DuoThemeObservation: XCTestCase {
-    func test_unchangedDefaultsDoNotInvalidateTheTheme() {
-        let observer = AskAIThemeObserver()
-        let originalVersion = observer.themeVersion
-        NotificationCenter.default.post(name: UserDefaults.didChangeNotification, object: UserDefaults.standard)
-        XCTAssertEqual(observer.themeVersion, originalVersion,
-                       "Unrelated defaults notifications must not recreate theme-aware editors")
-    }
-
-    func test_supportedThemeChangesStillInvalidateTheDisplayedTheme() throws {
-        let manager = try XCTUnwrap(ThemeManager.shared)
-        let originalTheme = try XCTUnwrap(manager.theme)
-        let defaults = UserDefaults.standard
-        let domainName = try XCTUnwrap(Bundle.main.bundleIdentifier)
-        let domain = defaults.persistentDomain(forName: domainName) ?? [:]
-        let keys = ["theme_style", "theme_light", "theme_dark"]
-        let originalPreferences = keys.map { domain[$0] }
-        func restorePreferences() {
-            for (key, value) in zip(keys, originalPreferences) {
-                if let value { defaults.set(value, forKey: key) }
-                else { defaults.removeObject(forKey: key) }
-            }
-        }
-        defer {
-            manager.theme = originalTheme
-            restorePreferences()
-            manager.updateTheme()
-            restorePreferences()
-            XCTAssertEqual(manager.theme, originalTheme)
-            for (key, value) in zip(keys, originalPreferences) {
-                XCTAssertEqual(defaults.persistentDomain(forName: domainName)?[key] as? NSObject,
-                               value as? NSObject, "The theme test must restore the original \(key) preference")
-            }
-        }
-        let observer = AskAIThemeObserver()
-        for theme in [ThemeStyleLight, ThemeStyleSepia, ThemeStyleMedium, ThemeStyleDark, ThemeStyleLight] {
-            let previousTheme = manager.effectiveTheme
-            let previousVersion = observer.themeVersion
-            manager.theme = theme
-            NotificationCenter.default.post(name: UserDefaults.didChangeNotification, object: defaults)
-            XCTAssertEqual(manager.effectiveTheme, theme)
-            if previousTheme != theme {
-                XCTAssertGreaterThan(observer.themeVersion, previousVersion,
-                                     "Changing the displayed theme to \(theme) must refresh SwiftUI colors")
-            }
-            let currentVersion = observer.themeVersion
-            NotificationCenter.default.post(name: UserDefaults.didChangeNotification, object: defaults)
-            XCTAssertEqual(observer.themeVersion, currentVersion,
-                           "Repeated \(theme) notifications must preserve editor identity")
-        }
-    }
-}
-
 // DuoPresentationTests.swift samples rendered column positions, including native split-view ancestor animations.
 @MainActor private final class DuoColumnMotionRecorder: NSObject {
     struct Sample {
@@ -1821,26 +1768,6 @@ private final class DuoSidebarResizePan: FeedsSidebarResizePanGestureRecognizer 
         XCTAssertTrue(completionCalled, "Dismissing timing options must finish without applying a choice")
     }
 
-    func test_readerAskAIStartsWithoutSendingAQuestion() async throws {
-        let app = try await prepareApp()
-        let pages = try await openReadableReader(app)
-        let originalModel = UserDefaults.standard.object(forKey: "askAIModel") as? NSObject
-        pages.toggleFontSize(nil)
-        let fontDialog = try await waitForPresentation(app)
-        let table = try XCTUnwrap(allViews(in: fontDialog.view).compactMap { $0 as? UITableView }.first)
-        try selectTableRow("Ask AI", in: table)
-        let dialog = try await waitForPresentation(app, excluding: fontDialog)
-        let askAI = try XCTUnwrap(descendant(of: AskAIViewController.self, in: dialog))
-        let model = try XCTUnwrap(askAI.viewModel)
-        XCTAssertFalse(model.hasAskedQuestion)
-        try await audit(dialog, named: "reader-ask-ai", app: app)
-        if let sheet = dialog.sheetPresentationController {
-            sheet.animateChanges { sheet.selectedDetentIdentifier = .large }
-            try await audit(dialog, named: "reader-ask-ai-expanded", app: app)
-        }
-        XCTAssertFalse(model.hasAskedQuestion, "Opening and resizing Ask AI must not send a question")
-        XCTAssertEqual(UserDefaults.standard.object(forKey: "askAIModel") as? NSObject, originalModel)
-    }
 
     func test_readerNewsBlurShareComposerFitsWithoutSubmitting() async throws {
         let app = try await prepareApp()

@@ -117,12 +117,6 @@ import UIKit
                 app.loadFeed(String(describing: id), withStory: nil, animated: true)
             })
         }
-        let defaults = UserDefaults.standard
-        if defaults.object(forKey: "show_ask_ai") == nil || defaults.bool(forKey: "show_ask_ai") {
-            tools.append(action("ask-ai", NBLocalization.text("Ask AI…"), "sparkles") {
-                app.openAskAIDialog(dictionary)
-            })
-        }
         return [reading, saving, sharing, tools].filter { !$0.isEmpty }
     }
 

@@ -4,7 +4,7 @@
 //  Fork replacement for the story-button preference half of upstream's
 //  Listen/ListenPreferences.swift + Listen/ListenStoryBridge.swift, which the
 //  fork stripped with the rest of the Listen audio subsystem. Keeps the
-//  show_sideoption_* toggles (Share / Save / Ask AI) working in
+//  show_sideoption_* toggles (Share / Save) working in
 //  StoryDetailObjCViewController and syncing via /profile/set_preference.
 //
 
@@ -12,15 +12,12 @@ import Foundation
 
 @objcMembers
 final class ForkStoryButtons: NSObject {
-    /// Local UserDefaults key per button name. `show_ask_ai` maps to the server's
-    /// `show_sideoption_ask_ai`; the others share their names with the server keys.
+    /// Local UserDefaults key per button name; the names match the server keys.
     private static let storyButtons: [(name: String, localKey: String)] = [
         ("share", "show_sideoption_share"),
         ("save", "show_sideoption_save"),
-        ("ask_ai", "show_ask_ai"),
     ]
 
-    private static let askAIMigrationKey = "listen_migrated_show_ask_ai"
     static let didChange = Notification.Name("ListenPreferencesDidChange")
 
     private static var defaults: UserDefaults { .standard }
@@ -35,14 +32,14 @@ final class ForkStoryButtons: NSObject {
         return true
     }
 
-    /// Whether the story button named share, save or ask_ai is shown. Unknown names show.
+    /// Whether the story button named share or save is shown. Unknown names show.
     static func showsStoryButton(_ name: String) -> Bool {
         guard let key = storyButtons.first(where: { $0.name == name })?.localKey else { return true }
         return defaults.object(forKey: key) == nil || defaults.bool(forKey: key)
     }
 
     static func serverKey(forLocalKey key: String) -> String {
-        key == "show_ask_ai" ? "show_sideoption_ask_ai" : key
+        key
     }
 
     static func isStoryButtonKey(_ key: String) -> Bool {
@@ -59,14 +56,6 @@ final class ForkStoryButtons: NSObject {
 
         for button in storyButtons {
             let serverKey = serverKey(forLocalKey: button.localKey)
-            if button.localKey == "show_ask_ai", !defaults.bool(forKey: askAIMigrationKey) {
-                // A Show Ask AI choice made before story buttons synced is carried once.
-                defaults.set(true, forKey: askAIMigrationKey)
-                if defaults.object(forKey: "show_ask_ai") != nil, !defaults.bool(forKey: "show_ask_ai") {
-                    send([serverKey: "false"])
-                    continue
-                }
-            }
             if let value = jsonBool(preferences[serverKey]), store(value, forKey: button.localKey) {
                 changed.append(button.localKey)
             }

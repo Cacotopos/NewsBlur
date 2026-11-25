@@ -9,7 +9,7 @@
 import Foundation
 
 /// A reusable Socket.IO client for NewsBlur real-time features.
-/// Supports Ask AI streaming, feed updates, and other real-time events.
+/// Supports feed updates and other real-time events.
 ///
 /// Uses Engine.IO v4 protocol where the server initiates ping/pong:
 /// - Server sends "2" (ping) at `pingInterval`

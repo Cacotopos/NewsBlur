@@ -1053,12 +1053,6 @@ class PreferencesViewModel: ObservableObject {
                         iconColor: .green,
                         type: .toggle(key: "show_sideoption_save", defaultValue: true)
                     ),
-                    PreferenceItem(
-                        title: NBLocalization.text("Show Ask AI"),
-                        icon: "sparkles",
-                        iconColor: Color(red: 0.85, green: 0.45, blue: 0.37),
-                        type: .toggle(key: "show_ask_ai", defaultValue: true)
-                    ),
                 ]
             ),
 

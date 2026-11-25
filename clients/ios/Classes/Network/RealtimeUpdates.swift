@@ -631,7 +631,7 @@ struct RealtimeNewStoryBuffer {
     private func connectIfWanted() {
         guard wantsConnection, let username, !isInBackground || Self.keepsConnectionInBackground else { return }
         socket.connect(username: username, feeds: subscribedFeeds)
-        // Ask AI may have opened the connection first with its own feed list.
+        // The socket may already be connected from an earlier session.
         socket.updateFeeds(subscribedFeeds)
     }
 

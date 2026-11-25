@@ -156,10 +156,6 @@
 .NB-mac .NB-button.NB-save-button .NB-icon {
     top: 0;
 }
-.NB-mac .NB-button.NB-ask-ai-button .NB-icon {
-    top: -1px;
-}
-
 .NB-mac .NB-button.NB-share-button .NB-sideoption-text {
     position: relative;
     top: -1px;
@@ -234,11 +230,6 @@
 .NB-ipad-wide .NB-button.NB-save-button .NB-icon,
 .NB-ipad-narrow .NB-button.NB-save-button .NB-icon {
     top: 0px;
-}
-
-.NB-ipad-wide .NB-button.NB-ask-ai-button .NB-icon,
-.NB-ipad-narrow .NB-button.NB-ask-ai-button .NB-icon {
-    top: -1px;
 }
 
 /**
@@ -1202,10 +1193,6 @@ a.NB-show-profile {
     float: none;
     margin: 0;
 }
-.NB-button.NB-ask-ai-button {
-    float: none;
-    margin: 0;
-}
 .NB-button.NB-listen-button {
     float: none;
     margin: 0;
@@ -1354,13 +1341,6 @@ a.NB-show-profile {
 .NB-button.NB-save-button .NB-icon {
     background: url("saved-stories@2x.png") no-repeat center center;
     background-size: 12px;
-}
-
-.NB-button.NB-ask-ai-button .NB-icon {
-    background: url("prompt.svg") no-repeat center center;
-    background-size: 14px 14px;
-    position: relative;
-    top: -1px;
 }
 
 .NB-button.NB-listen-button .NB-icon {
@@ -2165,7 +2145,7 @@ html[dir="rtl"] .NB-width-768 .NB-story .NB-large-image:dir(rtl) {
     margin-right: -30px !important;
 }
 
-/* Train, Share, Save and Ask AI buttons (a flex row, which mirrors by itself) and comment buttons */
+/* Train, Share and Save buttons (a flex row, which mirrors by itself) and comment buttons */
 html[dir="rtl"] .NB-button-wrapper .NB-button {
     float: left;
     padding: 0px 4px 4px 0px;
@@ -2174,7 +2154,7 @@ html[dir="rtl"] .NB-button.NB-share-button .NB-icon {
     margin-right: 0;
     margin-left: 8px;
 }
-/* A long Arabic or Hebrew label ("Ask AI") ends with an ellipsis inside its button instead of spilling out. */
+/* A long Arabic or Hebrew label ends with an ellipsis inside its button instead of spilling out. */
 html[dir="rtl"] .NB-button.NB-share-button .NB-sideoption-text {
     min-width: 0;
     overflow: hidden;
