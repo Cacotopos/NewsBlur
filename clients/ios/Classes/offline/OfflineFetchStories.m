@@ -42,7 +42,7 @@
         ![self.appDelegate isReachableForOffline]) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self.isCancelled || self.appDelegate.clearingOfflineCache) return;
-            [self.appDelegate.feedsViewController showDoneNotifier];
+            [self.appDelegate.feedEngine showDoneNotifier];
         });
         return NO;
     }
@@ -56,13 +56,13 @@
 //            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             
             if ([[NSUserDefaults standardUserDefaults] boolForKey:@"offline_text_download"]) {
-                [self.appDelegate.feedsViewController showCachingNotifier:@"Text" progress:0 hoursBack:1];
+                [self.appDelegate.feedEngine showCachingNotifier:@"Text" progress:0 hoursBack:1];
                 [self.appDelegate startOfflineFetchText];
             } else if ([[NSUserDefaults standardUserDefaults] boolForKey:@"offline_image_download"]) {
-                [self.appDelegate.feedsViewController showCachingNotifier:@"Images" progress:0 hoursBack:1];
+                [self.appDelegate.feedEngine showCachingNotifier:@"Images" progress:0 hoursBack:1];
                 [self.appDelegate startOfflineFetchImages];
             } else {
-                [self.appDelegate.feedsViewController showDoneNotifier];
+                [self.appDelegate.feedEngine showDoneNotifier];
                 [self.appDelegate finishBackground];
             }
         });
@@ -157,7 +157,7 @@
         __strong __typeof(&*weakSelf)strongSelf = weakSelf;
         if (!strongSelf) return;
         if (strongSelf.isCancelled) return;
-        [self.appDelegate.feedsViewController showSyncingNotifier:progress hoursBack:hours];
+        [self.appDelegate.feedEngine showSyncingNotifier:progress hoursBack:hours];
     });
 }
 

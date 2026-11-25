@@ -78,7 +78,7 @@ import Foundation
             }
             
             if !appDelegate.dictFoldersArray.contains(folderId) {
-                folderId = appDelegate.feedsViewController.fullFolderPath(for: folderId) ?? "everything"
+                folderId = appDelegate.feedEngine.fullFolderPath(for: folderId) ?? "everything"
             }
             
             if let searchQuery {

@@ -454,11 +454,11 @@ import SwiftUI
                     
                     if let response = response as? [String: Any], let dashboard = response["dashboard_rivers"] as? [Any] {
                         self.appDelegate.dashboardArray = dashboard
-                        self.appDelegate.feedsViewController.loadDashboard()
+                        self.appDelegate.feedEngine.loadDashboard()
                     }
                 case .failure(let error):
                     NSLog("🎛️ Error saving dashboard: \(error)")
-                    self.appDelegate.feedsViewController.loadDashboard()
+                    self.appDelegate.feedEngine.loadDashboard()
             }
         }
     }

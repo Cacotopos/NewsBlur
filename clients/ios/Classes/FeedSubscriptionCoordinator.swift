@@ -177,7 +177,7 @@ import ObjectiveC
 
     private func openSubscribedFeed(_ feedID: String, app: NewsBlurAppDelegate) {
         // FeedSubscriptionCoordinator.swift follows ordinary feed selection, without starting a notification story lookup.
-        app.feedsViewController.loadWorkItem?.cancel()
+        app.feedEngine.loadWorkItem?.cancel()
         app.feedDetailViewController.beginExplicitFeedSelection() // FORK: discover stripped
         app.feedDetailViewController.cancelMarkStoryReadTimer()
         app.cleanUpTryFeed()
@@ -190,7 +190,7 @@ import ObjectiveC
         app.tryFeedStoryId = nil
         app.tryFeedStoryTitle = nil
         app.skipTryFeedCleanup = false
-        app.feedsViewController.clearDashboard()
+        app.feedEngine.clearDashboard()
         app.storiesCollection.reset()
         app.storiesCollection.inSearch = false
         app.storiesCollection.searchQuery = nil

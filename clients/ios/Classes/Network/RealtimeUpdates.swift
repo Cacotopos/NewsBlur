@@ -663,7 +663,7 @@ struct RealtimeNewStoryBuffer {
         }
         // RealtimeUpdates.swift missed whatever happened while the socket was closed, so it counts everything once.
         Self.log("reconnected; catching up with a full count refresh")
-        appDelegate?.feedsViewController.refreshFeedList()
+        appDelegate?.feedEngine.refreshFeedList()
     }
 
     /// Active subscriptions plus blurblogs, the list the web subscribes with (reader.js send_socket_active_feeds).
@@ -739,7 +739,7 @@ struct RealtimeNewStoryBuffer {
         appDelegate.get("\(host)/reader/feed_unread_count", parameters: ["feed_id": feedIds], success: { [weak self] _, response in
             MainActor.assumeIsolated {
                 guard let self, self.username == account, let results = response as? [AnyHashable: Any] else { return }
-                self.appDelegate?.feedsViewController.applyRealtimeUnreadCounts(results)
+                self.appDelegate?.feedEngine.applyRealtimeUnreadCounts(results)
             }
         }, failure: { _, _ in
             // A failed count refresh leaves the counts as they were. The next update or catch-up asks again.
@@ -831,7 +831,7 @@ struct RealtimeNewStoryBuffer {
                 var folders = appDelegate.dictFolders ?? [:]
                 folders["saved_stories"] = savedStories
                 appDelegate.dictFolders = folders
-                appDelegate.feedsViewController.reloadFeedTitlesTable()
+                appDelegate.feedEngine.reloadFeedTitlesTable()
             }
         }, failure: { _, _ in
             // The saved counts stay as they were until the next save or feed list load.
@@ -853,7 +853,7 @@ struct RealtimeNewStoryBuffer {
                 // A change made on this device echoes back too, and the app reloads the feed list after it on its
                 // own. A list loaded since the message already shows the change.
                 if let loadedAt = self.feedListLoadedAt, loadedAt > requestedAt { return }
-                self.appDelegate?.feedsViewController.fetchFeedList(false)
+                self.appDelegate?.feedEngine.fetchFeedList(false)
             }
         }
         feedListReloadWork = work

@@ -830,7 +830,7 @@ class DetailViewController: BaseViewController {
         checkViewControllers()
         
         if fetchFeeds {
-            appDelegate.feedsViewController.loadOfflineFeeds(false)
+            appDelegate.feedEngine.loadOfflineFeeds(false)
         }
         
         if reload {
@@ -2119,7 +2119,7 @@ private extension DetailViewController {
                     feedDetailViewController.storyCache.prepareDashboard()
                     
                     DispatchQueue.main.async {
-                        self.appDelegate.feedsViewController.loadDashboard()
+                        self.appDelegate.feedEngine.loadDashboard()
                     }
                 }
             } else {

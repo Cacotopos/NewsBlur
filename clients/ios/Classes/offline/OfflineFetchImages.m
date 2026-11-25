@@ -44,7 +44,7 @@
         NSLog(@"Finished caching images. %ld total", (long)self.appDelegate.totalUncachedImagesCount);
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self.isCancelled || self.appDelegate.clearingOfflineCache) return;
-            [self.appDelegate.feedsViewController showDoneNotifier];
+            [self.appDelegate.feedEngine showDoneNotifier];
             [self.appDelegate cleanImageCache];
             [self.appDelegate finishBackground];
         });
@@ -54,7 +54,7 @@
     if (![self.appDelegate isReachableForOffline]) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self.isCancelled || self.appDelegate.clearingOfflineCache) return;
-            [self.appDelegate.feedsViewController showDoneNotifier];
+            [self.appDelegate.feedEngine showDoneNotifier];
         });
         return NO;
     }
@@ -99,7 +99,7 @@
 //    });
     
     //    dispatch_async(dispatch_get_main_queue(), ^{
-    //        [appDelegate.feedsViewController hideNotifier];
+    //        [appDelegate.feedEngine hideNotifier];
     //    });
     return YES;
 }
@@ -156,7 +156,7 @@
     }
     dispatch_async(dispatch_get_main_queue(), ^{
         if (self.isCancelled || self.appDelegate.clearingOfflineCache) return;
-        [self.appDelegate.feedsViewController showCachingNotifier:@"Images" progress:progress hoursBack:hours];
+        [self.appDelegate.feedEngine showCachingNotifier:@"Images" progress:progress hoursBack:hours];
     });
 }
 
@@ -194,7 +194,7 @@
         // OfflineFetchImages.m stops retrying an unwritable cache while keeping the image pending for a later sync.
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self.appDelegate.clearingOfflineCache) return;
-            [self.appDelegate.feedsViewController showDoneNotifier];
+            [self.appDelegate.feedEngine showDoneNotifier];
             [self.appDelegate finishBackground];
         });
     }

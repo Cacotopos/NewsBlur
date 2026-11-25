@@ -18,6 +18,7 @@
 #define SHARE_MODAL_HEIGHT 120
 #define STORY_TITLES_HEIGHT 240
 
+@class ForkFeedEngine;
 @class AppDelegateHelper;
 @class SplitViewController;
 @class FeedsViewController;
@@ -142,6 +143,7 @@ SFSafariViewControllerDelegate, UIGestureRecognizerDelegate>  {
 @property (nonatomic) UINavigationController *originalStoryViewNavController;
 @property (nonatomic) IBOutlet DetailViewController *detailViewController;
 @property (nonatomic) IBOutlet FeedsViewController *feedsViewController;
+@property (nonatomic, strong) ForkFeedEngine *feedEngine;
 @property (nonatomic, readonly) FeedDetailViewController *feedDetailViewController;
 @property (nonatomic, strong) UINavigationController *feedDetailMenuNavigationController;
 @property (nonatomic, readonly) StoryPagesViewController *storyPagesViewController;

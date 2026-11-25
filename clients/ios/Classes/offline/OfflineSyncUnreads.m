@@ -23,7 +23,7 @@
     
 //    NSLog(@"Syncing Unreads...");
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.appDelegate.feedsViewController showSyncingNotifier];
+        [self.appDelegate.feedEngine showSyncingNotifier];
     });
 
     __block NSCondition *lock = [NSCondition new];

@@ -542,7 +542,7 @@ static NSString *NBAccessibilitySlug(NSString *value) {
         }];
     } else if ([longPressTitle isEqualToString:@"mark_read_immediate"]) {
         [self.appDelegate.folderCountCache removeObjectForKey:folderTitle];
-        [self.appDelegate.feedsViewController markFeedsRead:feedIds cutoffDays:0];
+        [self.appDelegate.feedEngine markFeedsRead:feedIds cutoffDays:0];
         [self.appDelegate.feedsViewController.feedTitlesTable reloadData];
     }
 }

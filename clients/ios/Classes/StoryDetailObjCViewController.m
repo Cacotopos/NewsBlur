@@ -845,7 +845,7 @@
     contentWidthClass = [NSString stringWithFormat:@"%@ NB-width-%ld",
                          contentWidthClass, (long)contentWidth];
     
-    // if (appDelegate.feedsViewController.isOffline) {
+    // if (appDelegate.feedEngine.isOffline) {
         NSFileManager *manager = [NSFileManager defaultManager];
         NSString *storyHash = [self.activeStory objectForKey:@"story_hash"];
         NSArray *imageUrls = [appDelegate.activeCachedImages objectForKey:storyHash];
@@ -858,7 +858,7 @@
                 cachedUrl = [cachedUrl URLByAppendingPathExtension:@"jpeg"];
                 
                 if (![manager fileExistsAtPath:cachedUrl.path]) {
-                    if (appDelegate.feedsViewController.isOffline) {
+                    if (appDelegate.feedEngine.isOffline) {
                         cachedUrl = [[NSBundle mainBundle] URLForResource:@"blank" withExtension:@"png"];
                     } else {
                         continue;

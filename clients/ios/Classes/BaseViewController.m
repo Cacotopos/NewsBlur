@@ -590,7 +590,7 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
     NSInteger index = [command.propertyList integerValue];
     
     [self.appDelegate.feedsViewController.intelligenceControl setSelectedSegmentIndex:index];
-    [self.appDelegate.feedsViewController selectIntelligence];
+    [self.appDelegate.feedEngine selectIntelligence];
 }
 
 - (IBAction)chooseDashboard:(id)sender {
@@ -602,7 +602,7 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
     
     if ([string isEqualToString:@"none"]) {
         [self.appDelegate.feedsViewController reloadFeeds:nil];
-        [self.appDelegate.feedsViewController selectEverything:nil];
+        [self.appDelegate.feedEngine selectEverything:nil];
     } else if (self.isDashboard) {
         [self.appDelegate.feedDetailViewController reload];
     } else {
@@ -663,7 +663,7 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
     
     [[NSUserDefaults standardUserDefaults] setObject:string forKey:@"feed_list_spacing"];
     
-    [self.appDelegate.feedsViewController reloadFeedTitlesTable];
+    [self.appDelegate.feedEngine reloadFeedTitlesTable];
     [self.appDelegate.feedDetailViewController reloadWithSizing];
 }
 
@@ -802,19 +802,19 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
 }
 
 - (IBAction)nextSite:(id)sender {
-    [self.appDelegate.feedsViewController selectNextFeed:sender];
+    [self.appDelegate.feedEngine selectNextFeed:sender];
 }
 
 - (IBAction)previousSite:(id)sender {
-    [self.appDelegate.feedsViewController selectPreviousFeed:sender];
+    [self.appDelegate.feedEngine selectPreviousFeed:sender];
 }
 
 - (IBAction)nextFolder:(id)sender {
-    [self.appDelegate.feedsViewController selectNextFolder:sender];
+    [self.appDelegate.feedEngine selectNextFolder:sender];
 }
 
 - (IBAction)previousFolder:(id)sender {
-    [self.appDelegate.feedsViewController selectPreviousFolder:sender];
+    [self.appDelegate.feedEngine selectPreviousFolder:sender];
 }
 
 - (IBAction)openDashboard:(id)sender {
@@ -822,7 +822,7 @@ static UISplitViewControllerSplitBehavior NBSplitBehaviorFromDecision(StorySplit
 }
 
 - (IBAction)openAllStories:(id)sender {
-    [self.appDelegate.feedsViewController selectEverything:sender];
+    [self.appDelegate.feedEngine selectEverything:sender];
 }
 
 #pragma mark -

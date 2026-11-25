@@ -216,9 +216,9 @@ typedef NS_ENUM(NSUInteger, MarkReadMenuOlderNewerMode)
         NSInteger days = [options[MarkReadMenuDays] integerValue];
         
         if (days < 0) {
-            [self.appDelegate.feedsViewController markVisibleStoriesRead];
+            [self.appDelegate.feedEngine markVisibleStoriesRead];
         } else {
-            [self.appDelegate.feedsViewController markFeedsRead:self.feedIds cutoffDays:days];
+            [self.appDelegate.feedEngine markFeedsRead:self.feedIds cutoffDays:days];
         }
     }
     

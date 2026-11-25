@@ -338,14 +338,14 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
         NSArray *feedIds = weakSelf.storiesCollection.isRiverView ?
             [weakSelf.appDelegate feedIdsForFolderTitle:weakSelf.storiesCollection.activeFolder] :
             @[weakSelf.storiesCollection.activeFeed[@"id"]];
-        [weakSelf.appDelegate.feedsViewController markFeedsRead:feedIds cutoffDays:days];
+        [weakSelf.appDelegate.feedEngine markFeedsRead:feedIds cutoffDays:days];
         if (!weakSelf.isPhoneOrCompact) {
             [weakSelf reloadStories];
         }
-        [weakSelf.appDelegate.feedsViewController reloadFeedTitlesTable];
+        [weakSelf.appDelegate.feedEngine reloadFeedTitlesTable];
     };
     self.storyTitlesHeaderBar.markReadVisibleHandler = ^{
-        [weakSelf.appDelegate.feedsViewController markVisibleStoriesRead];
+        [weakSelf.appDelegate.feedEngine markVisibleStoriesRead];
     };
     self.storyTitlesTable.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
     self.storyTitlesTable.translatesAutoresizingMaskIntoConstraints = NO;
@@ -3612,7 +3612,7 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
     if (self.dashboardIndex >= 0) {
         self.pageFinished = YES;
         [self hideFetchingBanner];
-        [appDelegate.feedsViewController loadDashboard];
+        [appDelegate.feedEngine loadDashboard];
         return;
     }
     
@@ -5200,7 +5200,7 @@ static const CGFloat NBBottomNextFeedHeight = 56.0f;
     NSInteger selectedLocation = [self storyLocationForIndexPath:indexPath];
     if (selectedLocation < storiesCollection.storyLocationsCount) {
         // mark the cell as read
-        //        appDelegate.feedsViewController.currentRowAtIndexPath = nil;
+        //        appDelegate.feedEngine.currentRowAtIndexPath = nil;
         
         NSInteger location = storiesCollection.locationOfActiveStory;
         NSIndexPath *oldIndexPath = [self indexPathForStoryLocation:location];
@@ -5324,7 +5324,7 @@ leadingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (location < storiesCollection.storyLocationsCount) {
         // mark the cell as read
-        //        appDelegate.feedsViewController.currentRowAtIndexPath = nil;
+        //        appDelegate.feedEngine.currentRowAtIndexPath = nil;
         
         self.oldLocation = storiesCollection.locationOfActiveStory;
 //        NSIndexPath *oldIndexPath = self.selectedIndexPath;
@@ -5697,7 +5697,7 @@ finish_height_measurement:
     self.bottomNextFeedFeedback = nil;
     [self resetBottomNextFeedControl];
     
-    if (![self.appDelegate.feedsViewController selectNextUnreadFolderOrFeed]) {
+    if (![self.appDelegate.feedEngine selectNextUnreadFolderOrFeed]) {
         [self.appDelegate showFeedsListAnimated:YES];
     }
 }
@@ -5747,9 +5747,9 @@ finish_height_measurement:
         [self.bottomNextFeedFeedback prepare];
     }
 
-    NSString *kind = [self.appDelegate.feedsViewController nextUnreadNavigationKind] ?: @"site";
-    NSString *title = [self.appDelegate.feedsViewController nextUnreadNavigationTitle];
-    UIImage *icon = [self.appDelegate.feedsViewController nextUnreadNavigationIcon];
+    NSString *kind = [self.appDelegate.feedEngine nextUnreadNavigationKind] ?: @"site";
+    NSString *title = [self.appDelegate.feedEngine nextUnreadNavigationTitle];
+    UIImage *icon = [self.appDelegate.feedEngine nextUnreadNavigationIcon];
     [self.bottomNextFeedControl configureWithKind:kind title:title icon:icon progress:pressed ? 1.0f : 0.0f ready:pressed];
 
     if (pressed) {
@@ -5902,9 +5902,9 @@ finish_height_measurement:
         shouldShowControl = YES;
     }
 
-    NSString *kind = [self.appDelegate.feedsViewController nextUnreadNavigationKind] ?: @"site";
-    NSString *title = [self.appDelegate.feedsViewController nextUnreadNavigationTitle];
-    UIImage *icon = [self.appDelegate.feedsViewController nextUnreadNavigationIcon];
+    NSString *kind = [self.appDelegate.feedEngine nextUnreadNavigationKind] ?: @"site";
+    NSString *title = [self.appDelegate.feedEngine nextUnreadNavigationTitle];
+    UIImage *icon = [self.appDelegate.feedEngine nextUnreadNavigationIcon];
 
     self.bottomNextFeedControl.hidden = !shouldShowControl;
     [self.bottomNextFeedControl configureWithKind:kind title:title icon:icon progress:progress ready:ready];
@@ -5927,13 +5927,13 @@ finish_height_measurement:
         return;
     }
 
-    NSString *kind = [self.appDelegate.feedsViewController nextUnreadNavigationKind] ?: @"site";
+    NSString *kind = [self.appDelegate.feedEngine nextUnreadNavigationKind] ?: @"site";
     BOOL shouldShowControl = [self canPullToNextUnreadList] &&
         [self bottomNextFeedStaticRevealDistanceForScroll:self.storyTitlesTable] > 0.0f;
     CGFloat staticRevealDistance = [self bottomNextFeedStaticRevealDistanceForScroll:self.storyTitlesTable];
     CGFloat visibilityProgress = shouldShowControl ? MIN(1.0f, staticRevealDistance / NBBottomNextFeedFadeDistance) : 0.0f;
-    NSString *title = shouldShowControl ? [self.appDelegate.feedsViewController nextUnreadNavigationTitle] : nil;
-    UIImage *icon = shouldShowControl ? [self.appDelegate.feedsViewController nextUnreadNavigationIcon] : nil;
+    NSString *title = shouldShowControl ? [self.appDelegate.feedEngine nextUnreadNavigationTitle] : nil;
+    UIImage *icon = shouldShowControl ? [self.appDelegate.feedEngine nextUnreadNavigationIcon] : nil;
 
     self.bottomNextFeedControl.hidden = !shouldShowControl;
     [self.bottomNextFeedControl configureWithKind:kind title:title icon:icon progress:0 ready:NO];
@@ -6484,13 +6484,13 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
         // FeedDetailObjCViewController.m leaves infrequent-feed filtering to the server; the reply does not identify the filtered feeds.
         if (!infrequent) [self.appDelegate markFeedReadInCache:feedIds cutoffTimestamp:cutoffTimestamp older:older];
         if (queueOffline) {
-            self.appDelegate.feedsViewController.isOffline = NO;
+            self.appDelegate.feedEngine.isOffline = NO;
             [self.appDelegate.storyPagesViewController reloadWidget];
         }
-        [self.appDelegate.feedsViewController reloadFeedTitlesTable];
-        [self.appDelegate.feedsViewController refreshHeaderCounts];
+        [self.appDelegate.feedEngine reloadFeedTitlesTable];
+        [self.appDelegate.feedEngine refreshHeaderCounts];
         // FeedDetailObjCViewController.m reconciles badges with the server because offline stories may cover only part of a feed.
-        [self.appDelegate.feedsViewController refreshFeedList:feedIds.count == 1 ? feedIds.firstObject : nil];
+        [self.appDelegate.feedEngine refreshFeedList:feedIds.count == 1 ? feedIds.firstObject : nil];
         if (self.fetchRequestId == generation) [self reloadStories];
     } failure:^(NSURLSessionTask *operation, NSError *error) {
         [progressHUD hide:NO];
@@ -6498,10 +6498,10 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
             ![(self.appDelegate.url ?: @"") isEqualToString:host]) return;
         if (queueOffline && !infrequent) {
             [self.appDelegate markStoriesRead:nil inFeeds:feedIds cutoffTimestamp:cutoffTimestamp];
-            self.appDelegate.feedsViewController.isOffline = YES;
-            [self.appDelegate.feedsViewController showOfflineNotifier];
-            [self.appDelegate.feedsViewController reloadFeedTitlesTable];
-            [self.appDelegate.feedsViewController refreshHeaderCounts];
+            self.appDelegate.feedEngine.isOffline = YES;
+            [self.appDelegate.feedEngine showOfflineNotifier];
+            [self.appDelegate.feedEngine reloadFeedTitlesTable];
+            [self.appDelegate.feedEngine refreshHeaderCounts];
             if (self.fetchRequestId == generation) [self reloadStories];
         } else {
             // FeedDetailObjCViewController.m reports the failure from the story row menu and from the footer in the
@@ -6519,14 +6519,14 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
             [self reloadStories];
         }
         // Don't do this, as it causes a race condition with the marking read call
-//        [self.appDelegate.feedsViewController refreshFeedList];
-        [self.appDelegate.feedsViewController reloadFeedTitlesTable];
+//        [self.appDelegate.feedEngine refreshFeedList];
+        [self.appDelegate.feedEngine reloadFeedTitlesTable];
         [self.appDelegate showFeedsListAnimated:YES];
         
         NSString *loadNextPref = [[NSUserDefaults standardUserDefaults] stringForKey:@"after_mark_read"];
         
         if (![loadNextPref isEqualToString:@"stay"]) {
-            [self.appDelegate.feedsViewController selectNextFolderOrFeed];
+            [self.appDelegate.feedEngine selectNextFolderOrFeed];
         }
     };
     
@@ -6535,11 +6535,11 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
     NSString *confirmPref = [[NSUserDefaults standardUserDefaults] stringForKey:@"default_confirm_read_filter"];
     
     if (showMenu == MarkReadShowMenuNever) {
-        [self.appDelegate.feedsViewController markFeedsRead:feedIds cutoffDays:0];
+        [self.appDelegate.feedEngine markFeedsRead:feedIds cutoffDays:0];
         pop();
         return;
     } else if (showMenu == MarkReadShowMenuBasedOnPref && ([confirmPref isEqualToString:@"never"] || ([confirmPref isEqualToString:@"folders"] && !storiesCollection.isRiverView))) {
-        [self.appDelegate.feedsViewController markFeedsRead:feedIds cutoffDays:0];
+        [self.appDelegate.feedEngine markFeedsRead:feedIds cutoffDays:0];
         pop();
         return;
     }
@@ -6891,7 +6891,7 @@ didEndSwipingSwipingWithState:(MCSwipeTableViewCellState)state
         NSArray *values = @[@"compact", @"comfortable"];
 
         [viewController addSegmentedControlWithTitles:titles values:values defaultValue:@"comfortable" preferenceKey:preferenceKey selectionShouldDismiss:NO handler:^(NSUInteger selectedIndex) {
-            [self.appDelegate.feedsViewController reloadFeedTitlesTable];
+            [self.appDelegate.feedEngine reloadFeedTitlesTable];
             [self reloadWithSizing];
         }];
     }

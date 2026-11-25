@@ -147,7 +147,7 @@ final class NewsBlurUITestHarness {
                 }
                 return
             }
-            appDelegate.feedsViewController.loadWorkItem?.cancel()
+            appDelegate.feedEngine.loadWorkItem?.cancel()
         }
         guard let root = appDelegate.window?.rootViewController, root.viewIfLoaded?.window != nil else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -275,7 +275,7 @@ final class NewsBlurUITestHarness {
             return
         }
         // FeedsViewController.swift schedules startup navigation after publishing the feed list.
-        appDelegate.feedsViewController.loadWorkItem?.cancel()
+        appDelegate.feedEngine.loadWorkItem?.cancel()
         applyReaderScenario(scenario, on: appDelegate, remainingRetries: remainingRetries)
         if ProcessInfo.processInfo.arguments.contains("-newsblur-ui-test-sync-status") {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -329,11 +329,11 @@ final class NewsBlurUITestHarness {
             ) { _ in
                 MainActor.assumeIsolated {
                     guard appDelegate.activeUsername == ReaderUITestFixtures.username,
-                          !appDelegate.feedsViewController.isOffline,
+                          !appDelegate.feedEngine.isOffline,
                           appDelegate.dictFeeds?[ReaderUITestFixtures.swiftFeedId] != nil else { return }
                     didFinishReaderFeedLoad = true
                     // NewsBlurUITestHarness.swift reserves initial navigation for its requested scenario.
-                    appDelegate.feedsViewController.loadWorkItem?.cancel()
+                    appDelegate.feedEngine.loadWorkItem?.cancel()
                 }
             }
         }
@@ -367,14 +367,14 @@ final class NewsBlurUITestHarness {
             return
         case .goodReadsList:
             UserDefaults.standard.set(true, forKey: "show_good_reads")
-            appDelegate.feedsViewController.reloadFeedTitlesTable()
+            appDelegate.feedEngine.reloadFeedTitlesTable()
             appDelegate.feedsViewController.view.layoutIfNeeded()
         case .techFolder:
-            appDelegate.feedsViewController.selectFolder(CookingMarketingFixtures.enabled ? "Cooking" : "Tech")
+            appDelegate.feedEngine.selectFolder(CookingMarketingFixtures.enabled ? "Cooking" : "Tech")
         case .cultureFolder:
-            appDelegate.feedsViewController.selectFolder("Culture")
+            appDelegate.feedEngine.selectFolder("Culture")
         case .swiftFeed:
-            appDelegate.feedsViewController.selectFeed(ReaderUITestFixtures.swiftFeedId, inFolder: CookingMarketingFixtures.enabled ? "Cooking" : "Tech ▸ Swift")
+            appDelegate.feedEngine.selectFeed(ReaderUITestFixtures.swiftFeedId, inFolder: CookingMarketingFixtures.enabled ? "Cooking" : "Tech ▸ Swift")
         case .swiftStoryOne:
             appDelegate.loadFeed(ReaderUITestFixtures.swiftFeedId, withStory: CookingMarketingFixtures.enabled ? "cooking-pasta-1" : "ui-story-swift-1", animated: false)
 #if DEBUG && targetEnvironment(simulator)

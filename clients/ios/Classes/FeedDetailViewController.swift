@@ -952,7 +952,7 @@ extension FeedDetailViewController {
         
 //        if pageFinished, dashboardAwaitingFinish, dashboardIndex >= 0 {
 //            dashboardAwaitingFinish = false
-//            appDelegate.feedsViewController.loadDashboard()
+//            appDelegate.feedEngine.loadDashboard()
 //        }
     }
     
@@ -992,9 +992,9 @@ extension FeedDetailViewController: FeedDetailInteraction {
     
     func tapped(dash: DashList) {
         if dash.isFolder {
-            appDelegate.feedsViewController.selectFolder(dash.folderId)
+            appDelegate.feedEngine.selectFolder(dash.folderId)
         } else if let feedId = dash.feedId {
-            appDelegate.feedsViewController.selectFeed(feedId, inFolder: dash.folderId)
+            appDelegate.feedEngine.selectFeed(feedId, inFolder: dash.folderId)
         }
     }
     
@@ -1077,9 +1077,9 @@ extension FeedDetailViewController: FeedDetailInteraction {
         appDelegate.tryFeedFeedId = dash.feedId
         
         if dash.isFolder {
-            appDelegate.feedsViewController.selectFolder(dash.folderId)
+            appDelegate.feedEngine.selectFolder(dash.folderId)
         } else if let feedId = dash.feedId {
-            appDelegate.feedsViewController.selectFeed(feedId, inFolder: dash.folderId)
+            appDelegate.feedEngine.selectFeed(feedId, inFolder: dash.folderId)
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
@@ -1106,7 +1106,7 @@ extension FeedDetailViewController: FeedDetailInteraction {
     }
     
     func reloadOneDash(with dash: DashList) {
-        self.appDelegate.feedsViewController.reloadOneDash(with: dash.index)
+        self.appDelegate.feedEngine.reloadOneDash(with: dash.index)
     }
     
     func reading(story: Story) {

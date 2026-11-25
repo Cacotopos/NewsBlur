@@ -442,8 +442,8 @@ final class ForkFeedColumnViewController: UIViewController, UITableViewDataSourc
             app.markFeedRead(inCache: [feedId])
             (app.dictUnreadCounts?[feedId] as? NSMutableDictionary)?.setValuesForKeys(
                 ["ps": 0, "nt": 0, "ng": 0])
-            app.feedsViewController?.refreshFeedList(feedId)
-            app.feedsViewController?.reloadFeedTitlesTable()
+            app.feedEngine?.refreshFeedList(feedId)
+            app.feedEngine?.reloadFeedTitlesTable()
             DispatchQueue.main.async {
                 self?.recomputeOrder()
                 self?.rebuildRows()

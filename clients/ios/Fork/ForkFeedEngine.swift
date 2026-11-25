@@ -1443,6 +1443,13 @@ final class ForkFeedEngine: NSObject {
         }
     }
 
+    @objc func selectWidgetStories() {
+        let tag = appDelegate.dictFoldersArray.index(of: appDelegate.widgetFolder as Any)
+        if tag != NSNotFound {
+            didSelectSectionHeader(withTag: tag)
+        }
+    }
+
     @objc func selectWidgetSource(_ source: String) -> Bool {
         guard let folders = appDelegate.dictFoldersArray as? [String] else { return false }
         let folder: String

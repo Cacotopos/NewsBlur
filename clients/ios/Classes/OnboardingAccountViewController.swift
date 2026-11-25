@@ -339,13 +339,13 @@ import SwiftUI
 @MainActor final class AccountDeletionSession {
     let username = NewsBlurAppDelegate.shared()?.activeUsername
     let server = NewsBlurAppDelegate.shared()?.url
-    private let generation = NewsBlurAppDelegate.shared()?.feedsViewController.feedListAccountGeneration
+    private let generation = NewsBlurAppDelegate.shared()?.feedEngine.feedListAccountGeneration
     var cancelled = false
 
     func validate() throws {
         let app = NewsBlurAppDelegate.shared()
         guard !cancelled, let username, !username.isEmpty, username == app?.activeUsername,
-              server == app?.url, generation == app?.feedsViewController.feedListAccountGeneration else {
+              server == app?.url, generation == app?.feedEngine.feedListAccountGeneration else {
             throw OnboardingAPI.error("Your account session changed. Close this dialog and try again.")
         }
     }
@@ -448,7 +448,7 @@ import SwiftUI
                 guard (try? self.model.session.validate()) != nil, let app = NewsBlurAppDelegate.shared() else { return }
                 // OnboardingAccountViewController.swift invalidates queued account work before returning to login after deletion.
                 app.cancelOfflineQueue()
-                app.feedsViewController.resetForAccountChange()
+                app.feedEngine.resetForAccountChange()
                 app.feedDetailViewController.resetForAccountChange()
                 app.activeUsername = nil
                 app.activeStory = nil
