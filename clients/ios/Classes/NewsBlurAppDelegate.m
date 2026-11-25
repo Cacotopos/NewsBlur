@@ -148,6 +148,14 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
 @synthesize detailViewController;
 @synthesize feedsViewController;
 @synthesize feedEngine;
+
+- (ForkFeedEngine *)feedEngine {
+    if (feedEngine == nil) {
+        feedEngine = [ForkFeedEngine new];
+        feedEngine.viewController = self.feedsViewController;
+    }
+    return feedEngine;
+}
 @synthesize fontSettingsViewController;
 @synthesize storyDetailViewController;
 @synthesize loginViewController;
@@ -1350,7 +1358,6 @@ static NSString *NBNormalizedServerURLString(NSString *rawURLString) {
     
     self.feedsNavigationController = (UINavigationController *)splitChildren[0];
     self.feedsViewController = self.feedsNavigationController.viewControllers.firstObject;
-    self.feedEngine = [ForkFeedEngine new];
     self.feedEngine.viewController = self.feedsViewController;
     self.detailNavigationController = (UINavigationController *)splitChildren[1];
     self.detailViewController = self.detailNavigationController.viewControllers.firstObject;

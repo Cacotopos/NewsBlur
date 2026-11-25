@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		17A396D924F86A8F0023C9E2 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17A396D824F86A8F0023C9E2 /* MainInterface.storyboard */; };
+		175790D82930605500490924 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17A396D824F86A8F0023C9E2 /* MainInterface.storyboard */; };
 		00AA878DEEF44B06BAB107C7 /* listen-pause.svg in Resources */ = {isa = PBXBuildFile; fileRef = CFBD2DFE9CB96A808E171C49 /* listen-pause.svg */; };
 		010EDEFA1B2386B7003B79DE /* OnePasswordExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 010EDEF81B2386B7003B79DE /* OnePasswordExtension.m */; };
 		010EDEFC1B238722003B79DE /* 1Password.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 010EDEFB1B238722003B79DE /* 1Password.xcassets */; };
@@ -1506,6 +1508,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		17A396D824F86A8F0023C9E2 /* MainInterface.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = MainInterface.storyboard; sourceTree = "<group>"; };
 		010EDEF81B2386B7003B79DE /* OnePasswordExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OnePasswordExtension.m; path = "Other Sources/OnePasswordExtension/OnePasswordExtension.m"; sourceTree = "<group>"; };
 		010EDEF91B2386B7003B79DE /* OnePasswordExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnePasswordExtension.h; path = "Other Sources/OnePasswordExtension/OnePasswordExtension.h"; sourceTree = "<group>"; };
 		010EDEFB1B238722003B79DE /* 1Password.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = 1Password.xcassets; path = "Other Sources/OnePasswordExtension/1Password.xcassets"; sourceTree = "<group>"; };
@@ -2768,6 +2771,7 @@
 		4307BE511565EDF8007A932A /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				17A396D824F86A8F0023C9E2 /* MainInterface.storyboard */,
 				FF191E4E18A323F400473252 /* Images.xcassets */,
 				17EE11CD2B28011D00E7C0CC /* Credits.rtf */,
 				430C4BBE15D7208000B9F63B /* FTUX */,
@@ -4024,6 +4028,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				175790D82930605500490924 /* MainInterface.storyboard in Resources */,
 				175790632930605500490924 /* ChronicleSSm-Book.otf in Resources */,
 				1757920D2930605500490924 /* Settings.bundle in Resources */,
 				175790642930605500490924 /* WhitneySSm-Book-Bas.otf in Resources */,
@@ -4485,6 +4490,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17A396D924F86A8F0023C9E2 /* MainInterface.storyboard in Resources */,
 				FF3A3E091BFBBB5100ADC01A /* ChronicleSSm-Book.otf in Resources */,
 				FF3A3E111BFBBB6B00ADC01A /* WhitneySSm-Book-Bas.otf in Resources */,
 				FF3A3E0A1BFBBB5400ADC01A /* ChronicleSSm-BookItalic.otf in Resources */,

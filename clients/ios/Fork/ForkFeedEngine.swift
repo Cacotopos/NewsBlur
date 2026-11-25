@@ -19,7 +19,7 @@ import UIKit
 @objcMembers
 final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
 
-    // Indices in appDelegate.dictFoldersArray; keep in sync with NewsBlurTopSection.
+    // Indices in foldersArray; keep in sync with NewsBlurTopSection.
     private static let topSectionNames = [/* 0 */ "dashboard",
                                           /* 1 */ "discover_sites",
                                           /* 2 */ "daily_briefing",
@@ -45,6 +45,22 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         }
         return appDelegate
     }
+
+    // These collections are nil until /reader/feeds lands (and after
+    // showLogin's reset). ObjC callers messaged nil harmlessly; the Swift
+    // port reads them through these fallbacks so pre-load callers — the
+    // bottom next-feed control, visibility checks — get the same empty
+    // answer instead of an IUO trap.
+    private var foldersArray: NSMutableArray { appDelegate.dictFoldersArray ?? NSMutableArray() }
+    private var foldersDict: [AnyHashable: Any] { appDelegate.dictFolders ?? [:] }
+    private var feedsDict: NSMutableDictionary { appDelegate.dictFeeds ?? NSMutableDictionary() }
+    private var inactiveFeedsDict: [AnyHashable: Any] { (appDelegate.dictInactiveFeeds as? [AnyHashable: Any]) ?? [:] }
+    private var socialFeedsDict: [AnyHashable: Any] { appDelegate.dictSocialFeeds ?? [:] }
+    private var feedIconsDict: [AnyHashable: Any] { appDelegate.dictFeedIcons ?? [:] }
+    private var unreadCountsDict: NSMutableDictionary { appDelegate.dictUnreadCounts ?? NSMutableDictionary() }
+    private var savedStoryTagsDict: [AnyHashable: Any] { appDelegate.dictSavedStoryTags ?? [:] }
+    private var userProfileDict: [AnyHashable: Any] { appDelegate.dictUserProfile ?? [:] }
+    private var folderCountCacheDict: NSMutableDictionary { appDelegate.folderCountCache ?? NSMutableDictionary() }
 
     @objc var isOffline = false
     @objc var viewShowingAllFeeds = false
@@ -123,8 +139,8 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     }
 
     @objc func updateCachedUserProfilePreference(withKey key: String, value: Any?) {
-        guard let existing = appDelegate.dictUserProfile as? [AnyHashable: Any], !existing.isEmpty, !key.isEmpty else { return }
-        var userProfile = existing
+        guard !userProfileDict.isEmpty, !key.isEmpty else { return }
+        var userProfile = userProfileDict
         var preferences = Self.userProfilePreferences(userProfile) ?? [:]
         preferences[key] = value ?? ""
         userProfile["preferences"] = preferences
@@ -215,7 +231,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         NSLog("Fetching feed list")
         appDelegate.cancelOfflineQueue()
         // A feed list load ends in a full count refresh, which covers RealtimeUpdates.swift's catch-up.
-        MainActor.assumeIsolated { RealtimeUpdates.shared.noteFullCountRefresh() }
+        DispatchQueue.main.async { RealtimeUpdates.shared.noteFullCountRefresh() }
 
         var urlFeedList = "\(appDelegate.url ?? "")/reader/feeds?flat=true&update_counts=\(inPullToRefresh ? "true" : "false")&include_inactive=true"
         if appDelegate.value(forKey: "backgroundAppRefreshTask") != nil {
@@ -343,8 +359,8 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         defaults?.set(results["share_ext_token"], forKey: "share:token")
         defaults?.set(appDelegate.url, forKey: "share:host")
         defaults?.set(appDelegate.activeUsername, forKey: "share:username")
-        defaults?.set(appDelegate.dictSavedStoryTags, forKey: "share:tags")
-        defaults?.set(appDelegate.dictFoldersArray, forKey: "share:folders")
+        defaults?.set(savedStoryTagsDict, forKey: "share:tags")
+        defaults?.set(foldersArray, forKey: "share:folders")
         defaults?.set(preview, forKey: "widget:preview_images_size")
         defaults?.set(userPreferences.object(forKey: "infrequent_stories_per_month"), forKey: "widget:infrequent_stories_per_month")
         validateWidgetFeeds(forGroupDefaults: defaults, usingResults: results)
@@ -421,15 +437,15 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         appDelegate.dictUnreadCounts = NSMutableDictionary()
         appDelegate.dictSocialProfile = results?["social_profile"] as? [AnyHashable: Any]
         appDelegate.dictUserProfile = results?["user_profile"] as? [AnyHashable: Any]
-        syncStoryClusteringDefaults(fromUserProfile: appDelegate.dictUserProfile as? [AnyHashable: Any])
+        syncStoryClusteringDefaults(fromUserProfile: userProfileDict)
         // FORK: Listen stripped; story button prefs still sync (Fork/ForkStoryButtons.swift).
-        ForkStoryButtons.syncFromUserProfile(appDelegate.dictUserProfile as? [AnyHashable: Any])
+        ForkStoryButtons.syncFromUserProfile(userProfileDict)
         appDelegate.dictSocialServices = results?["social_services"] as? [AnyHashable: Any]
         appDelegate.userActivitiesArray = results?["activities"] as? [Any]
 
         appDelegate.dashboardArray = results?["dashboard_rivers"] as? [Any]
 
-        let userProfile = appDelegate.dictUserProfile as? [AnyHashable: Any] ?? [:]
+        let userProfile = userProfileDict
         appDelegate.isPremium = (userProfile["is_premium"] as? Int ?? 0) == 1
         appDelegate.isPremiumArchive = (userProfile["is_archive"] as? Int ?? 0) == 1
         appDelegate.isPremiumPro = (userProfile["is_pro"] as? Int ?? 0) == 1
@@ -486,7 +502,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
 
         // set up dictFeeds
         let dictFeeds = ((results?["feeds"] as? NSDictionary)?.mutableCopy() as? NSMutableDictionary) ?? NSMutableDictionary()
-        dictFeeds.addEntries(from: appDelegate.dictInactiveFeeds as? [AnyHashable: Any] ?? [:])
+        dictFeeds.addEntries(from: inactiveFeedsDict)
         appDelegate.dictFeeds = dictFeeds
         appDelegate.populateDictUnreadCounts()
         appDelegate.populateDictTextFeeds()
@@ -516,7 +532,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         for (folderKey, folderObject) in allFolders {
             guard let folder = folderObject as? [Any] else { continue }
             let folderTitle = (folderKey as? String) == " " ? "everything" : "\(folderKey)"
-            appDelegate.dictFoldersArray.add(folderTitle)
+            foldersArray.add(folderTitle)
 
             var feeds: [[AnyHashable: Any]] = []
 
@@ -527,9 +543,9 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
                 if appDelegate.isSavedSearch(feedIdStr) || appDelegate.isSavedFeed(feedIdStr) {
                     feed = ["id": feedId]
                 } else if appDelegate.isSocialFeed(feedIdStr) {
-                    feed = appDelegate.dictSocialFeeds[feedIdStr] as? [AnyHashable: Any]
+                    feed = socialFeedsDict[feedIdStr] as? [AnyHashable: Any]
                 } else {
-                    feed = appDelegate.dictFeeds[feedIdStr] as? [AnyHashable: Any]
+                    feed = feedsDict[feedIdStr] as? [AnyHashable: Any]
                 }
 
                 if let feed {
@@ -544,7 +560,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         }
 
         appDelegate.dictFolders = sortedFolders as! [AnyHashable: Any]
-        appDelegate.dictFoldersArray.sort { a, b in
+        foldersArray.sort { a, b in
             "\(a)".caseInsensitiveCompare("\(b)")
         }
         // Add feeds from subfolders (addSubfolderFeeds() assigns dictSubfolders itself)
@@ -552,48 +568,48 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
 
         // Add all stories etc. to top
         for (sectionIndex, sectionName) in Self.topSectionNames.enumerated() {
-            appDelegate.dictFoldersArray.remove(sectionName)
-            appDelegate.dictFoldersArray.insert(sectionName, at: sectionIndex)
+            foldersArray.remove(sectionName)
+            foldersArray.insert(sectionName, at: sectionIndex)
         }
 
-        let orderedFolders = DailyBriefingFolderPlacementDecision.orderedFolders(folderNames: appDelegate.dictFoldersArray as? [String] ?? [],
+        let orderedFolders = DailyBriefingFolderPlacementDecision.orderedFolders(folderNames: foldersArray as? [String] ?? [],
                                                                                isEnabled: appDelegate.briefingEnabled)
         appDelegate.dictFoldersArray = NSMutableArray(array: orderedFolders)
 
         // Add Read Stories folder to bottom
-        appDelegate.dictFoldersArray.remove("read_stories")
-        appDelegate.dictFoldersArray.add("read_stories")
+        foldersArray.remove("read_stories")
+        foldersArray.add("read_stories")
 
         // Add Global Shared Stories folder to bottom
-        appDelegate.dictFoldersArray.remove("river_global")
-        appDelegate.dictFoldersArray.add("river_global")
+        foldersArray.remove("river_global")
+        foldersArray.add("river_global")
 
         // Add trending story folders to bottom
         for trending in ["trending:well_read", "trending:long_reads", "trending:good_reads"] {
-            appDelegate.dictFoldersArray.remove(trending)
-            appDelegate.dictFoldersArray.add(trending)
+            foldersArray.remove(trending)
+            foldersArray.add(trending)
         }
 
         // Add All Shared Stories folder to bottom
-        appDelegate.dictFoldersArray.remove("river_blurblogs")
-        if appDelegate.dictSocialFeeds.count > 0 {
-            appDelegate.dictFoldersArray.add("river_blurblogs")
+        foldersArray.remove("river_blurblogs")
+        if socialFeedsDict.count > 0 {
+            foldersArray.add("river_blurblogs")
         }
 
         // Add Saved Searches folder to bottom
-        appDelegate.dictFoldersArray.remove("saved_searches")
+        foldersArray.remove("saved_searches")
         if appDelegate.savedSearchesCount > 0 {
-            appDelegate.dictFoldersArray.add("saved_searches")
+            foldersArray.add("saved_searches")
         }
 
         // Add Saved Stories folder to bottom
-        appDelegate.dictFoldersArray.remove("saved_stories")
+        foldersArray.remove("saved_stories")
         if appDelegate.savedStoriesCount > 0 {
-            appDelegate.dictFoldersArray.add("saved_stories")
+            foldersArray.add("saved_stories")
         }
 
         // test for empty
-        if appDelegate.dictFeeds.count == 0 && appDelegate.dictSocialFeeds.count == 0 {
+        if feedsDict.count == 0 && socialFeedsDict.count == 0 {
             appDelegate.hasNoSites = true
         }
 
@@ -744,9 +760,9 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     // MARK: - Folder path helpers (from FeedsViewController.swift)
 
     @objc func addSubfolderFeeds() {
-        let folders = NSMutableDictionary(dictionary: appDelegate.dictFolders as? [AnyHashable: Any] ?? [:])
+        let folders = NSMutableDictionary(dictionary: foldersDict)
         let subfolders = NSMutableDictionary()
-        for case let folderName as String in appDelegate.dictFoldersArray {
+        for case let folderName as String in foldersArray {
             addSubfolderFeeds(for: folderName, folders: folders, subfolders: subfolders)
         }
         appDelegate.dictFolders = folders as! [AnyHashable: Any]
@@ -792,7 +808,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
 
     @objc(fullFolderPathForFolderTitle:)
     func fullFolderPath(for folderTitle: String) -> String? {
-        for case let folder as String in appDelegate.dictFoldersArray
+        for case let folder as String in foldersArray
         where folder.components(separatedBy: " ▸ ").last == folderTitle {
             return folder
         }
@@ -926,14 +942,14 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     // MARK: - Selection
 
     private var folderCount: Int {
-        appDelegate.hasNoSites ? 0 : appDelegate.dictFoldersArray.count
+        appDelegate.hasNoSites ? 0 : foldersArray.count
     }
 
     private func rowCount(inSection section: Int) -> Int {
         guard !appDelegate.hasNoSites,
-              section >= 0, section < appDelegate.dictFoldersArray.count,
-              let folderName = appDelegate.dictFoldersArray[section] as? String,
-              let folder = appDelegate.dictFolders[folderName] as? [Any] else {
+              section >= 0, section < foldersArray.count,
+              let folderName = foldersArray[section] as? String,
+              let folder = foldersDict[folderName] as? [Any] else {
             return 0
         }
         let limit = 5000
@@ -958,7 +974,6 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     @objc(selectFeedAtIndexPath:)
     func selectFeed(at indexPath: IndexPath) {
         if appDelegate.hasNoSites { return }
-        _ = appDelegate.dictFoldersArray[indexPath.section] // FORK: discover stripped
 
         appDelegate.feedDetailViewController.beginExplicitFeedSelection()
         appDelegate.feedDetailViewController.cancelMarkStoryReadTimer()
@@ -969,8 +984,9 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         lastRowAtIndexPath = indexPath
         lastSection = -1
 
-        guard let folderName = appDelegate.dictFoldersArray[indexPath.section] as? String,
-              let feeds = appDelegate.dictFolders[folderName] as? [Any],
+        guard indexPath.section < foldersArray.count,
+              let folderName = foldersArray[indexPath.section] as? String,
+              let feeds = foldersDict[folderName] as? [Any],
               indexPath.row < feeds.count else { return }
 
         var feedIdStr = "\(feeds[indexPath.row])"
@@ -1019,8 +1035,8 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         lastRowAtIndexPath = nil
         lastSection = tag
 
-        var folder = (tag >= 0 && tag < appDelegate.dictFoldersArray.count
-                      ? appDelegate.dictFoldersArray[tag] as? String : nil) ?? ""
+        var folder = (tag >= 0 && tag < foldersArray.count
+                      ? foldersArray[tag] as? String : nil) ?? ""
 
         if tag >= 0 && tag < Self.topSectionNames.count {
             folder = Self.topSectionNames[tag]
@@ -1160,9 +1176,9 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     }
 
     private func feedAtIndexPathHasUnreadForNextNavigation(_ indexPath: IndexPath) -> Bool {
-        guard indexPath.section >= 0, indexPath.section < appDelegate.dictFoldersArray.count,
-              let folderName = appDelegate.dictFoldersArray[indexPath.section] as? String,
-              let feedsInFolder = appDelegate.dictFolders[folderName] as? [Any],
+        guard indexPath.section >= 0, indexPath.section < foldersArray.count,
+              let folderName = foldersArray[indexPath.section] as? String,
+              let feedsInFolder = foldersDict[folderName] as? [Any],
               indexPath.row >= 0, indexPath.row < feedsInFolder.count else {
             return false
         }
@@ -1170,7 +1186,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         if appDelegate.isFolderOrParentCollapsed(folderName) { return false }
 
         let feedIdStr = appDelegate.feedIdWithoutSearchQuery("\(feedsInFolder[indexPath.row])") ?? ""
-        if appDelegate.dictInactiveFeeds[feedIdStr] != nil { return false }
+        if inactiveFeedsDict[feedIdStr] != nil { return false }
         if let searchFeedIds, !searchFeedIds.contains(feedIdStr) { return false }
 
         return feedIdHasUnreadForNextNavigation(feedIdStr)
@@ -1189,10 +1205,10 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     }
 
     private func folderAtSectionHasUnreadForNextNavigation(_ section: Int) -> Bool {
-        guard section >= 0, section < appDelegate.dictFoldersArray.count,
+        guard section >= 0, section < foldersArray.count,
               folderSectionIsVisible(section) else { return false }
 
-        guard let folderName = appDelegate.dictFoldersArray[section] as? String else { return false }
+        guard let folderName = foldersArray[section] as? String else { return false }
         return unreadCountsMatchNextNavigation(appDelegate.splitUnreadCount(forFolder: folderName))
     }
 
@@ -1200,7 +1216,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     /// math is gone; this answers "does this folder get a header" as a Bool.
     private func folderSectionIsVisible(_ section: Int) -> Bool {
         let prefs = UserDefaults.standard
-        guard let folderName = appDelegate.dictFoldersArray[section] as? String else { return false }
+        guard let folderName = foldersArray[section] as? String else { return false }
 
         let visibleFeeds = (visibleFolders[folderName] as? Bool) ?? false
         let exempt = section == Self.sectionDashboard
@@ -1248,18 +1264,18 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     }
 
     private func titleForFeed(at indexPath: IndexPath) -> String? {
-        guard indexPath.section < appDelegate.dictFoldersArray.count,
-              let folderName = appDelegate.dictFoldersArray[indexPath.section] as? String,
-              let feedsInFolder = appDelegate.dictFolders[folderName] as? [Any],
+        guard indexPath.section < foldersArray.count,
+              let folderName = foldersArray[indexPath.section] as? String,
+              let feedsInFolder = foldersDict[folderName] as? [Any],
               indexPath.row < feedsInFolder.count else { return nil }
         let feedIdStr = appDelegate.feedIdWithoutSearchQuery("\(feedsInFolder[indexPath.row])") ?? ""
-        guard let feed = (appDelegate.dictFeeds[feedIdStr] ?? appDelegate.dictSocialFeeds[feedIdStr]) as? [AnyHashable: Any] else { return nil }
+        guard let feed = (feedsDict[feedIdStr] ?? socialFeedsDict[feedIdStr]) as? [AnyHashable: Any] else { return nil }
         let title = (feed["feed_title"] ?? feed["username"] ?? feed["title"]) as? String
         return title?.isEmpty == false ? title : nil
     }
 
     private func titleForFolder(atSection section: Int) -> String? {
-        guard let folderName = appDelegate.dictFoldersArray[section] as? String else { return nil }
+        guard let folderName = foldersArray[section] as? String else { return nil }
 
         switch folderName {
         case "dashboard": return "Dashboard"
@@ -1281,9 +1297,9 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
 
     private func iconForFeed(at indexPath: IndexPath?) -> UIImage? {
         guard let indexPath,
-              indexPath.section >= 0, indexPath.section < appDelegate.dictFoldersArray.count,
-              let folderName = appDelegate.dictFoldersArray[indexPath.section] as? String,
-              let feedsInFolder = appDelegate.dictFolders[folderName] as? [Any],
+              indexPath.section >= 0, indexPath.section < foldersArray.count,
+              let folderName = foldersArray[indexPath.section] as? String,
+              let feedsInFolder = foldersDict[folderName] as? [Any],
               indexPath.row >= 0, indexPath.row < feedsInFolder.count else { return nil }
 
         let feedIdStr = appDelegate.feedIdWithoutSearchQuery("\(feedsInFolder[indexPath.row])") ?? ""
@@ -1291,7 +1307,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         let isSaved = appDelegate.isSavedFeed(feedIdStr)
 
         if !isSocial && !isSaved,
-           let customIcon = appDelegate.dictFeedIcons[feedIdStr] as? [AnyHashable: Any],
+           let customIcon = feedIconsDict[feedIdStr] as? [AnyHashable: Any],
            customIcon["icon_type"] as? String != "none",
            let customFeedIcon = CustomIconRenderer.renderIcon(customIcon, size: CGSize(width: 28, height: 28)) {
             return customFeedIcon
@@ -1301,8 +1317,8 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     }
 
     private func iconForFolder(atSection section: Int) -> UIImage? {
-        guard section >= 0, section < appDelegate.dictFoldersArray.count,
-              let folderName = appDelegate.dictFoldersArray[section] as? String else { return nil }
+        guard section >= 0, section < foldersArray.count,
+              let folderName = foldersArray[section] as? String else { return nil }
         return appDelegate.folderIcon(folderName)
     }
 
@@ -1332,15 +1348,15 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
             }
 
             if sender == nil, let indexPath {
-                guard indexPath.section < appDelegate.dictFoldersArray.count,
-                      let folderName = appDelegate.dictFoldersArray[indexPath.section] as? String,
-                      let feeds = appDelegate.dictFolders[folderName] as? [Any],
+                guard indexPath.section < foldersArray.count,
+                      let folderName = foldersArray[indexPath.section] as? String,
+                      let feeds = foldersDict[folderName] as? [Any],
                       indexPath.row < feeds.count else {
                     foundNext = false
                     continue
                 }
                 let feedIdStr = "\(feeds[indexPath.row])"
-                let isInactive = appDelegate.dictInactiveFeeds[feedIdStr] != nil
+                let isInactive = inactiveFeedsDict[feedIdStr] != nil
 
                 if isInactive || appDelegate.isFolderOrParentCollapsed(folderName) {
                     foundNext = false
@@ -1383,8 +1399,8 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
             foundNext = true
 
             section = section < folderCount - 1 ? section + 1 : 0
-            guard section >= 0, section < appDelegate.dictFoldersArray.count,
-                  let folderName = appDelegate.dictFoldersArray[section] as? String else {
+            guard section >= 0, section < foldersArray.count,
+                  let folderName = foldersArray[section] as? String else {
                 foundNext = false
                 continue
             }
@@ -1406,8 +1422,8 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
             foundNext = true
 
             section = section > 0 ? section - 1 : folderCount - 1
-            guard section >= 0, section < appDelegate.dictFoldersArray.count,
-                  let folderName = appDelegate.dictFoldersArray[section] as? String else {
+            guard section >= 0, section < foldersArray.count,
+                  let folderName = foldersArray[section] as? String else {
                 foundNext = false
                 continue
             }
@@ -1425,15 +1441,15 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     }
 
     @objc func selectFolder(_ folder: String) {
-        let tag = appDelegate.dictFoldersArray.index(of: folder)
+        let tag = foldersArray.index(of: folder)
         if tag != NSNotFound {
             didSelectSectionHeader(withTag: tag)
         }
     }
 
     @objc func selectFeed(_ feedId: String, inFolder folder: String) {
-        let section = appDelegate.dictFoldersArray.index(of: folder)
-        guard let feedsInFolder = appDelegate.dictFolders[folder] as? [Any],
+        let section = foldersArray.index(of: folder)
+        guard let feedsInFolder = foldersDict[folder] as? [Any],
               section != NSNotFound else { return }
 
         for (row, thisFeedId) in feedsInFolder.enumerated() where "\(thisFeedId)" == feedId {
@@ -1444,20 +1460,20 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     }
 
     @objc func selectWidgetStories() {
-        let tag = appDelegate.dictFoldersArray.index(of: appDelegate.widgetFolder as Any)
+        let tag = foldersArray.index(of: appDelegate.widgetFolder as Any)
         if tag != NSNotFound {
             didSelectSectionHeader(withTag: tag)
         }
     }
 
     @objc func selectWidgetSource(_ source: String) -> Bool {
-        guard let folders = appDelegate.dictFoldersArray as? [String] else { return false }
+        guard let folders = foldersArray as? [String] else { return false }
         let folder: String
         var site: String?
         if source.hasPrefix("feed:") {
             let id = String(source.dropFirst("feed:".count))
             let path = ClassifierFolderPath.serverPath(forFeed: id, folderOrder: folders,
-                                                       folders: (appDelegate.dictFolders as? [String: Any]) ?? [:])
+                                                       folders: (foldersDict as? [String: Any]) ?? [:])
             folder = folders.first { ClassifierFolderPath.serverPath(fromNative: $0) == path } ?? "everything"
             site = id
         } else if source.hasPrefix("folder:") {
@@ -1471,7 +1487,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         guard let section = folders.firstIndex(of: folder) else { return false }
         for ancestor in parentTitles(for: folder).reversed() { expandFolderIfNecessary(ancestor) }
         if let site {
-            let ids = ClassifierFolderPath.feedIds(in: appDelegate.dictFolders[folder])
+            let ids = ClassifierFolderPath.feedIds(in: foldersDict[folder])
             guard let row = ids.firstIndex(of: site) else { return false }
             let hiddenBySearch = searchFeedIds.map { !$0.contains(site) } ?? false
             let needsReload = hiddenBySearch || !isFeedVisible(site)
@@ -1509,7 +1525,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         // Try feeds are always visible
         if feedIdStr == appDelegate.tryFeedFeedId { return true }
 
-        let unreadCounts = appDelegate.dictUnreadCounts[feedIdStr] as? [AnyHashable: Any]
+        let unreadCounts = unreadCountsDict[feedIdStr] as? [AnyHashable: Any]
         let stillVisible = stillVisibleFeeds[feedIdStr]
         if stillVisible == nil && appDelegate.isSavedStoriesIntelligenceMode() {
             return appDelegate.savedStoriesCount(forFeed: feedIdStr) > 0
@@ -1528,7 +1544,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
             return false
         } else if stillVisible == nil
             && !viewShowingAllFeeds
-            && appDelegate.dictInactiveFeeds[feedIdStr] != nil {
+            && inactiveFeedsDict[feedIdStr] != nil {
             return false
         }
 
@@ -1579,9 +1595,9 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         activeFeedLocations = NSMutableDictionary()
         visibleFolders = NSMutableDictionary()
 
-        for case let folderName as String in appDelegate.dictFoldersArray {
+        for case let folderName as String in foldersArray {
             if folderName == "river_global" || folderName.hasPrefix("trending:") { continue }
-            guard let folder = appDelegate.dictFolders[folderName] as? [Any] else { continue }
+            guard let folder = foldersDict[folderName] as? [Any] else { continue }
             let feedLocations = NSMutableArray()
             for (index, feedId) in folder.enumerated() where isFeedVisible(feedId) {
                 feedLocations.add(NSNumber(value: index))
@@ -1605,8 +1621,8 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     @objc func loadAvatars() {
         DispatchQueue.global(qos: .utility).async { [weak self] in
             guard let self else { return }
-            for case let feedId as String in self.appDelegate.dictSocialFeeds.keys {
-                guard let feed = self.appDelegate.dictSocialFeeds[feedId] as? [AnyHashable: Any],
+            for case let feedId as String in self.socialFeedsDict.keys {
+                guard let feed = self.socialFeedsDict[feedId] as? [AnyHashable: Any],
                       let photoUrl = feed["photo_url"] as? String,
                       let imageURL = URL(string: photoUrl),
                       let imageData = try? Data(contentsOf: imageURL),
@@ -1624,7 +1640,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         DispatchQueue.global(qos: .utility).async { [weak self] in
             guard let self else { return }
             for (feedId, faviconObject) in results {
-                guard self.appDelegate.dictFeeds[feedId] != nil,
+                guard self.feedsDict[feedId] != nil,
                       let favicon = faviconObject as? String, !favicon.isEmpty,
                       let imageData = Data(base64Encoded: favicon, options: .ignoreUnknownCharacters),
                       let faviconImage = UIImage(data: imageData) else { continue }
@@ -1661,7 +1677,9 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
 
         if feedId == nil {
             appDelegate.cancelOfflineQueue()
-            MainActor.assumeIsolated { RealtimeUpdates.shared.noteFullCountRefresh() }
+            // flushQueuedReadStories's callback delivers on the FMDB queue, so
+            // this can arrive off-main.
+            DispatchQueue.main.async { RealtimeUpdates.shared.noteFullCountRefresh() }
         }
 
         appDelegate.get(urlString, parameters: nil as Any?, success: { [weak self] _, responseObject in
@@ -1701,7 +1719,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
     // skips the favicon download a full refresh does, and updates blurblog rows, which read dictSocialFeeds.
     @objc func applyRealtimeUnreadCounts(_ results: [AnyHashable: Any]) {
         if let socialCounts = results["social_feeds"] as? [String: Any], !socialCounts.isEmpty {
-            let socialFeeds = NSMutableDictionary(dictionary: appDelegate.dictSocialFeeds)
+            let socialFeeds = NSMutableDictionary(dictionary: socialFeedsDict)
             for (socialId, countsObject) in socialCounts {
                 guard let counts = countsObject as? [String: Any],
                       var socialFeed = socialFeeds[socialId] as? [String: Any] else { continue }
@@ -1725,9 +1743,9 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
         let intelligenceLevel = appDelegate.selectedIntelligence
         // FeedsObjCViewController.m computes visibility on snapshots, then publishes on main
         // only if authentication has not replaced the account while this work was queued.
-        let previousCounts = NSDictionary(dictionary: appDelegate.dictUnreadCounts as! [AnyHashable: Any], copyItems: true)
-        let folderNames = (appDelegate.dictFoldersArray.copy() as? [Any]) ?? []
-        let folderFeeds = NSDictionary(dictionary: appDelegate.dictFolders ?? [:], copyItems: true)
+        let previousCounts = NSDictionary(dictionary: unreadCountsDict as! [AnyHashable: Any], copyItems: true)
+        let folderNames = (foldersArray.copy() as? [Any]) ?? []
+        let folderFeeds = NSDictionary(dictionary: foldersDict, copyItems: true)
         let activeLocations = NSDictionary(dictionary: activeFeedLocations as! [AnyHashable: Any], copyItems: true)
 
         DispatchQueue.global(qos: .default).async { [weak self] in
@@ -1796,12 +1814,12 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
             self.dispatchFeedRefreshPublication { [weak self] in
                 guard let self, accountGeneration == self.feedListAccountGeneration else { return }
                 for (feed, update) in countUpdates {
-                    guard let unreadCount = (self.appDelegate.dictUnreadCounts[feed] as? NSMutableDictionary)?.mutableCopy() as? NSMutableDictionary else { continue }
+                    guard let unreadCount = (self.unreadCountsDict[feed] as? NSMutableDictionary)?.mutableCopy() as? NSMutableDictionary else { continue }
                     unreadCount.addEntries(from: update)
-                    self.appDelegate.dictUnreadCounts[feed] = unreadCount
+                    self.unreadCountsDict[feed] = unreadCount
                 }
                 self.stillVisibleFeeds.addEntries(from: visibleUpdates)
-                self.appDelegate.folderCountCache.removeAllObjects()
+                self.folderCountCacheDict.removeAllObjects()
                 self.reloadFeedTitlesTable()
                 self.refreshHeaderCounts()
                 if feedId == nil {
@@ -1822,7 +1840,7 @@ final class ForkFeedEngine: NSObject, PreferencesViewDelegate {
             return
         }
 
-        appDelegate.folderCountCache.removeObject(forKey: "everything")
+        folderCountCacheDict.removeObject(forKey: "everything")
 
         guard let counts = appDelegate.splitUnreadCount(forFolder: "everything") else { return }
 
