@@ -56,6 +56,23 @@ enum ForkFolderStore {
         }
     }
 
+    /// Key for the rail's "All Feeds" entry — synthetic, never a `dictFolders` key.
+    static let allFeedsKey = "all_feeds"
+
+    /// The "All Feeds" pseudo-folder: every feed in every folder plus the
+    /// top-level "everything" bucket, in upstream's order.
+    static func allFeedsFolder() -> ForkFolder {
+        let ids = allFeedIds()
+        return ForkFolder(key: allFeedsKey, title: "All Feeds", shortLabel: "All",
+                          feedIds: ids, unread: unread(feedIds: ids), unreadFeeds: unreadFeeds(feedIds: ids))
+    }
+
+    /// Every subscribed feed id across user folders + the unfoldered bucket.
+    private static func allFeedIds() -> [String] {
+        var seen = Set<String>()
+        return (topLevelFolders() + [otherFolder()]).flatMap(\.feedIds).filter { seen.insert($0).inserted }
+    }
+
     /// The "Other" pseudo-folder: top-level feeds outside any folder.
     static func otherFolder() -> ForkFolder {
         let ids = feedIds(inFolder: otherKey)
@@ -71,6 +88,7 @@ enum ForkFolderStore {
 
     /// Feeds in a folder that upstream knows about, muted (inactive) ones included, in upstream's order.
     static func feedIds(inFolder key: String) -> [String] {
+        if key == allFeedsKey { return allFeedIds() }
         guard let app, let raw = app.dictFolders?[key] as? [Any] else { return [] }
         return raw.map { "\($0)" }.filter { app.dictFeeds?[$0] != nil }
     }

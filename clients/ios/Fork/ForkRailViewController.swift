@@ -20,6 +20,7 @@ final class ForkRailViewController: UIViewController, UIContextMenuInteractionDe
     private let bottomStack = UIStackView()
     private let border = UIView()
     private let otherButton = ForkRailButton()
+    private let allFeedsButton = ForkRailButton()
     private let settingsButton = UIButton(type: .system)
 
     private var folders: [ForkFolder] = []
@@ -34,13 +35,15 @@ final class ForkRailViewController: UIViewController, UIContextMenuInteractionDe
         set { UserDefaults.standard.set(newValue, forKey: Self.selectedKeyDefaults) }
     }
 
-    /// The saved folder if it exists right now, otherwise the first folder (or Other).
+    /// The saved folder if it exists right now, otherwise All Feeds — the app
+    /// opens on the everything river, so the rail selection mirrors it.
     var selectedFolder: ForkFolder? {
         if let key = savedKey {
+            if key == ForkFolderStore.allFeedsKey { return ForkFolderStore.allFeedsFolder() }
             if key == other?.key, let other, !other.feedIds.isEmpty { return other }
             if let match = folders.first(where: { $0.key == key }) { return match }
         }
-        return folders.first ?? other
+        return ForkFolderStore.allFeedsFolder()
     }
 
     var selectedKey: String? { selectedFolder?.key }
@@ -65,6 +68,10 @@ final class ForkRailViewController: UIViewController, UIContextMenuInteractionDe
         bottomStack.spacing = 6
         bottomStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(bottomStack)
+
+        allFeedsButton.symbolName = "rectangle.stack"
+        allFeedsButton.addTarget(self, action: #selector(allFeedsTapped), for: .touchUpInside)
+        folderStack.addArrangedSubview(allFeedsButton)
 
         otherButton.symbolName = "tray"
         otherButton.addTarget(self, action: #selector(otherTapped), for: .touchUpInside)
@@ -138,6 +145,9 @@ final class ForkRailViewController: UIViewController, UIContextMenuInteractionDe
     }
 
     private func applyContent() {
+        let allFeeds = ForkFolderStore.allFeedsFolder()
+        allFeedsButton.configure(folder: allFeeds, label: allFeeds.shortLabel,
+                                 glyph: .symbol("rectangle.stack"), selected: allFeeds.key == selectedKey)
         for (button, folder) in zip(folderButtons, folders) {
             button.configure(folder: folder, label: ForkFolderAppearance.label(for: folder),
                              glyph: glyph(for: folder), selected: folder.key == selectedKey)
@@ -257,6 +267,10 @@ final class ForkRailViewController: UIViewController, UIContextMenuInteractionDe
     @objc private func folderTapped(_ sender: ForkRailButton) {
         guard let index = folderButtons.firstIndex(of: sender), folders.indices.contains(index) else { return }
         select(folders[index])
+    }
+
+    @objc private func allFeedsTapped() {
+        select(ForkFolderStore.allFeedsFolder())
     }
 
     @objc private func otherTapped() {
